@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/privacy-policy`)
+   fetch(`${API_URL}/privacy-policy`)
       .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
       .then(data => { setPage(data); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
