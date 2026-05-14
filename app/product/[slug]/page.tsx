@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/app/components/CartContext';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
+const API_URL  = process.env.NEXT_PUBLIC_API_URL || ''; // images ke liye
+const FETCH_URL = ''; // API calls ke liye (rewrites use karega)
 // ═══════════════════════════════════════════
 // STARS COMPONENT
 // ═══════════════════════════════════════════
