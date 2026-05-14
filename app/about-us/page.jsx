@@ -15,10 +15,10 @@ export default function AboutPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/api/offerings`).then(r => r.json()).catch(() => null),
-      fetch(`${API_URL}/api/core-values-main`).then(r => r.json()).catch(() => null),
-      fetch(`${API_URL}/api/core-values`).then(r => r.json()).catch(() => []),
-      fetch(`${API_URL}/api/experience-the-power`).then(r => r.json()).catch(() => null),
+      fetch(`${API_URL}/api/offerings`, { credentials: 'omit' }).then(r => r.json()).catch(() => null),
+fetch(`${API_URL}/api/core-values-main`, { credentials: 'omit' }).then(r => r.json()).catch(() => null),
+fetch(`${API_URL}/api/core-values`, { credentials: 'omit' }).then(r => r.json()).catch(() => []),
+fetch(`${API_URL}/api/experience-the-power`, { credentials: 'omit' }).then(r => r.json()).catch(() => null),
     ]).then(([off, cvm, cv, exp]) => {
       setOffering(off);
       setCoreValuesMain(cvm);
