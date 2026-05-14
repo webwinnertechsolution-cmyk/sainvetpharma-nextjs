@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import WishlistHeart from '@/app/components/WishlistHeart';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = '';
 
 function CollectionsPageInner() {
   const searchParams = useSearchParams();
