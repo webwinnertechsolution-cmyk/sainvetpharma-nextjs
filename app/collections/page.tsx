@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import WishlistHeart from '@/app/components/WishlistHeart';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = '';
 
 function CollectionsPageInner() {
   const searchParams = useSearchParams();
@@ -40,10 +40,10 @@ function CollectionsPageInner() {
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
         qs.append('page', page);
-       const res = await fetch(`${API_URL}/api/shop?${qs}`, {
-  credentials: 'omit',
-  headers: { 'Content-Type': 'application/json' }
-});
+        const res = await fetch(`/api/shop?${qs}`, {
+          credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' }
+        });
         const data = await res.json();
         setAllProducts(data.products   || []);
         setCategories(data.categories  || []);
@@ -69,7 +69,7 @@ function CollectionsPageInner() {
   }, [allProducts, appliedMin, appliedMax]);
 
   /* ── Helpers ── */
-  function getEffectivePrice(p: any) {
+  function getEffectivePrice(p) {
     if (p.sale_price && parseFloat(p.sale_price) > 0) return parseFloat(p.sale_price);
     if (p.price      && parseFloat(p.price)      > 0) return parseFloat(p.price);
     if (p.variants?.length) {
@@ -79,7 +79,7 @@ function CollectionsPageInner() {
     return null;
   }
 
-  function getDiscount(p: any) {
+  function getDiscount(p) {
     let compare = null, selling = null;
     if (p.compare_price && parseFloat(p.compare_price) > 0) compare = parseFloat(p.compare_price);
     if (p.price         && parseFloat(p.price)         > 0) selling = parseFloat(p.price);
@@ -97,8 +97,8 @@ function CollectionsPageInner() {
     return pct >= 1 ? { pct, compare, selling } : null;
   }
 
-  const imgUrl     = (n: any) => n ? `${API_URL}/uploads/products/${n}`         : null;
-  const galleryUrl = (n: any) => n ? `${API_URL}/uploads/products/gallery/${n}` : null;
+  const imgUrl     = (n) => n ? `/uploads/products/${n}`         : null;
+  const galleryUrl = (n) => n ? `/uploads/products/gallery/${n}` : null;
 
   /* ── Nav ── */
   const buildUrl = useCallback((overrides = {}) => {
@@ -110,17 +110,17 @@ function CollectionsPageInner() {
     return `/collections?${u.toString()}`;
   }, [searchParams]);
 
-  const applySort     = (val: any)           => router.push(buildUrl({ sort: val }));
-  const applyCategory = (slug: any)          => { router.push(buildUrl({ category: slug || null })); setDrawerOpen(false); };
-  const applyTag      = (slug: any, checked: any) => { router.push(buildUrl({ tag: checked ? slug : null })); setDrawerOpen(false); };
+  const applySort     = (val)           => router.push(buildUrl({ sort: val }));
+  const applyCategory = (slug)          => { router.push(buildUrl({ category: slug || null })); setDrawerOpen(false); };
+  const applyTag      = (slug, checked) => { router.push(buildUrl({ tag: checked ? slug : null })); setDrawerOpen(false); };
 
   const applyPrice = () => { setAppliedMin(minInput); setAppliedMax(maxInput); setDrawerOpen(false); };
   const clearPrice = () => { setMinInput(''); setMaxInput(''); setAppliedMin(''); setAppliedMax(''); };
   const clearAll   = () => { clearPrice(); router.push('/collections'); };
-  const toggleSec  = (k: any) => setSecOpen(prev => ({ ...prev, [k]: !prev[k] }));
+  const toggleSec  = (k) => setSecOpen(prev => ({ ...prev, [k]: !prev[k] }));
 
   useEffect(() => {
-    const h = (e: any) => { if (e.key === 'Escape') setDrawerOpen(false); };
+    const h = (e) => { if (e.key === 'Escape') setDrawerOpen(false); };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, []);
@@ -131,6 +131,12 @@ function CollectionsPageInner() {
 
   const hasFilters  = category || tag || appliedMin || appliedMax;
   const priceActive = appliedMin || appliedMax;
+
+  const currentCategoryName = category
+    ? categories.find((c) => c.slug === category)?.name || 'Shop'
+    : tag
+    ? `#${tags.find((t) => t.slug === tag)?.name || tag}`
+    : 'All Products';
 
   const sidebarJSX = (
     <>
@@ -157,9 +163,9 @@ function CollectionsPageInner() {
           <div className="filter-body">
             <button className={`cat-link ${!category ? 'active' : ''}`} onClick={() => applyCategory(null)}>
               All Products
-              <span className="cat-count">{categories.reduce((a: any, c: any) => a + (c.products_count || 0), 0) || '∞'}</span>
+              <span className="cat-count">{categories.reduce((a, c) => a + (c.products_count || 0), 0) || '∞'}</span>
             </button>
-            {categories.map((cat: any) => (
+            {categories.map((cat) => (
               <button key={cat.id} className={`cat-link ${category === cat.slug ? 'active' : ''}`} onClick={() => applyCategory(cat.slug)}>
                 {cat.name}
                 <span className="cat-count">{cat.products_count || 0}</span>
@@ -176,7 +182,7 @@ function CollectionsPageInner() {
           </button>
           {secOpen.tags && (
             <div className="filter-body">
-              {tags.map((t: any) => (
+              {tags.map((t) => (
                 <label key={t.id} className="chk-item">
                   <input type="checkbox" checked={tag === t.slug} style={{ display:'none' }}
                     onChange={(e) => applyTag(t.slug, e.target.checked)} />
@@ -222,14 +228,96 @@ function CollectionsPageInner() {
   return (
     <div style={{ background:'#f5f7fa', minHeight:'100vh', fontFamily:"'Nunito', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
-        .col-header { background:#1872B5; padding:20px 0; }
-        .col-header-inner { max-width:1400px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; }
-        .col-title { font-family:'Sora',sans-serif; font-size:19px; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px; }
-        .col-bc { font-size:13px; color:rgba(255,255,255,.65); }
-        .col-bc a { color:rgba(255,255,255,.65); text-decoration:none; }
-        .col-bc a:hover { color:#fff; }
+
+        /* ── BANNER ── */
+        .col-banner {
+          position: relative;
+          height: 210px;
+          background: linear-gradient(135deg, #0a214f 0%, #1872B5 55%, #2596e1 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .col-banner::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E") repeat;
+        }
+        .col-banner::after {
+          content: '';
+          position: absolute;
+          width: 340px;
+          height: 340px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+          right: -80px;
+          top: -80px;
+        }
+        .col-banner-orb {
+          position: absolute;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%);
+          left: -60px;
+          bottom: -60px;
+        }
+        .col-banner-content {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+          animation: bannerReveal 0.7s ease both;
+        }
+        .col-banner-content h1 {
+          font-family: 'Sora', sans-serif;
+          font-size: 42px;
+          font-weight: 800;
+          color: #fff;
+          margin: 0 0 10px;
+          letter-spacing: -0.02em;
+          text-shadow: 0 2px 20px rgba(0,0,0,.25);
+        }
+        .col-banner-content p {
+          color: rgba(255,255,255,.7);
+          font-size: 15px;
+          font-weight: 600;
+          margin: 0;
+        }
+        @keyframes bannerReveal {
+          from { opacity: 0; transform: translateY(-12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── BREADCRUMB ── */
+        .col-bc-bar {
+          background: #1872B5;
+          padding: 10px 0;
+        }
+        .col-bc {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 24px;
+          font-size: 13px;
+          color: rgba(255,255,255,.75);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+        .col-bc a {
+          color: rgba(255,255,255,.75);
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .col-bc a:hover { color: #fff; }
+        .col-bc-sep { opacity: 0.5; margin: 0 2px; }
+        .col-bc-cur { color: #fff; font-weight: 700; }
+
+        /* ── LAYOUT ── */
         .col-layout { max-width:1400px; margin:28px auto; padding:0 24px 60px; display:grid; grid-template-columns:250px 1fr; gap:24px; align-items:start; }
         .col-sidebar-desktop { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow:hidden; position:sticky; top:20px; }
         .mob-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:998; opacity:0; transition:opacity .3s; }
@@ -308,6 +396,7 @@ function CollectionsPageInner() {
         .col-spinner { width:44px; height:44px; border-radius:50%; border:4px solid #dbeafe; border-top-color:#1872B5; animation:spin .8s linear infinite; display:inline-block; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .wh-btn.active { background: #fff; }
+
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
         @media(max-width:900px) {
           .col-layout { grid-template-columns:1fr; }
@@ -315,31 +404,55 @@ function CollectionsPageInner() {
           .mob-filter-btn { display:flex !important; }
           .mob-drawer { display:block; }
           .col-grid { grid-template-columns:repeat(2,1fr); }
+          .col-banner { height: 150px; }
+          .col-banner-content h1 { font-size: 28px !important; }
         }
         @media(max-width:480px) {
           .col-grid { gap:10px; }
           .col-layout { padding:0 14px 40px; }
           .col-topbar { padding:10px 14px; }
+          .col-banner { height: 121px; }
         }
       `}</style>
 
-      <div className={`mob-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
-      <div className={`mob-drawer ${drawerOpen ? 'open' : ''}`}>{sidebarJSX}</div>
-
-      <div className="col-header">
-        <div className="col-header-inner">
-          <div className="col-title">
-            {category ? categories.find((c: any) => c.slug === category)?.name || 'Shop'
-              : tag    ? `#${tags.find((t: any) => t.slug === tag)?.name || tag}`
-              : 'All Products'}
-          </div>
-          <div className="col-bc">
-            <Link href="/">Home</Link> &nbsp;›&nbsp; <Link href="/collections">Shop</Link>
-            {category && <> &nbsp;›&nbsp; {categories.find((c: any) => c.slug === category)?.name}</>}
-            {tag      && <> &nbsp;›&nbsp; #{tags.find((t: any) => t.slug === tag)?.name || tag}</>}
-          </div>
+      {/* ── BANNER ── */}
+      <div className="col-banner">
+        <div className="col-banner-orb" />
+        <div className="col-banner-content">
+          <h1>Our Products</h1>
+          <p>Quality • Trust • Excellence</p>
         </div>
       </div>
+
+      {/* ── BREADCRUMB ── */}
+      <div className="col-bc-bar">
+        <nav className="col-bc">
+          <Link href="/">Home</Link>
+          <span className="col-bc-sep">›</span>
+          <Link href="/collections">Shop</Link>
+          {category && (
+            <>
+              <span className="col-bc-sep">›</span>
+              <span className="col-bc-cur">{categories.find((c) => c.slug === category)?.name || category}</span>
+            </>
+          )}
+          {tag && (
+            <>
+              <span className="col-bc-sep">›</span>
+              <span className="col-bc-cur">#{tags.find((t) => t.slug === tag)?.name || tag}</span>
+            </>
+          )}
+          {!category && !tag && (
+            <>
+              <span className="col-bc-sep">›</span>
+              <span className="col-bc-cur">All Products</span>
+            </>
+          )}
+        </nav>
+      </div>
+
+      <div className={`mob-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
+      <div className={`mob-drawer ${drawerOpen ? 'open' : ''}`}>{sidebarJSX}</div>
 
       <div className="col-layout">
         <aside className="col-sidebar-desktop">{sidebarJSX}</aside>
@@ -349,7 +462,7 @@ function CollectionsPageInner() {
             <span className="col-result">
               Showing <strong>{products.length}</strong>
               {allProducts.length !== products.length && <> of <strong>{allProducts.length}</strong></>} products
-              {category && <> in <strong>{categories.find((c: any) => c.slug === category)?.name}</strong></>}
+              {category && <> in <strong>{categories.find((c) => c.slug === category)?.name}</strong></>}
             </span>
             <div className="topbar-right">
               <button className="mob-filter-btn" onClick={() => setDrawerOpen(true)}>
@@ -374,12 +487,12 @@ function CollectionsPageInner() {
             <div className="active-filters">
               {category && (
                 <button className="af-chip" onClick={() => router.push(buildUrl({ category: null }))}>
-                  📁 {categories.find((c: any) => c.slug === category)?.name || category} ×
+                  📁 {categories.find((c) => c.slug === category)?.name || category} ×
                 </button>
               )}
               {tag && (
                 <button className="af-chip" onClick={() => router.push(buildUrl({ tag: null }))}>
-                  🏷️ #{tags.find((t: any) => t.slug === tag)?.name || tag} ×
+                  🏷️ #{tags.find((t) => t.slug === tag)?.name || tag} ×
                 </button>
               )}
               {priceActive && (
@@ -401,7 +514,7 @@ function CollectionsPageInner() {
               </div>
             )}
 
-            {!loading && products.map((product: any) => {
+            {!loading && products.map((product) => {
               const disc    = getDiscount(product);
               const inStock = product.stock_quantity > 0;
               const price   = disc?.selling ?? getEffectivePrice(product);
