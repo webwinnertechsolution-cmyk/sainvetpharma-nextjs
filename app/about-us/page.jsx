@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import VideoSection from '../components/home/VideoSection';
 
-// ── API and Image URLs ──
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
+// ── API URLs (Empty - proxy will handle) ──
+const API_URL = '';
+const IMAGE_BASE_URL = '';
 
 export default function AboutPage() {
   const [offering, setOffering] = useState(null);
@@ -19,16 +19,16 @@ export default function AboutPage() {
   // ── Fetch all data on mount ──
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/offerings`, { credentials: 'omit' })
+      fetch(`/api/offerings`, { credentials: 'omit' })
         .then(r => r.json())
         .catch(() => null),
-      fetch(`${API_URL}/core-values-main`, { credentials: 'omit' })
+      fetch(`/api/core-values-main`, { credentials: 'omit' })
         .then(r => r.json())
         .catch(() => null),
-      fetch(`${API_URL}/core-values`, { credentials: 'omit' })
+      fetch(`/api/core-values`, { credentials: 'omit' })
         .then(r => r.json())
         .catch(() => []),
-      fetch(`${API_URL}/experience-the-power`, { credentials: 'omit' })
+      fetch(`/api/experience-the-power`, { credentials: 'omit' })
         .then(r => r.json())
         .catch(() => null),
     ]).then(([off, cvm, cv, exp]) => {
@@ -68,12 +68,11 @@ export default function AboutPage() {
     if (isImg) {
       return (
         <img
-          src={`${IMAGE_BASE_URL}/uploads/corevalues/${iconStr}`}
+          src={`/uploads/corevalues/${iconStr}`}
           alt={heading}
           style={{ width: 88, height: 88, objectFit: 'cover', borderRadius: '50%' }}
           onError={(e) => {
-            e.target.src = '⭐';
-            e.target.style.fontSize = '36px';
+            e.target.style.display = 'none';
           }}
         />
       );
@@ -892,7 +891,7 @@ export default function AboutPage() {
               {offering.image ? (
                 <div className="off-img-wrap">
                   <img
-                    src={`${IMAGE_BASE_URL}/uploads/offering/${offering.image}`}
+                    src={`/uploads/offering/${offering.image}`}
                     alt={offering.alt_tag || 'Offering'}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -983,7 +982,7 @@ export default function AboutPage() {
                     <div className="cv-icon-wrap">
                       {cv.image ? (
                         <img
-                          src={`${IMAGE_BASE_URL}/uploads/corevalues/${cv.image}`}
+                          src={`/uploads/corevalues/${cv.image}`}
                           alt={cv.heading}
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -1027,7 +1026,7 @@ export default function AboutPage() {
               {experience.image ? (
                 <div className="exp-img-wrap">
                   <img
-                    src={`${IMAGE_BASE_URL}/uploads/experience-the-power/${experience.image}`}
+                    src={`/uploads/experience-the-power/${experience.image}`}
                     alt={experience.alt_tag || 'Experience the Power'}
                     onError={(e) => {
                       e.target.style.display = 'none';
