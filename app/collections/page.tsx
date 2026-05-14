@@ -40,7 +40,10 @@ function CollectionsPageInner() {
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
         qs.append('page', page);
-        const res  = await fetch(`${API_URL}/api/shop?${qs}`);
+       const res = await fetch(`${API_URL}/api/shop?${qs}`, {
+  credentials: 'omit',
+  headers: { 'Content-Type': 'application/json' }
+});
         const data = await res.json();
         setAllProducts(data.products   || []);
         setCategories(data.categories  || []);
