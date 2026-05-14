@@ -94,8 +94,8 @@ function CollectionsPageInner() {
     return pct >= 1 ? { pct, compare, selling } : null;
   }
 
-  const imgUrl     = (n: any) => n ? `${API_URL}/uploads/products/${n}`         : null;
-  const galleryUrl = (n: any) => n ? `${API_URL}/uploads/products/gallery/${n}` : null;
+  const imgUrl     = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
+const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
 
   /* ── Nav ── */
   const buildUrl = useCallback((overrides = {}) => {
