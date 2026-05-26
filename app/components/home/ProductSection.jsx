@@ -562,7 +562,17 @@ const ProductSection = ({ section = null, products = [] }) => {
           color: #dc2626;
           align-self: flex-start;
         }
-
+.ps-header-left p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    color: #1872B5;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+}
         @media (max-width: 767px) {
           .ps-wrap { padding-bottom: 29px !important; }
           .ps-inner { padding: 0 14px; }
