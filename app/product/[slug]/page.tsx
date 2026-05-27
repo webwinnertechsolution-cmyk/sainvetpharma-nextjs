@@ -179,7 +179,7 @@ function ReviewsSection({ productId, productTitle }) {
     max-height: 100%;
     object-fit: cover!important;
     transition: transform .4s ease;
-    width: 100%;
+    width: 100%!important;
 }
 .slide {
     min-width: 100%;
@@ -208,13 +208,13 @@ function ReviewsSection({ productId, productTitle }) {
     flex-shrink: 0;
     transition: all .22s;
     position: relative;
-    margin-top: 3px;
+    margin-top: 3px!important;
 }
 .thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    padding: 0px;
+    object-fit: cover!important;
+    padding: 0px!important;
 }
 .thumb-variant-badge {
     position: absolute;
