@@ -235,6 +235,84 @@ function ReviewsSection({ productId, productTitle }) {
     margin-bottom: -8px;
     margin-top: -6px;
 }
+.prod-tab-content {
+    padding: 20px 18px;
+    animation: tabFadeIn .3s ease both;
+    min-height: 120px;
+    font-size: 13px;
+    line-height: 19px;
+}
+.rv-card {
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 8px 12px;
+    animation: rvFadeUp .3s ease both;
+    transition: box-shadow .2s,border-color .2s;
+}
+.rv-avatar {
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Sora',sans-serif;
+    flex-shrink: 0;
+}
+.rv-rname {
+    font-size: 11px;
+    font-weight: 800;
+    color: #0a214f;
+    margin-bottom: -7px;
+}
+.rv-card-hd {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
+}
+.rv-text {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.75;
+}
+.reviews-tab-wrap {
+    padding: 14px 18px;
+    animation: tabFadeIn .3s ease both;
+}
+.rv-avg-big {
+    font-family: 'Sora',sans-serif;
+    font-size: 35px;
+    font-weight: 800;
+    color: #0a214f;
+    line-height: 1;
+    text-align: center;
+}
+.rv-cta-big {
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: 'Sora',sans-serif;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all .22s;
+    box-shadow: 0 4px 14px rgba(24,114,181,.28);
+}
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
