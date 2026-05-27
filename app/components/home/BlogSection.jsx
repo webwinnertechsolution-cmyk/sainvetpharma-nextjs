@@ -277,7 +277,11 @@ a.bs-view-all {
     display: flex;
     flex-direction: column;
 }
-
+.bs-arrow {
+    opacity: 1 !important;
+    width: 30px;
+    height: 30px;
+}
         }
       `}</style>
 
