@@ -5,8 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/app/components/CartContext';
 
-const API_URL  = process.env.NEXT_PUBLIC_API_URL || '';
-const FETCH_URL = '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // ═══════════════════════════════════════════
 // STARS COMPONENT
@@ -39,13 +38,13 @@ function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating =
 // REVIEWS SECTION COMPONENT
 // ═══════════════════════════════════════════
 function ReviewsSection({ productId, productTitle }) {
-  const [data, setData]             = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [sort, setSort]             = useState('newest');
-  const [modalOpen, setModalOpen]   = useState(false);
-  const [step, setStep]             = useState(1);
-  const [hover, setHover]           = useState(0);
-  const [form, setForm]             = useState({ rating: 0, review_content: '', reviewer_name: '', reviewer_email: '' });
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState('newest');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [step, setStep] = useState(1);
+  const [hover, setHover] = useState(0);
+  const [form, setForm] = useState({ rating: 0, review_content: '', reviewer_name: '', reviewer_email: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('idle');
 
@@ -90,10 +89,10 @@ function ReviewsSection({ productId, productTitle }) {
   const sortedReviews = () => {
     if (!data?.reviews) return [];
     const arr = [...data.reviews];
-    if (sort === 'newest')  return arr.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    if (sort === 'oldest')  return arr.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    if (sort === 'newest') return arr.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    if (sort === 'oldest') return arr.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     if (sort === 'highest') return arr.sort((a, b) => b.rating - a.rating);
-    if (sort === 'lowest')  return arr.sort((a, b) => a.rating - b.rating);
+    if (sort === 'lowest') return arr.sort((a, b) => a.rating - b.rating);
     return arr;
   };
 
@@ -104,13 +103,10 @@ function ReviewsSection({ productId, productTitle }) {
       <style>{`
         @keyframes rvFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
         @keyframes rvCheckPop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
-        @keyframes rvModalIn{from{opacity:0;transform:scale(.95) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}
-
         .rv-wrap{padding:8px 0 0;}
         .rv-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px;}
         .rv-write-btn{background:linear-gradient(135deg,#1872B5,#2596e1);color:#fff;border:none;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .22s;box-shadow:0 4px 14px rgba(24,114,181,.28);}
         .rv-write-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(24,114,181,.38);}
-
         .rv-summary-grid{display:grid;grid-template-columns:180px 1fr 160px;gap:28px;align-items:center;background:#f8faff;border:1.5px solid #e0eaff;border-radius:16px;padding:22px 26px;margin-bottom:24px;}
         .rv-avg-big{font-family:'Sora',sans-serif;font-size:48px;font-weight:800;color:#0a214f;line-height:1;text-align:center;}
         .rv-avg-label{font-size:12px;color:#6b7280;margin-top:5px;text-align:center;}
@@ -124,12 +120,10 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-cta-big{background:linear-gradient(135deg,#1872B5,#2596e1);color:#fff;border:none;padding:13px 18px;border-radius:12px;font-size:13px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .22s;box-shadow:0 4px 14px rgba(24,114,181,.28);}
         .rv-cta-big:hover{transform:translateY(-2px);}
         .rv-cta-note{font-size:11px;color:#9ca3af;text-align:center;line-height:1.5;}
-
         .rv-sort-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
         .rv-sort-lbl{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;}
         .rv-sort-sel{padding:7px 13px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:13px;font-weight:700;color:#374151;font-family:'Nunito',sans-serif;outline:none;cursor:pointer;background:#fff;}
         .rv-sort-sel:focus{border-color:#1872B5;}
-
         .rv-list{display:flex;flex-direction:column;gap:12px;}
         .rv-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:14px;padding:18px 20px;animation:rvFadeUp .3s ease both;transition:box-shadow .2s,border-color .2s;}
         .rv-card:hover{box-shadow:0 6px 22px rgba(0,0,0,.08);border-color:#d0e4ff;}
@@ -141,8 +135,6 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-text{font-size:14px;color:#4b5563;line-height:1.75;}
         .rv-empty{text-align:center;padding:40px 20px;}
         .rv-empty-ico{font-size:44px;margin-bottom:10px;}
-
-        /* Modal */
         .rv-ov{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .3s;}
         .rv-ov.open{opacity:1;visibility:visible;}
         .rv-mod{background:#fff;border-radius:20px;width:100%;max-width:490px;max-height:90vh;overflow-y:auto;position:relative;transform:scale(.95) translateY(18px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 30px 70px rgba(0,0,0,.22);}
@@ -153,7 +145,6 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-mod-x{position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
         .rv-mod-x:hover{background:rgba(255,255,255,.3);}
         .rv-mod-bd{padding:20px 24px 26px;}
-
         .rv-steps{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
         .rv-sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:'Sora',sans-serif;transition:all .25s;flex-shrink:0;}
         .rv-sdot.done{background:#10b981;color:#fff;}
@@ -161,33 +152,28 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-sdot.idle{background:#f3f4f6;color:#9ca3af;}
         .rv-sline{flex:1;height:2px;background:#e5e7eb;border-radius:2px;}
         .rv-sline.done{background:#10b981;}
-
         .rv-stars-big{display:flex;justify-content:center;gap:8px;margin:14px 0 6px;}
         .rv-star-ico{font-size:42px;cursor:pointer;transition:transform .15s,color .15s;color:#d1d5db;line-height:1;display:inline-block;}
         .rv-star-ico.on{color:#10b981;}
         .rv-star-ico:hover{transform:scale(1.15);}
         .rv-rlbl{text-align:center;font-size:14px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;height:20px;margin-bottom:14px;}
-
         .rv-field{margin-bottom:13px;}
         .rv-field label{display:block;font-size:10px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
         .rv-field input,.rv-field textarea{width:100%;padding:10px 13px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:14px;color:#1c1c1c;font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;background:#f9fafb;box-sizing:border-box;}
         .rv-field input:focus,.rv-field textarea:focus{border-color:#1872B5;background:#fff;box-shadow:0 0 0 3px rgba(24,114,181,.1);}
         .rv-field textarea{height:95px;resize:vertical;}
         .rv-2col{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
-
         .rv-actions{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
         .rv-btn-back{background:none;border:2px solid #e5e7eb;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:800;color:#6b7280;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:6px;transition:all .18s;}
         .rv-btn-back:hover{border-color:#1872B5;color:#1872B5;}
         .rv-btn-next{background:linear-gradient(135deg,#1872B5,#2596e1);color:#fff;border:none;padding:11px 26px;border-radius:9px;font-size:13px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .22s;box-shadow:0 4px 14px rgba(24,114,181,.28);}
         .rv-btn-next:hover:not(:disabled){transform:translateY(-1px);}
         .rv-btn-next:disabled{opacity:.55;cursor:not-allowed;}
-
         .rv-success{padding:36px 20px;text-align:center;}
         .rv-success-ico{width:60px;height:60px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;animation:rvCheckPop .5s ease both;}
         .rv-success h4{font-family:'Sora',sans-serif;font-size:19px;color:#065f46;margin:0 0 6px;}
         .rv-success p{font-size:13px;color:#6b7280;}
         .rv-err-msg{background:#fee2e2;color:#991b1b;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;}
-
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
@@ -214,7 +200,6 @@ function ReviewsSection({ productId, productTitle }) {
                 {data.total > 0 ? `Based on ${data.total} review${data.total > 1 ? 's' : ''}` : 'No reviews yet'}
               </div>
             </div>
-
             <div className="rv-bars">
               {[5, 4, 3, 2, 1].map(star => {
                 const cnt = data.breakdown?.[star] ?? 0;
@@ -230,7 +215,6 @@ function ReviewsSection({ productId, productTitle }) {
                 );
               })}
             </div>
-
             <div className="rv-cta-box">
               <button className="rv-cta-big" onClick={openModal}>✏️ Write a Review</button>
               <div className="rv-cta-note">Share your experience with this product</div>
@@ -305,7 +289,6 @@ function ReviewsSection({ productId, productTitle }) {
                   <div className={`rv-sline ${step > 1 ? 'done' : ''}`} />
                   <div className={`rv-sdot ${step >= 2 ? 'active' : 'idle'}`}>2</div>
                 </div>
-
                 {step === 1 && (
                   <>
                     <div style={{ textAlign: 'center', fontSize: 13, color: '#6b7280', fontWeight: 600, marginBottom: 4 }}>
@@ -333,10 +316,9 @@ function ReviewsSection({ productId, productTitle }) {
                     </div>
                   </>
                 )}
-
                 {step === 2 && (
                   <>
-                    {submitStatus === 'error'     && <div className="rv-err-msg">⚠️ Something went wrong. Please try again.</div>}
+                    {submitStatus === 'error' && <div className="rv-err-msg">⚠️ Something went wrong. Please try again.</div>}
                     {submitStatus === 'duplicate' && <div className="rv-err-msg">⚠️ You have already reviewed this product.</div>}
                     <div className="rv-field">
                       <label>Review Content (Required)</label>
@@ -376,24 +358,25 @@ export default function ProductDetailPage() {
   const { slug } = useParams();
   const { addToCart } = useCart();
 
-  const [product, setProduct]                 = useState<any>(null);
-  const [loading, setLoading]                 = useState(true);
-  const [curSlide, setCurSlide]               = useState(0);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [curSlide, setCurSlide] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
-  const [enquiryOpen, setEnquiryOpen]         = useState(false);
-  const [addedAnim, setAddedAnim]             = useState(false);
-  const [formData, setFormData]               = useState({ name: '', phone: '', email: '', address: '', message: '' });
-  const [formStatus, setFormStatus]           = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [related, setRelated]                 = useState<any[]>([]);
-  const [discount, setDiscount]               = useState<any>(null);
-  const [zoomOpen, setZoomOpen]               = useState(false);
-  const [quantity, setQuantity]               = useState(1);
-  const [activeTab, setActiveTab]             = useState(0);
-  const [reviewsData, setReviewsData]         = useState<any>(null);
-  const thumbsRef = useRef<HTMLDivElement>(null);
-
-  // ⭐ FIX: Store the images array in state so it doesn't get recreated
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [addedAnim, setAddedAnim] = useState(false);
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', message: '' });
+  const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [related, setRelated] = useState<any[]>([]);
+  const [discount, setDiscount] = useState<any>(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState(0);
+  const [reviewsData, setReviewsData] = useState<any>(null);
   const [images, setImages] = useState<any[]>([]);
+  const thumbsRef = useRef<HTMLDivElement>(null);
+  
+  // ⭐ NEW: Track which variant's image we're showing, but don't auto-switch
+  const [pendingVariantImage, setPendingVariantImage] = useState<number | null>(null);
 
   /* ── Fetch product ── */
   useEffect(() => {
@@ -405,7 +388,6 @@ export default function ProductDetailPage() {
         setProduct(data);
         if (data.variants?.length) setSelectedVariant(data.variants[0]);
         
-        // Build images array after product is loaded
         const imgs: any[] = [];
         if (data.featured_image)
           imgs.push({ src: `${API_URL}/uploads/products/${data.featured_image}`, alt: data.featured_image_alt || data.title, type: 'image', variantId: null });
@@ -427,8 +409,7 @@ export default function ProductDetailPage() {
         });
         
         setImages(imgs);
-        setCurSlide(0); // Reset to first slide when new product loads
-        
+        setCurSlide(0);
         setLoading(false);
 
         if (data.id) {
@@ -451,7 +432,7 @@ export default function ProductDetailPage() {
       .catch(() => setLoading(false));
   }, [slug]);
 
-  /* ── Fetch reviews for summary ── */
+  /* ── Fetch reviews ── */
   useEffect(() => {
     if (!product?.id) return;
     fetch(`${API_URL}/api/products/${product.id}/reviews`)
@@ -460,22 +441,28 @@ export default function ProductDetailPage() {
       .catch(() => {});
   }, [product?.id]);
 
-  // ⭐ FIX: When variant changes, ONLY update curSlide if it's the variant image
-  // But don't auto-switch if user has manually navigated away
-  useEffect(() => {
-    if (!selectedVariant || !images.length) return;
-    const variantImageIndex = images.findIndex(img => img.variantId === selectedVariant.id);
-    if (variantImageIndex !== -1 && variantImageIndex !== curSlide) {
-      // Only auto-switch if current slide is not already that image
+  /* ── Handle variant click - ONLY switch to variant image if user hasn't manually navigated ── */
+  const handleVariantClick = (variant: any) => {
+    setSelectedVariant(variant);
+    
+    // Find the variant image index
+    const variantImageIndex = images.findIndex(img => img.variantId === variant.id);
+    
+    // Only switch to variant image if it exists
+    if (variantImageIndex !== -1) {
       setCurSlide(variantImageIndex);
-      if (thumbsRef.current) {
-        const thumbW = 70; const gap = 8;
-        const containerW = thumbsRef.current.offsetWidth;
-        const scrollTo = variantImageIndex * (thumbW + gap) - containerW / 2 + thumbW / 2;
-        thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
-      }
+      // Scroll thumbnail into view
+      setTimeout(() => {
+        if (thumbsRef.current) {
+          const thumbW = 70;
+          const gap = 8;
+          const containerW = thumbsRef.current.offsetWidth;
+          const scrollTo = variantImageIndex * (thumbW + gap) - containerW / 2 + thumbW / 2;
+          thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
+        }
+      }, 50);
     }
-  }, [selectedVariant?.id, images]);
+  };
 
   /* ── Parse extra_tabs ── */
   const getExtraTabs = (): Array<{ title: string; content: string }> => {
@@ -488,21 +475,20 @@ export default function ProductDetailPage() {
     } catch { return []; }
   };
 
-  /* All tabs: Description + extra tabs + Reviews */
   const allTabs = [
     { title: 'Description', content: product?.description || '', type: 'html' },
     ...getExtraTabs().map(t => ({ ...t, type: 'html' })),
     { title: '⭐ Reviews', content: '__REVIEWS__', type: 'reviews' },
   ];
 
-  // ⭐ FIX: Navigation functions that work with the images state
   const goSlide = (n: number) => {
     if (!images.length) return;
     const total = images.length;
     const next = ((n % total) + total) % total;
     setCurSlide(next);
     if (thumbsRef.current) {
-      const thumbW = 70; const gap = 8;
+      const thumbW = 70;
+      const gap = 8;
       const containerW = thumbsRef.current.offsetWidth;
       const scrollTo = next * (thumbW + gap) - containerW / 2 + thumbW / 2;
       thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
@@ -511,33 +497,108 @@ export default function ProductDetailPage() {
 
   let touchStartX = 0;
   const onTouchStart = (e: React.TouchEvent) => { touchStartX = e.touches[0].clientX; };
-  const onTouchEnd   = (e: React.TouchEvent) => {
+  const onTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) diff > 0 ? goSlide(curSlide + 1) : goSlide(curSlide - 1);
   };
 
-  /* ── Price helpers ── */
-  const getPrice   = () => { if (selectedVariant?.price) return parseFloat(selectedVariant.price); if (product?.sale_price) return parseFloat(product.sale_price); if (product?.price) return parseFloat(product.price); return null; };
-  const getCompare = () => { if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); if (product?.sale_price && product?.price) return parseFloat(product.price); return null; };
-  const getVariantDisc = () => { const p = getPrice(), c = getCompare(); if (!p || !c || c <= p) return null; return Math.round(((c - p) / c) * 100); };
+  const getPrice = () => { 
+    if (selectedVariant?.price) return parseFloat(selectedVariant.price); 
+    if (product?.sale_price) return parseFloat(product.sale_price); 
+    if (product?.price) return parseFloat(product.price); 
+    return null; 
+  };
+  
+  const getCompare = () => { 
+    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); 
+    if (product?.sale_price && product?.price) return parseFloat(product.price); 
+    return null; 
+  };
+  
+  const getVariantDisc = () => { 
+    const p = getPrice(), c = getCompare(); 
+    if (!p || !c || c <= p) return null; 
+    return Math.round(((c - p) / c) * 100); 
+  };
 
-  /* ── Discount helpers ── */
   const isBxgy = discount?.type === 'buy_x_get_y';
-  const getBxgyFreeQty = (): number => { if (!isBxgy || !discount) return 0; const buyQty = discount.buy_quantity ?? 1; const getQty = discount.get_quantity ?? 1; const maxUses = discount.max_uses_per_order ?? 999; const sets = Math.min(Math.floor(quantity / buyQty), maxUses); return sets * getQty; };
-  const getBxgyDiscountedPrice = (op: number): number => { if (!isBxgy || !discount) return op; const fq = getBxgyFreeQty(); if (fq === 0) return op; if (discount.get_value_type === 'free') { return Math.round((op * (quantity - fq)) / quantity); } if (discount.get_value_type === 'percentage') { const td = (op * discount.get_value / 100) * fq; return Math.round(((op * quantity) - td) / quantity); } return op; };
-  const getBxgyLabel = (): string => { if (!isBxgy || !discount) return ''; if (discount.get_value_type === 'free') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} Free`; if (discount.get_value_type === 'percentage') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} @ ${discount.get_value}% OFF`; return `Buy ${discount.buy_quantity} Get ${discount.get_quantity}`; };
-  const isBxgyApplicable = (): boolean => { if (!isBxgy || !discount) return false; return quantity >= (discount.buy_quantity ?? 1); };
-  const isDiscountApplicable = (): boolean => { if (!discount) return false; if (isBxgy) return isBxgyApplicable(); const minQty = discount.min_quantity ?? 0; const minAmt = discount.min_amount ?? 0; if (minQty > 0 && quantity < minQty) return false; if (minAmt > 0) { const p = getPrice(); if (!p || p * quantity < minAmt) return false; } return true; };
-  const getDiscountedPrice = (op: number): number => { if (!discount || !isDiscountApplicable()) return op; if (isBxgy) return getBxgyDiscountedPrice(op); if (discount.value_type === 'percentage') return Math.round(op - (op * discount.value / 100)); return Math.max(0, op - discount.value); };
-  const getDiscountLabel = (): string => { if (!discount) return ''; if (isBxgy) return getBxgyLabel(); return discount.value_type === 'percentage' ? `${discount.value}% OFF` : `₹${discount.value} OFF`; };
-  const getSavingsAmount = (op: number): number => { if (!isDiscountApplicable()) return 0; if (isBxgy) { const fq = getBxgyFreeQty(); if (discount.get_value_type === 'free') return op * fq; if (discount.get_value_type === 'percentage') return Math.round((op * discount.get_value / 100) * fq); return 0; } return op - getDiscountedPrice(op); };
+  
+  const getBxgyFreeQty = (): number => { 
+    if (!isBxgy || !discount) return 0; 
+    const buyQty = discount.buy_quantity ?? 1; 
+    const getQty = discount.get_quantity ?? 1; 
+    const maxUses = discount.max_uses_per_order ?? 999; 
+    const sets = Math.min(Math.floor(quantity / buyQty), maxUses); 
+    return sets * getQty; 
+  };
+  
+  const getBxgyDiscountedPrice = (op: number): number => { 
+    if (!isBxgy || !discount) return op; 
+    const fq = getBxgyFreeQty(); 
+    if (fq === 0) return op; 
+    if (discount.get_value_type === 'free') { 
+      return Math.round((op * (quantity - fq)) / quantity); 
+    } 
+    if (discount.get_value_type === 'percentage') { 
+      const td = (op * discount.get_value / 100) * fq; 
+      return Math.round(((op * quantity) - td) / quantity); 
+    } 
+    return op; 
+  };
+  
+  const getBxgyLabel = (): string => { 
+    if (!isBxgy || !discount) return ''; 
+    if (discount.get_value_type === 'free') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} Free`; 
+    if (discount.get_value_type === 'percentage') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} @ ${discount.get_value}% OFF`; 
+    return `Buy ${discount.buy_quantity} Get ${discount.get_quantity}`; 
+  };
+  
+  const isBxgyApplicable = (): boolean => { 
+    if (!isBxgy || !discount) return false; 
+    return quantity >= (discount.buy_quantity ?? 1); 
+  };
+  
+  const isDiscountApplicable = (): boolean => { 
+    if (!discount) return false; 
+    if (isBxgy) return isBxgyApplicable(); 
+    const minQty = discount.min_quantity ?? 0; 
+    const minAmt = discount.min_amount ?? 0; 
+    if (minQty > 0 && quantity < minQty) return false; 
+    if (minAmt > 0) { 
+      const p = getPrice(); 
+      if (!p || p * quantity < minAmt) return false; 
+    } 
+    return true; 
+  };
+  
+  const getDiscountedPrice = (op: number): number => { 
+    if (!discount || !isDiscountApplicable()) return op; 
+    if (isBxgy) return getBxgyDiscountedPrice(op); 
+    if (discount.value_type === 'percentage') return Math.round(op - (op * discount.value / 100)); 
+    return Math.max(0, op - discount.value); 
+  };
+  
+  const getDiscountLabel = (): string => { 
+    if (!discount) return ''; 
+    if (isBxgy) return getBxgyLabel(); 
+    return discount.value_type === 'percentage' ? `${discount.value}% OFF` : `₹${discount.value} OFF`; 
+  };
+  
+  const getSavingsAmount = (op: number): number => { 
+    if (!isDiscountApplicable()) return 0; 
+    if (isBxgy) { 
+      const fq = getBxgyFreeQty(); 
+      if (discount.get_value_type === 'free') return op * fq; 
+      if (discount.get_value_type === 'percentage') return Math.round((op * discount.get_value / 100) * fq); 
+      return 0; 
+    } 
+    return op - getDiscountedPrice(op); 
+  };
 
-  /* ── Quantity ── */
-  const maxStock    = product?.stock_quantity ?? 99;
+  const maxStock = selectedVariant?.stock_quantity ?? product?.stock_quantity ?? 99;
   const decreaseQty = () => setQuantity(q => Math.max(1, q - 1));
   const increaseQty = () => setQuantity(q => Math.min(maxStock, q + 1));
 
-  /* ── Add to Cart ── */
   const handleAddToCart = () => {
     const price = getPrice();
     if (!price || !product) return;
@@ -555,7 +616,6 @@ export default function ProductDetailPage() {
     setTimeout(() => setAddedAnim(false), 1800);
   };
 
-  /* ── Enquiry ── */
   const handleEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus('sending');
@@ -566,16 +626,14 @@ export default function ProductDetailPage() {
     } catch { setFormStatus('error'); }
   };
 
-  /* ── Related price helpers ── */
-  const relPrice   = (p: any) => p.sale_price ? parseFloat(p.sale_price) : p.price ? parseFloat(p.price) : p.variants?.[0]?.price ? parseFloat(p.variants[0].price) : null;
+  const relPrice = (p: any) => p.sale_price ? parseFloat(p.sale_price) : p.price ? parseFloat(p.price) : p.variants?.[0]?.price ? parseFloat(p.variants[0].price) : null;
   const relCompare = (p: any) => p.sale_price && p.price ? parseFloat(p.price) : p.variants?.[0]?.compare_price ? parseFloat(p.variants[0].compare_price) : null;
 
-  /* ── Keyboard ── */
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') goSlide(curSlide + 1);
-      if (e.key === 'ArrowLeft')  goSlide(curSlide - 1);
-      if (e.key === 'Escape')     { setEnquiryOpen(false); setZoomOpen(false); }
+      if (e.key === 'ArrowLeft') goSlide(curSlide - 1);
+      if (e.key === 'Escape') { setEnquiryOpen(false); setZoomOpen(false); }
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -586,7 +644,6 @@ export default function ProductDetailPage() {
     return () => { document.body.style.overflow = ''; };
   }, [enquiryOpen, zoomOpen]);
 
-  /* ══ LOADING ══ */
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', flexDirection: 'column', gap: 16, fontFamily: 'Nunito,sans-serif' }}>
       <div style={{ width: 48, height: 48, borderRadius: '50%', border: '4px solid #dbeafe', borderTopColor: '#1872B5', animation: 'spin .8s linear infinite' }} />
@@ -604,18 +661,18 @@ export default function ProductDetailPage() {
     </div>
   );
 
-  const price         = getPrice();
-  const compare       = getCompare();
-  const variantDisc   = getVariantDisc();
-  const inStock       = (selectedVariant?.stock_quantity ?? product.stock_quantity) > 0;
-  const applicable    = isDiscountApplicable();
-  const finalPrice    = price && applicable ? getDiscountedPrice(price) : price;
-  const savings       = price && applicable ? getSavingsAmount(price) : 0;
+  const price = getPrice();
+  const compare = getCompare();
+  const variantDisc = getVariantDisc();
+  const inStock = (selectedVariant?.stock_quantity ?? product.stock_quantity) > 0;
+  const applicable = isDiscountApplicable();
+  const finalPrice = price && applicable ? getDiscountedPrice(price) : price;
+  const savings = price && applicable ? getSavingsAmount(price) : 0;
   const discountLabel = getDiscountLabel();
-  const minQty        = discount?.min_quantity ?? 0;
-  const needMoreForDisc  = discount && !applicable && minQty > 0 && quantity < minQty;
-  const bxgyFreeQty      = getBxgyFreeQty();
-  const needMoreForBxgy  = isBxgy && !isBxgyApplicable() && discount;
+  const minQty = discount?.min_quantity ?? 0;
+  const needMoreForDisc = discount && !applicable && minQty > 0 && quantity < minQty;
+  const bxgyFreeQty = getBxgyFreeQty();
+  const needMoreForBxgy = isBxgy && !isBxgyApplicable() && discount;
 
   return (
     <div style={{ background: '#f5f7fa', minHeight: '100vh', fontFamily: "'Nunito',sans-serif" }}>
@@ -632,7 +689,6 @@ export default function ProductDetailPage() {
         @keyframes bxgyPop{0%{transform:scale(.95);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
         @keyframes tabFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes slideDown{from{opacity:0;max-height:0}to{opacity:1;max-height:200px}}
-
         .pd-bc-bar{background:#1872B5;padding:14px 0;}
         .pd-bc-inner{max-width:1260px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
         .pd-bc{font-size:13px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
@@ -640,7 +696,6 @@ export default function ProductDetailPage() {
         .pd-bc a:hover{color:#fff;}
         .pd-bc-sep{opacity:.5;margin:0 2px;}
         .pd-bc-cur{color:#fff;font-weight:700;}
-
         .pd-grid{max-width:1260px;margin:30px auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;}
         .pd-gallery{position:sticky;top:24px;}
         .slider-wrap{position:relative;background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.1);cursor:zoom-in;}
@@ -668,17 +723,14 @@ export default function ProductDetailPage() {
         .thumb img{width:100%;height:100%;object-fit:contain;padding:4px;}
         .thumb.on,.thumb:hover{border-color:#1872B5;transform:translateY(-3px);box-shadow:0 6px 16px rgba(24,114,181,.22);}
         .thumb-variant-badge{position:absolute;top:2px;right:2px;background:#1872B5;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;}
-
         .pd-info{animation:fadeIn .45s ease both;}
         .pd-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:#0a214f;line-height:25px;margin-bottom:10px;}
         .pd-sku{font-size:12px;color:#9ca3af;margin-bottom:18px;display:flex;align-items:center;gap:6px;}
         .pd-sku b{color:#374151;background:#f3f4f6;padding:2px 8px;border-radius:5px;}
-
         .reviews-summary{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1.5px solid #e5e7eb;animation:slideDown .4s ease both;}
         .reviews-stars{display:flex;gap:2px;}
         .reviews-star{font-size:20px;line-height:1;}
         .reviews-text{font-size:13px;font-weight:700;color:#374151;font-family:'Sora',sans-serif;}
-
         .price-box{background:#ffffff00;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:-6px;}
         .price-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
         .price-main{font-size:18px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;line-height:1;}
@@ -699,18 +751,15 @@ export default function ProductDetailPage() {
         .bxgy-counter{background:linear-gradient(135deg,#059669,#10b981);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;animation:bxgyPop .4s ease both;}
         .bxgy-counter-icon{font-size:24px;}
         .disc-hint-strip{margin-top:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400e;font-weight:700;display:flex;align-items:center;gap:8px;}
-
         .stock-pill{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:700;padding:7px 16px;border-radius:20px;margin-bottom:12px;}
         .stock-in{background:#d1fae5;color:#065f46;}
         .stock-out{background:#fee2e2;color:#991b1b;}
         .sp-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
         .sp-dot-in{background:#10b981;animation:pulse 1.6s infinite;}
         .sp-dot-out{background:#ef4444;}
-
         .overview-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:none;}
         .overview-box{font-size:14px;color:#374151;line-height:20px;margin-bottom:-6px;padding:0;background:#ffffff00;border-radius:12px;border:none;padding-block:1px;}
         .divider{border:none;border-top:0px solid #e5e7eb;margin:10px 0;}
-
         .vg-label{font-size:11px;font-weight:800;color:#0a214f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
         .variant-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
         .vc{position:relative;min-width:58px;background:#fff;border:2px solid #e5e7eb;border-radius:7px;padding:7px 9px;text-align:center;cursor:pointer;transition:all .18s;box-shadow:none!important;}
@@ -719,15 +768,12 @@ export default function ProductDetailPage() {
         .vc-off{display:none;}
         .vc-name{font-size:12px;font-weight:600;color:#0a214f;font-family:'Sora',sans-serif;}
         .vc-out{font-size:10px;color:#dc2626;font-weight:700;margin-top:3px;}
-
         .qty-section{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-        .qty-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;}
         .qty-ctrl{display:flex;align-items:center;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;}
         .qty-btn{width:42px;height:42px;border:none;background:#f9fafb;cursor:pointer;font-size:20px;font-weight:700;color:#374151;display:flex;align-items:center;justify-content:center;transition:all .15s;}
         .qty-btn:hover:not(:disabled){background:#1872B5;color:#fff;}
         .qty-btn:disabled{opacity:.4;cursor:not-allowed;}
         .qty-num{width:52px;text-align:center;font-size:13px;font-weight:800;color:#0a214f;background:#fff;border-left:2px solid #e5e7eb;border-right:2px solid #e5e7eb;height:42px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;}
-
         .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
         .cta-btn{flex:1;min-width:140px;padding:15px 20px;border-radius:12px;font-size:15px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;transition:all .22s;position:relative;overflow:hidden;}
         .cta-add{background:linear-gradient(135deg,#1872B5 0%,#2596e1 100%);color:#fff;box-shadow:0 4px 18px rgba(24,114,181,.35);}
@@ -736,7 +782,6 @@ export default function ProductDetailPage() {
         .cta-add.added{background:linear-gradient(135deg,#059669,#10b981)!important;animation:cartBounce .5s ease;}
         .cta-enq{background:#fff;color:#1872B5;border:2px solid #1872B5;}
         .cta-enq:hover{background:#eff6ff;transform:translateY(-2px);}
-
         .meta-tbl{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;border:1.5px solid #e5e7eb;font-size:13px;}
         .meta-tbl tr{border-bottom:1px solid #e5e7eb;}
         .meta-tbl tr:last-child{border-bottom:none;}
@@ -744,7 +789,6 @@ export default function ProductDetailPage() {
         .meta-tbl td:first-child{font-weight:700;color:#6b7280;width:36%;background:#f9fafb;border-right:1px solid #e5e7eb;}
         .chip-cat{background:#eff6ff;color:#1872B5;border:1px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;text-decoration:none;display:inline-block;margin:2px;transition:background .2s;}
         .chip-cat:hover{background:#dbeafe;}
-
         .prod-tabs-section{max-width:1260px;margin:48px auto 0;padding:0 24px 40px;}
         .prod-tabs-wrap{background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);}
         .prod-tabs-nav{display:flex;border-bottom:1.5px solid #e5e7eb;overflow-x:auto;scrollbar-width:none;background:#fafbfc;}
@@ -755,18 +799,15 @@ export default function ProductDetailPage() {
         .prod-tab-content{padding:28px 32px;animation:tabFadeIn .3s ease both;min-height:120px;}
         .reviews-tab-wrap{padding:24px 32px;animation:tabFadeIn .3s ease both;}
         .rv-topbar{display:none!important;}
-
         .rel-section{max-width:1260px;margin:0 auto;padding:0 24px 64px;}
         .rel-head{font-family:'Sora',sans-serif;font-size:19px;font-weight:800;color:#0a214f;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #e5e7eb;display:flex;align-items:center;gap:10px;}
         .rel-head::before{content:'';display:inline-block;width:4px;height:26px;background:linear-gradient(180deg,#1872B5,#2596e1);border-radius:2px;}
         .rel-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
-
         .cart-toast{position:fixed;bottom:28px;right:28px;background:#065f46;color:#fff;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:10px;z-index:99998;box-shadow:0 8px 28px rgba(0,0,0,.22);animation:slideInRight .35s ease;pointer-events:none;}
         .zoom-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;animation:zoomIn .25s ease;}
         .zoom-img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
         .zoom-close{position:absolute;top:20px;right:20px;width:44px;height:44px;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
         .zoom-close:hover{background:rgba(255,255,255,.3);}
-
         .enq-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .3s;}
         .enq-overlay.open{opacity:1;visibility:visible;}
         .enq-modal{background:#fff;border-radius:22px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(28px) scale(.97);transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 30px 70px rgba(0,0,0,.22);}
@@ -791,7 +832,6 @@ export default function ProductDetailPage() {
         .enq-success-icon{width:68px;height:68px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px;animation:checkPop .5s ease both;}
         .enq-success h4{font-family:'Sora',sans-serif;font-size:22px;margin:0 0 8px;color:#065f46;}
         .enq-success p{font-size:14px;color:#6b7280;}
-
         @media(max-width:980px){
           .pd-grid{grid-template-columns:1fr;gap:28px;padding:0 16px 32px;margin:20px auto;padding-bottom:0;margin-bottom:-14px;}
           .pd-gallery{position:static;}
@@ -838,8 +878,8 @@ export default function ProductDetailPage() {
               <div className="slider-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onClick={() => images[curSlide]?.type !== 'video' && setZoomOpen(true)}>
                 <div className="slide-badges">
                   {product.is_featured && <span className="badge-feat">⭐ Featured</span>}
-                  {variantDisc && !discount    && <span className="badge-sale">{variantDisc}% OFF</span>}
-                  {discount && applicable && isBxgy  && <span className="badge-bxgy">🎁 {getBxgyLabel()}</span>}
+                  {variantDisc && !discount && <span className="badge-sale">{variantDisc}% OFF</span>}
+                  {discount && applicable && isBxgy && <span className="badge-bxgy">🎁 {getBxgyLabel()}</span>}
                   {discount && applicable && !isBxgy && <span className="badge-discount">🏷️ {discountLabel}</span>}
                 </div>
                 {images.length > 1 && <button className="arrow-btn arrow-prev" onClick={e => { e.stopPropagation(); goSlide(curSlide - 1); }}>‹</button>}
@@ -965,7 +1005,7 @@ export default function ProductDetailPage() {
                   const attrs = v.attributes || {};
                   const label = Object.keys(attrs).length === 1 ? Object.values(attrs)[0] as string : v.name;
                   return (
-                    <div key={idx} className={`vc ${selectedVariant?.id === v.id ? 'on' : ''}`} onClick={() => setSelectedVariant(v)}>
+                    <div key={idx} className={`vc ${selectedVariant?.id === v.id ? 'on' : ''}`} onClick={() => handleVariantClick(v)}>
                       <div className="vc-name">{label}</div>
                       {(v.stock_quantity === 0 || v.stock_quantity === '0') && <div className="vc-out">Out of Stock</div>}
                     </div>
@@ -1063,8 +1103,8 @@ export default function ProductDetailPage() {
           <div className="rel-grid">
             {related.map((rp: any) => {
               const rPrice = relPrice(rp);
-              const rComp  = relCompare(rp);
-              const rImg   = rp.featured_image ? `${API_URL}/uploads/products/${rp.featured_image}` : null;
+              const rComp = relCompare(rp);
+              const rImg = rp.featured_image ? `${API_URL}/uploads/products/${rp.featured_image}` : null;
               return (
                 <Link key={rp.id} href={`/product/${rp.slug}`} className="rel-card" style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #e5e7eb', overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none', color: 'inherit', transition: 'all .22s', boxShadow: '0 2px 10px rgba(0,0,0,.07)' }}>
                   <div style={{ aspectRatio: '1', background: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -1073,7 +1113,7 @@ export default function ProductDetailPage() {
                   <div style={{ padding: '10px 12px 14px' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#0a214f', lineHeight: 1.4, marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.title}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      {rComp  && <span style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'line-through' }}>₹{rComp.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
+                      {rComp && <span style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'line-through' }}>₹{rComp.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                       {rPrice && <span style={{ fontSize: 14, fontWeight: 800, color: '#1872B5', fontFamily: "'Sora',sans-serif" }}>₹{rPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                     </div>
                   </div>
