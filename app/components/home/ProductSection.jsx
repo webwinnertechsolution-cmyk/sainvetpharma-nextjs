@@ -608,6 +608,47 @@ const ProductSection = ({ section = null, products = [] }) => {
           .ps-disc-badge { font-size: 11px; padding: 4px 8px; top: 8px; left: 8px; }
           .ps-wish-btn { opacity: 1; width: 28px; height: 28px; }
           .ps-wish-btn svg { width: 14px; height: 14px; }
+          .ps-inner {
+    padding: 13px 14px;
+}
+.ps-arrow {
+    opacity: 1 !important;
+    width: 30px;
+    height: 30px;
+}
+.ps-header-left p {
+    font-size: 14px;
+    color: #1872B5;
+    margin: 0px 0 -9px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+}
+.ps-body {
+    padding: 9px 10px 9px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.ps-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0a214f;
+    line-height: 16px;
+    margin-bottom: -4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-family: 'Nunito';
+}
+.ps-disc-badge.sale {
+    background: linear-gradient(135deg, #1872b5 0%, #1872b5 100%);
+    color: #fff;
+    box-shadow: none;
+    font-size: 8px;
+    padding: 5px;
+    border-radius: 5px;
+}
         }
       `}</style>
 
