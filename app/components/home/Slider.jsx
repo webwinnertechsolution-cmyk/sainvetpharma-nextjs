@@ -333,6 +333,36 @@ button.rl-arrow.rl-arrow-prev {
     justify-content: center;
     transition: background 0.3s;
 }
+.rl-dots {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 10;
+    display: none;
+}
+.rl-slider-section .rl-arrow {
+    position: absolute;
+    top: 57%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 25px!important;
+    height: 25px!important;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease, background 0.3s ease, box-shadow 0.3s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+
         }
         @media (max-width: 1024px) and (min-width: 768px) {
           .rl-slider { height: 420px; }
