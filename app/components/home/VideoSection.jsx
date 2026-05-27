@@ -35,7 +35,7 @@ const VideoSection = ({ sectionId }) => {
   }, []);
 
   const GAP          = 14;
-  const maxItems     = isMobile ? 1 : 5;
+  const maxItems     = isMobile ? 2 : 5;  // ✅ Mobile par 2 cards
   const itemsVisible = Math.min(maxItems, videoList.length);
   const totalSlides  = Math.max(1, videoList.length - itemsVisible + 1);
   const showArrows   = videoList.length > itemsVisible;
@@ -90,7 +90,6 @@ const VideoSection = ({ sectionId }) => {
     setPlayingId(idx);
   };
 
-  // ✅ Video ruke ya khatam ho — play icon wapas aaye
   const handleVideoStop = (e) => {
     e.stopPropagation();
     setPlayingId(null);
@@ -137,29 +136,20 @@ const VideoSection = ({ sectionId }) => {
         .vs-arrow-next{right:-22px}
         .vs-arrow svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
         .vs-gradient-bg{width:100%;height:100%;background:linear-gradient(135deg,#1872B5 0%,#0a214f 100%);display:flex;align-items:center;justify-content:center;font-size:48px}
-       .vs-video-wrap {
-    aspect-ratio: 16/26;
-    position: relative;
-    background: #000;
-    overflow: hidden;
-}
-a.vs-view-all {
-    display: none;
-}
-section.exclusive-offers-wrapper {
-    margin-bottom: 36px;
-}
-.vs-wrap {
-    padding: 8px 0 18px;
-}
+        .vs-video-wrap{aspect-ratio:16/26;position:relative;background:#000;overflow:hidden}
+        a.vs-view-all{display:none}
+        section.exclusive-offers-wrapper{margin-bottom:36px}
+        .vs-wrap{padding:8px 0 18px}
 
-	   @media(max-width:767px){
+        @media(max-width:767px){
           .vs-inner{padding:0 14px}
           .vs-arrow{opacity:1!important;width:36px;height:36px}
           .vs-arrow-prev{left:-8px}
           .vs-arrow-next{right:-8px}
           .vs-view-all{display:none}
           .vs-header-left h2{font-size:20px}
+          .vs-play{width:40px;height:40px}
+          .vs-play svg{width:16px;height:16px}
         }
       `}</style>
 
@@ -212,9 +202,7 @@ section.exclusive-offers-wrapper {
                           controls
                           playsInline
                           onClick={e => e.stopPropagation()}
-                          // ✅ Pause karo → play icon wapas
                           onPause={handleVideoStop}
-                          // ✅ Video khatam → play icon wapas
                           onEnded={handleVideoStop}
                           style={{ width:'100%', height:'100%', objectFit:'cover' }}
                           onError={(e) => console.error('Video error:', vUrl, e.target.error)}
