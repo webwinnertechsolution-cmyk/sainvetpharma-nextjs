@@ -573,6 +573,20 @@ const ProductSection = ({ section = null, products = [] }) => {
     font-family: 'Nunito', sans-serif;
     font-weight: 800;
 }
+.ps-wrap {
+    padding: 4px 0 3px;
+    background: transparent;
+    position: relative;
+    z-index: 1;
+}
+.ps-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 17px;
+    margin-top: 10px;
+    position: relative;
+}
         @media (max-width: 767px) {
           .ps-wrap { padding-bottom: 29px !important; }
           .ps-inner { padding: 0 14px; }
@@ -673,7 +687,7 @@ const ProductSection = ({ section = null, products = [] }) => {
                       flex: `0 0 ${cardFlexBasis}`,
                       pointerEvents: isDragging ? 'none' : 'auto',
                     }}
-                    onClick={(e) => isDragging && e.preventDefault()}
+                    onClick={(e) => { isDragging && e.preventDefault(); }}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
