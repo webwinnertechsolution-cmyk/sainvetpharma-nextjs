@@ -661,6 +661,9 @@ const ProductSection = ({ section = null, products = [] }) => {
     overflow: hidden;
     font-family: 'Nunito';
 }
+.ps-wrap {
+    padding-bottom: 0px !important;
+}
         }
       `}</style>
 
