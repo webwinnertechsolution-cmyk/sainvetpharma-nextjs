@@ -174,6 +174,60 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-success h4{font-family:'Sora',sans-serif;font-size:19px;color:#065f46;margin:0 0 6px;}
         .rv-success p{font-size:13px;color:#6b7280;}
         .rv-err-msg{background:#fee2e2;color:#991b1b;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;}
+        .slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover!important;
+    transition: transform .4s ease;
+    width: 100%;
+}
+.slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+    flex-shrink: 0;
+}
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    display: none;
+}
+.thumb {
+    width: 70px;
+    height: 70px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    flex-shrink: 0;
+    transition: all .22s;
+    position: relative;
+    margin-top: 3px;
+}
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0px;
+}
+.thumb-variant-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #1872B5;
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: none;
+}
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
