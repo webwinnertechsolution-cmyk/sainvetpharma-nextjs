@@ -191,7 +191,7 @@ p.sabdj {
 .hc-img-wrap {
     position: absolute;
     top: 5px;
-    left: 52%!important;
+    left: 58%!important;
     transform: translateX(-50%);
     width: 94px;
     height: 90px;
