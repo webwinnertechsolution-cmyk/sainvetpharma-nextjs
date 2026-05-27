@@ -625,6 +625,9 @@ const ProductSection = ({ section = null, products = [] }) => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {showArrows && (
             <button
@@ -640,9 +643,6 @@ const ProductSection = ({ section = null, products = [] }) => {
 
           <div
             className={`ps-overflow ${isDragging ? 'dragging' : ''}`}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
           >
             <div
               className="ps-track"
