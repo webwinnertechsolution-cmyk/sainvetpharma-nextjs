@@ -19,7 +19,7 @@ const ProductSection = ({ section = null, products = [] }) => {
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [wishlistLoading, setWishlistLoading] = useState(new Set());
   const trackRef = useRef(null);
-  const isWishlistClick = useRef(false); // ✅ NEW: Track if wishlist button was clicked
+  const isWishlistClick = useRef(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -76,7 +76,6 @@ const ProductSection = ({ section = null, products = [] }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // ✅ NEW: Mark that wishlist button was clicked
     isWishlistClick.current = true;
 
     const user = getStoredUser();
@@ -134,7 +133,6 @@ const ProductSection = ({ section = null, products = [] }) => {
   };
 
   const handleMouseDown = (e) => {
-    // ✅ NEW: Agar wishlist button pe click hua to drag start mat karo
     if (isWishlistClick.current) {
       isWishlistClick.current = false;
       return;
@@ -168,7 +166,6 @@ const ProductSection = ({ section = null, products = [] }) => {
   };
 
   const handleTouchStart = (e) => {
-    // ✅ NEW: Touch pe bhi same check
     if (isWishlistClick.current) {
       isWishlistClick.current = false;
       return;
@@ -279,6 +276,9 @@ const ProductSection = ({ section = null, products = [] }) => {
           color: #6b7280;
           margin: 6px 0 0;
           font-family: 'Nunito', sans-serif;
+          font-size: 17px;
+          color: #1872B5;
+          font-weight: 800;
         }
 
         .ps-view-all {
@@ -562,31 +562,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           color: #dc2626;
           align-self: flex-start;
         }
-.ps-header-left p {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 6px 0 0;
-    font-family: 'Nunito', sans-serif;
-    font-size: 17px;
-    color: #1872B5;
-    margin: 6px 0 0;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-}
-.ps-wrap {
-    padding: 4px 0 3px;
-    background: transparent;
-    position: relative;
-    z-index: 1;
-}
-.ps-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 17px;
-    margin-top: 10px;
-    position: relative;
-}
+
         @media (max-width: 767px) {
           .ps-wrap { padding-bottom: 29px !important; }
           .ps-inner { padding: 0 14px; }
@@ -679,15 +655,15 @@ const ProductSection = ({ section = null, products = [] }) => {
                 const showPrice = discInfo?.sellingPrice || product.price;
 
                 return (
-                  <Link
+                  <div
                     key={product.id}
-                    href={detailUrl}
                     className="ps-card"
                     style={{
                       flex: `0 0 ${cardFlexBasis}`,
                       pointerEvents: isDragging ? 'none' : 'auto',
+                      cursor: isDragging ? 'grabbing' : 'pointer',
                     }}
-                    onClick={(e) => { isDragging && e.preventDefault(); }}
+                    onClick={() => !isDragging && (window.location.href = detailUrl)}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
@@ -700,14 +676,15 @@ const ProductSection = ({ section = null, products = [] }) => {
 
                       <button
                         className={`ps-wish-btn${isWishlisted ? ' active' : ''}${isWishLoading ? ' loading' : ''}`}
-                        onClick={(e) => toggleWishlist(e, product.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(e, product.id);
+                        }}
                         onMouseDown={(e) => {
-                          // ✅ NEW: Prevent drag on wishlist button mousedown
                           e.stopPropagation();
                           isWishlistClick.current = true;
                         }}
                         onTouchStart={(e) => {
-                          // ✅ NEW: Prevent drag on wishlist button touch
                           e.stopPropagation();
                           isWishlistClick.current = true;
                         }}
@@ -754,7 +731,7 @@ const ProductSection = ({ section = null, products = [] }) => {
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
