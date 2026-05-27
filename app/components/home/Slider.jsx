@@ -361,12 +361,10 @@ button.rl-arrow.rl-arrow-prev {
     transition: opacity 0.3s ease, background 0.3s ease, box-shadow 0.3s;
     box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
-.hc-card:hover::before {
-    display: none;
-    width: 122px;
-    height: 118px;
-}
 
+.hc-card::before {
+    display: none;
+}
         }
         @media (max-width: 1024px) and (min-width: 768px) {
           .rl-slider { height: 420px; }
