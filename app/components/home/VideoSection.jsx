@@ -166,6 +166,11 @@ const VideoSection = ({ sectionId }) => {
 .vs-wrap {
     padding: 8px 0 0px;
 }
+.vs-arrow {
+    opacity: 1!important;
+    width: 30px;
+    height: 30px;
+}
         }
       `}</style>
 
