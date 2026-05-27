@@ -2,12 +2,11 @@
 
 import { useState, useRef, useEffect, useId } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { getStoredUser } from '@/lib/googleAuth';
 
 const ProductSection = ({ section = null, products = [] }) => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  const router = useRouter();
+
   const instanceId = useId().replace(/:/g, '_');
 
   const [productList] = useState(products);
@@ -15,13 +14,14 @@ const ProductSection = ({ section = null, products = [] }) => {
   const [isMobile, setIsMobile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [currentX, setCurrentX] = useState(0);
-  const [dragDistance, setDragDistance] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [wishlistLoading, setWishlistLoading] = useState(new Set());
   const trackRef = useRef(null);
-  const overflowRef = useRef(null);
+  const isWishlistClick = useRef(false);
+  const hasDragged = useRef(false);       // ✅ NEW: Track actual drag
+  const DRAG_THRESHOLD = 5;               // ✅ NEW: Min px to count as drag
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -78,6 +78,8 @@ const ProductSection = ({ section = null, products = [] }) => {
     e.preventDefault();
     e.stopPropagation();
 
+    isWishlistClick.current = true;
+
     const user = getStoredUser();
     if (!user) {
       window.location.href = '/login';
@@ -132,82 +134,96 @@ const ProductSection = ({ section = null, products = [] }) => {
     return firstCard ? firstCard.offsetWidth + GAP : 0;
   };
 
+  // ✅ FIXED: handleMouseDown — reset hasDragged
   const handleMouseDown = (e) => {
-    // Don't start drag if clicking on wishlist button or buttons inside card
-    if (e.target.closest('.ps-wish-btn') || e.target.closest('button')) {
+    if (isWishlistClick.current) {
+      isWishlistClick.current = false;
       return;
     }
-    
     setIsDragging(true);
     setStartX(e.clientX);
-    setCurrentX(e.clientX);
-    setDragDistance(0);
+    setOffset(0);
+    hasDragged.current = false; // ✅ reset on every new press
   };
 
+  // ✅ FIXED: handleMouseMove — only mark drag after threshold
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    
-    const newX = e.clientX;
-    const distance = newX - startX;
-    setCurrentX(newX);
-    setDragDistance(Math.abs(distance));
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > DRAG_THRESHOLD) {
+      hasDragged.current = true; // ✅ real drag happened
+    }
+    setOffset(diff);
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
       setIsDragging(false);
-      finalizeDrag();
+      if (hasDragged.current) {
+        const cardW = getCardWidth();
+        const slideCount = Math.round(-offset / cardW);
+        if (Math.abs(slideCount) > 0)
+          setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
+      }
+      setOffset(0);
+      setTimeout(() => { hasDragged.current = false; }, 0);
     }
   };
 
-  const handleMouseUp = (e) => {
+  // ✅ FIXED: handleMouseUp — use hasDragged instead of isDragging for slide logic
+  const handleMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    finalizeDrag();
-  };
-
-  const finalizeDrag = () => {
-    if (dragDistance > 30) {
-      const direction = startX - currentX > 0 ? 1 : -1;
-      const newIndex = currentIndex + direction;
-      setCurrentIndex(Math.max(0, Math.min(newIndex, totalSlides - 1)));
+    if (hasDragged.current) {
+      const cardW = getCardWidth();
+      const slideCount = Math.round(-offset / cardW);
+      if (Math.abs(slideCount) > 0)
+        setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
     }
-    
-    setDragDistance(0);
+    setOffset(0);
+    // ✅ Delay reset so onClick fires before we clear the flag
+    setTimeout(() => { hasDragged.current = false; }, 0);
   };
 
+  // ✅ FIXED: handleTouchStart — reset hasDragged
   const handleTouchStart = (e) => {
-    if (e.target.closest('.ps-wish-btn') || e.target.closest('button')) {
+    if (isWishlistClick.current) {
+      isWishlistClick.current = false;
       return;
     }
-    
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
-    setCurrentX(e.touches[0].clientX);
-    setDragDistance(0);
+    setOffset(0);
+    hasDragged.current = false; // ✅ reset
   };
 
+  // ✅ FIXED: handleTouchMove — threshold check
   const handleTouchMove = (e) => {
     if (!isDragging) return;
-    
-    const newX = e.touches[0].clientX;
-    const distance = newX - startX;
-    setCurrentX(newX);
-    setDragDistance(Math.abs(distance));
+    const diff = e.touches[0].clientX - startX;
+    if (Math.abs(diff) > DRAG_THRESHOLD) {
+      hasDragged.current = true; // ✅ real drag
+    }
+    setOffset(diff);
   };
 
+  // ✅ FIXED: handleTouchEnd — use hasDragged
   const handleTouchEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    finalizeDrag();
+    if (hasDragged.current) {
+      const cardW = getCardWidth();
+      const slideCount = Math.round(-offset / cardW);
+      if (Math.abs(slideCount) > 0)
+        setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
+    }
+    setOffset(0);
+    setTimeout(() => { hasDragged.current = false; }, 0);
   };
-
-  // Calculate offset for visual feedback during drag
-  const dragOffset = isDragging ? (currentX - startX) : 0;
 
   const translateStep = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
   const baseTransform = `calc(-${currentIndex} * ${translateStep})`;
-  const finalTransform = `calc(${baseTransform} + ${dragOffset}px)`;
+  const finalTransform = isDragging ? `calc(${baseTransform} + ${offset}px)` : baseTransform;
 
   const getImageUrl = (imageName) =>
     imageName ? `${API_URL}/uploads/products/${imageName}` : null;
@@ -243,23 +259,6 @@ const ProductSection = ({ section = null, products = [] }) => {
     ? `calc((100vw - 28px - 14px) / 2)`
     : `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible})`;
 
-  // Arrow button handlers
-  const handlePrevClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handleNextClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (currentIndex < totalSlides - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
   return (
     <div className="ps-wrap">
       <style>{`
@@ -267,7 +266,7 @@ const ProductSection = ({ section = null, products = [] }) => {
         * { box-sizing: border-box; }
 
         .ps-wrap {
-          padding: 42px 0 50px;
+          padding: 4px 0 3px;
           background: transparent;
           position: relative;
           z-index: 1;
@@ -283,7 +282,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 33px;
+          margin-bottom: 17px;
           margin-top: 10px;
           position: relative;
         }
@@ -343,9 +342,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           cursor: grab;
         }
 
-        .ps-overflow.dragging { 
-          cursor: grabbing;
-        }
+        .ps-overflow.dragging { cursor: grabbing; }
 
         .ps-track {
           display: flex;
@@ -413,6 +410,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           flex-direction: column;
           text-decoration: none;
           color: inherit;
+          cursor: pointer;
         }
 
         .ps-card:hover {
@@ -469,7 +467,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           position: absolute;
           top: 8px;
           right: 8px;
-          z-index: 11;
+          z-index: 10;
           width: 32px;
           height: 32px;
           border-radius: 50%;
@@ -639,7 +637,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-prev"
-              onClick={handlePrevClick}
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
               disabled={currentIndex === 0}
               aria-label="Previous"
               type="button"
@@ -650,7 +648,6 @@ const ProductSection = ({ section = null, products = [] }) => {
 
           <div
             className={`ps-overflow ${isDragging ? 'dragging' : ''}`}
-            ref={overflowRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -659,7 +656,7 @@ const ProductSection = ({ section = null, products = [] }) => {
               className="ps-track"
               ref={trackRef}
               style={{
-                transform: finalTransform,
+                transform: `translateX(${finalTransform})`,
                 transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               }}
             >
@@ -688,15 +685,16 @@ const ProductSection = ({ section = null, products = [] }) => {
                 return (
                   <Link
                     key={product.id}
-                    href={dragDistance > 30 ? '#' : detailUrl}
+                    href={detailUrl}
                     className="ps-card"
                     style={{
                       flex: `0 0 ${cardFlexBasis}`,
+                      // ✅ FIXED: Use hasDragged.current (ref) instead of isDragging (state)
+                      // pointerEvents stays 'auto' always; onClick handles the guard
                     }}
                     onClick={(e) => {
-                      if (dragDistance > 30) {
-                        e.preventDefault();
-                      }
+                      // ✅ FIXED: Block redirect only if actual drag happened
+                      if (hasDragged.current) e.preventDefault();
                     }}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
@@ -711,6 +709,14 @@ const ProductSection = ({ section = null, products = [] }) => {
                       <button
                         className={`ps-wish-btn${isWishlisted ? ' active' : ''}${isWishLoading ? ' loading' : ''}`}
                         onClick={(e) => toggleWishlist(e, product.id)}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          isWishlistClick.current = true;
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          isWishlistClick.current = true;
+                        }}
                         title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                         type="button"
                       >
@@ -763,7 +769,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-next"
-              onClick={handleNextClick}
+              onClick={() => setCurrentIndex(Math.min(currentIndex + 1, totalSlides - 1))}
               disabled={currentIndex >= totalSlides - 1}
               aria-label="Next"
               type="button"
