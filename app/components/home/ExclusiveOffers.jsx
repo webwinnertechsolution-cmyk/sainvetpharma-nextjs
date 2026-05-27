@@ -452,6 +452,10 @@ const ExclusiveOffers = () => {
     grid-template-columns: 1fr;
     gap: 8px;
 }
+.offers-heading {
+    text-align: center;
+    margin-bottom: 45px;
+}
         }
       `}</style>
 
