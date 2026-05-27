@@ -649,6 +649,18 @@ const ProductSection = ({ section = null, products = [] }) => {
     padding: 5px;
     border-radius: 5px;
 }
+.ps-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0a214f;
+    line-height: 16px;
+    margin-bottom: -4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-family: 'Nunito';
+}
         }
       `}</style>
 
