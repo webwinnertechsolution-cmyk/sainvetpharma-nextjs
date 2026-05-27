@@ -216,6 +216,22 @@ a.br-view-all {
     margin-top: -1px;
     margin-bottom: 4px;
 }
+.br-header h2 {
+    font-size: 20px;
+}
+.br-wrap {
+    padding: 23px 0 33px;
+    background: #D0EDFB;
+    margin-top: -1px;
+    margin-bottom: 4px;
+}
+.br-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 9px;
+    margin-top: 8px;
+}
         }
       `}</style>
 
