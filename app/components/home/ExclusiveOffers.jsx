@@ -407,7 +407,7 @@ const ExclusiveOffers = () => {
         }
 
         /* Small mobile */
-        @media (max-width: 480px) {
+        @media (max-width: 767px) {
           .offer-item {
             height: 280px;
           }
@@ -423,6 +423,35 @@ const ExclusiveOffers = () => {
           .offer-content {
             padding: 20px 16px 16px;
           }
+		  .exclusive-offers-wrapper {
+    margin: 8px 0;
+    padding: 0 12px;
+}
+.offers-heading h2 {
+    font-size: 20px;
+    margin-bottom: -18px;
+}
+.offers-heading p {
+    font-size: 14px;
+    color: #1872B5;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    margin-top: 18px;
+    margin-bottom: -27px;
+}
+.offers-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0px;
+}
+.offer-item {
+    height: 361px;
+}
+.offers-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
         }
       `}</style>
 
