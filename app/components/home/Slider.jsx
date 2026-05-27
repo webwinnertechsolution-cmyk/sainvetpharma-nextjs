@@ -287,10 +287,51 @@ export default function Slider({ sliders }) {
     background-repeat: no-repeat;
 }
 button.rl-arrow.rl-arrow-next {
-    left: 4px;
+    right: 4px;
 }
 button.rl-arrow.rl-arrow-prev {
-    right: 4px;
+    left: 4px;
+}
+.rl-slide-content {
+    max-width: 209px;
+}
+.rl-slide-sub-title {
+    color: #444;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    font-family: 'Nunito', sans-serif;
+}
+.rl-slide-title {
+    color: #1a2e44;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    font-family: 'Sora', sans-serif;
+}
+.rl-slide-title {
+    font-size: 22px;
+}
+.rl-slide-btn {
+    font-size: 12px;
+    padding: 10px 20px;
+}
+.rl-slide-btn {
+    font-size: 12px;
+    padding: 3px 10px;
+}
+.rl-slide-btn .btn-arrow {
+    width: 24px;
+    height: 24px;
+    background: rgb(255 255 255 / 85%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
 }
         }
         @media (max-width: 1024px) and (min-width: 768px) {
