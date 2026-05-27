@@ -5,8 +5,9 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/app/components/CartContext';
 
-const API_URL  = process.env.NEXT_PUBLIC_API_URL || ''; // images ke liye
-const FETCH_URL = ''; // API calls ke liye (rewrites use karega)
+const API_URL  = process.env.NEXT_PUBLIC_API_URL || '';
+const FETCH_URL = '';
+
 // ═══════════════════════════════════════════
 // STARS COMPONENT
 // ═══════════════════════════════════════════
@@ -462,14 +463,44 @@ export default function ProductDetailPage() {
     if (!product) return [];
     const imgs: any[] = [];
     if (product.featured_image)
-      imgs.push({ src: `${API_URL}/uploads/products/${product.featured_image}`, alt: product.featured_image_alt || product.title, type: 'image' });
+      imgs.push({ src: `${API_URL}/uploads/products/${product.featured_image}`, alt: product.featured_image_alt || product.title, type: 'image', variantId: null });
     (product.images || []).forEach((gi: any) =>
-      imgs.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || product.title, type: gi.type || 'image' })
+      imgs.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || product.title, type: gi.type || 'image', variantId: null })
     );
+    
+    // ✅ ADD VARIANT IMAGES
+    (product.variants || []).forEach((variant: any) => {
+      if (variant.image) {
+        imgs.push({ 
+          src: `${API_URL}/uploads/products/variants/${variant.image}`, 
+          alt: variant.name, 
+          type: 'image', 
+          variantId: variant.id,
+          variantName: variant.name 
+        });
+      }
+    });
+    
     return imgs;
   };
 
   const imgs = getImages();
+  
+  // ✅ When variant changes, swap to its image
+  useEffect(() => {
+    if (!selectedVariant) return;
+    const variantImageIndex = imgs.findIndex(img => img.variantId === selectedVariant.id);
+    if (variantImageIndex !== -1) {
+      setCurSlide(variantImageIndex);
+      if (thumbsRef.current) {
+        const thumbW = 70; const gap = 8;
+        const containerW = thumbsRef.current.offsetWidth;
+        const scrollTo = variantImageIndex * (thumbW + gap) - containerW / 2 + thumbW / 2;
+        thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
+      }
+    }
+  }, [selectedVariant?.id, imgs]);
+
   const goSlide = (n: number) => {
     const total = imgs.length;
     const next = ((n % total) + total) % total;
@@ -637,9 +668,10 @@ export default function ProductDetailPage() {
         .sdot-item.on{background:#1872B5;width:22px;border-radius:4px;}
         .thumbs-wrap{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
         .thumbs-wrap::-webkit-scrollbar{display:none;}
-        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;}
+        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;position:relative;}
         .thumb img{width:100%;height:100%;object-fit:contain;padding:4px;}
         .thumb.on,.thumb:hover{border-color:#1872B5;transform:translateY(-3px);box-shadow:0 6px 16px rgba(24,114,181,.22);}
+        .thumb-variant-badge{position:absolute;top:2px;right:2px;background:#1872B5;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;}
 
         .pd-info{animation:fadeIn .45s ease both;}
         .pd-title {
@@ -990,10 +1022,17 @@ span.vc-off {
     display: none!important;
 }
 
-
-
-
-
+.thumb-variant-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #1872B5;
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
 
         @media(max-width:980px){
           .pd-grid{grid-template-columns:1fr;gap:28px;padding:0 16px 32px;margin:20px auto;}
@@ -1116,6 +1155,7 @@ span.vc-off {
                 <div className="thumbs-wrap" ref={thumbsRef}>
                   {imgs.map((im, i) => (
                     <div key={i} className={`thumb ${i === curSlide ? 'on' : ''}`} onClick={() => goSlide(i)}>
+                      {im.variantId && <span className="thumb-variant-badge">✓ Var</span>}
                       {im.type === 'video'
                         ? <div style={{ width: '100%', height: '100%', background: '#0a214f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, borderRadius: 8 }}>▶</div>
                         : <img src={im.src} alt={im.alt} />}
