@@ -140,7 +140,13 @@ const VideoSection = ({ sectionId }) => {
         a.vs-view-all{display:none}
         section.exclusive-offers-wrapper{margin-bottom:36px}
         .vs-wrap{padding:8px 0 18px}
-
+.vs-header-left p {
+    font-size: 17px;
+    color: #1872B5;
+    margin: -1px 0 -6px;
+    font-family: 'Nunito',sans-serif;
+    font-weight: 800;
+}
         @media(max-width:767px){
           .vs-inner{padding:0 14px}
           .vs-arrow{opacity:1!important;width:36px;height:36px}
@@ -150,6 +156,16 @@ const VideoSection = ({ sectionId }) => {
           .vs-header-left h2{font-size:20px}
           .vs-play{width:40px;height:40px}
           .vs-play svg{width:16px;height:16px}
+          .vs-header-left p {
+    font-size: 14px;
+    color: #1872B5;
+    margin: -1px 0 -15px;
+    font-family: 'Nunito',sans-serif;
+    font-weight: 800;
+}
+.vs-wrap {
+    padding: 8px 0 0px;
+}
         }
       `}</style>
 
