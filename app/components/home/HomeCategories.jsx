@@ -109,6 +109,9 @@ p.sabdj {
     padding: 20px 0 37px;
     background: #fff;
 }
+.hc-card::before {
+    display: none;
+}
         @media (max-width: 767px) {
           .hc-section { padding: 16px 0 36px; }
           .hc-container { padding: 0 14px; }
@@ -123,6 +126,9 @@ p.sabdj {
           .hc-arrow-side { opacity: 1 !important; width: 36px; height: 36px; }
           .hc-arrow-side-prev { left: -8px; }
           .hc-arrow-side-next { right: -8px; }
+		  .hc-card::before {
+    display: none;
+}
         }
         @media (min-width: 768px) and (max-width: 1024px) {
           .hc-img-wrap { width: 86px; height: 86px; }
