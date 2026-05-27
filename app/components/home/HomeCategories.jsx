@@ -191,7 +191,7 @@ p.sabdj {
 .hc-img-wrap {
     position: absolute;
     top: 5px;
-    left: 52%;
+    left: 52%!important;
     transform: translateX(-50%);
     width: 94px;
     height: 90px;
@@ -226,6 +226,13 @@ p.sabdj {
     margin: -3px 0 -1px;
     font-family: 'Nunito', sans-serif;
     font-weight: 800;
+}
+.hc-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    margin-top: 19px;
 }
         }
         @media (min-width: 768px) and (max-width: 1024px) {
