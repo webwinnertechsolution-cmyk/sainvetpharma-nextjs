@@ -1,17 +1,17 @@
+cat > /mnt/user-data/outputs/page.tsx << 'ENDOFFILE'
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/app/components/CartContext';
 
 const API_URL  = process.env.NEXT_PUBLIC_API_URL || '';
-const FETCH_URL = '';
 
 // ═══════════════════════════════════════════
 // STARS COMPONENT
 // ═══════════════════════════════════════════
-function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating = 0 }) {
+function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating = 0 }: any) {
   return (
     <span style={{ display: 'inline-flex', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => {
@@ -38,8 +38,8 @@ function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating =
 // ═══════════════════════════════════════════
 // REVIEWS SECTION COMPONENT
 // ═══════════════════════════════════════════
-function ReviewsSection({ productId, productTitle }) {
-  const [data, setData]             = useState(null);
+function ReviewsSection({ productId, productTitle }: any) {
+  const [data, setData]             = useState<any>(null);
   const [loading, setLoading]       = useState(true);
   const [sort, setSort]             = useState('newest');
   const [modalOpen, setModalOpen]   = useState(false);
@@ -90,8 +90,8 @@ function ReviewsSection({ productId, productTitle }) {
   const sortedReviews = () => {
     if (!data?.reviews) return [];
     const arr = [...data.reviews];
-    if (sort === 'newest')  return arr.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    if (sort === 'oldest')  return arr.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    if (sort === 'newest')  return arr.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    if (sort === 'oldest')  return arr.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     if (sort === 'highest') return arr.sort((a, b) => b.rating - a.rating);
     if (sort === 'lowest')  return arr.sort((a, b) => a.rating - b.rating);
     return arr;
@@ -142,7 +142,6 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-empty{text-align:center;padding:40px 20px;}
         .rv-empty-ico{font-size:44px;margin-bottom:10px;}
 
-        /* Modal */
         .rv-ov{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .3s;}
         .rv-ov.open{opacity:1;visibility:visible;}
         .rv-mod{background:#fff;border-radius:20px;width:100%;max-width:490px;max-height:90vh;overflow-y:auto;position:relative;transform:scale(.95) translateY(18px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 30px 70px rgba(0,0,0,.22);}
@@ -196,7 +195,6 @@ function ReviewsSection({ productId, productTitle }) {
       `}</style>
 
       <div className="rv-wrap">
-        {/* Top bar */}
         <div className="rv-topbar">
           <div style={{ fontSize: 13, color: '#6b7280', fontWeight: 600 }}>
             {loading ? 'Loading...' : `${data?.total ?? 0} review${(data?.total ?? 0) !== 1 ? 's' : ''}`}
@@ -204,7 +202,6 @@ function ReviewsSection({ productId, productTitle }) {
           <button className="rv-write-btn" onClick={openModal}>✏️ Write a Review</button>
         </div>
 
-        {/* Summary */}
         {!loading && data && (
           <div className="rv-summary-grid">
             <div>
@@ -240,7 +237,6 @@ function ReviewsSection({ productId, productTitle }) {
           </div>
         )}
 
-        {/* Sort */}
         {(data?.total ?? 0) > 0 && (
           <div className="rv-sort-row">
             <span className="rv-sort-lbl">Sort</span>
@@ -253,7 +249,6 @@ function ReviewsSection({ productId, productTitle }) {
           </div>
         )}
 
-        {/* Reviews list */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: 32, color: '#9ca3af', fontSize: 14 }}>Loading reviews...</div>
         ) : sortedReviews().length === 0 ? (
@@ -264,7 +259,7 @@ function ReviewsSection({ productId, productTitle }) {
           </div>
         ) : (
           <div className="rv-list">
-            {sortedReviews().map((rv, i) => (
+            {sortedReviews().map((rv: any, i: number) => (
               <div className="rv-card" key={rv.id} style={{ animationDelay: `${i * 0.055}s` }}>
                 <div className="rv-card-hd">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
@@ -288,7 +283,6 @@ function ReviewsSection({ productId, productTitle }) {
         )}
       </div>
 
-      {/* ── MODAL ── */}
       <div className={`rv-ov ${modalOpen ? 'open' : ''}`} onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
         <div className="rv-mod">
           <div className="rv-mod-hd">
@@ -305,14 +299,12 @@ function ReviewsSection({ productId, productTitle }) {
               </div>
             ) : (
               <>
-                {/* Steps */}
                 <div className="rv-steps">
                   <div className={`rv-sdot ${step > 1 ? 'done' : 'active'}`}>{step > 1 ? '✓' : '1'}</div>
                   <div className={`rv-sline ${step > 1 ? 'done' : ''}`} />
                   <div className={`rv-sdot ${step >= 2 ? 'active' : 'idle'}`}>2</div>
                 </div>
 
-                {/* Step 1 */}
                 {step === 1 && (
                   <>
                     <div style={{ textAlign: 'center', fontSize: 13, color: '#6b7280', fontWeight: 600, marginBottom: 4 }}>
@@ -341,7 +333,6 @@ function ReviewsSection({ productId, productTitle }) {
                   </>
                 )}
 
-                {/* Step 2 */}
                 {step === 2 && (
                   <>
                     {submitStatus === 'error'     && <div className="rv-err-msg">⚠️ Something went wrong. Please try again.</div>}
@@ -400,6 +391,10 @@ export default function ProductDetailPage() {
   const [reviewsData, setReviewsData]         = useState<any>(null);
   const thumbsRef = useRef<HTMLDivElement>(null);
 
+  // ── KEY FIX: Track variant changes separately from slide changes ──
+  const variantChangedRef = useRef(false);
+  const prevVariantIdRef  = useRef<any>(null);
+
   /* ── Fetch product ── */
   useEffect(() => {
     if (!slug) return;
@@ -451,44 +446,43 @@ export default function ProductDetailPage() {
     } catch { return []; }
   };
 
-  /* All tabs: Description + extra tabs + Reviews */
   const allTabs = [
     { title: 'Description', content: product?.description || '', type: 'html' },
     ...getExtraTabs().map(t => ({ ...t, type: 'html' })),
     { title: '⭐ Reviews', content: '__REVIEWS__', type: 'reviews' },
   ];
 
-  /* ── Images ── */
-  const getImages = () => {
+  /* ── Images — useMemo so array stays stable between renders ── */
+  const imgs = useMemo(() => {
     if (!product) return [];
-    const imgs: any[] = [];
+    const result: any[] = [];
     if (product.featured_image)
-      imgs.push({ src: `${API_URL}/uploads/products/${product.featured_image}`, alt: product.featured_image_alt || product.title, type: 'image', variantId: null });
+      result.push({ src: `${API_URL}/uploads/products/${product.featured_image}`, alt: product.featured_image_alt || product.title, type: 'image', variantId: null });
     (product.images || []).forEach((gi: any) =>
-      imgs.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || product.title, type: gi.type || 'image', variantId: null })
+      result.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || product.title, type: gi.type || 'image', variantId: null })
     );
-    
-    // ✅ ADD VARIANT IMAGES
     (product.variants || []).forEach((variant: any) => {
       if (variant.image) {
-        imgs.push({ 
-          src: `${API_URL}/uploads/products/variants/${variant.image}`, 
-          alt: variant.name, 
-          type: 'image', 
+        result.push({
+          src: `${API_URL}/uploads/products/variants/${variant.image}`,
+          alt: variant.name,
+          type: 'image',
           variantId: variant.id,
-          variantName: variant.name 
+          variantName: variant.name
         });
       }
     });
-    
-    return imgs;
-  };
+    return result;
+  }, [product]);
 
-  const imgs = getImages();
-  
-  // ✅ When variant changes, swap to its image
+  /* ── KEY FIX: When variant changes, scroll to its image.
+        But DO NOT run on every render — only when variantId actually changes ── */
   useEffect(() => {
     if (!selectedVariant) return;
+    // Skip if variant hasn't actually changed
+    if (prevVariantIdRef.current === selectedVariant.id) return;
+    prevVariantIdRef.current = selectedVariant.id;
+
     const variantImageIndex = imgs.findIndex(img => img.variantId === selectedVariant.id);
     if (variantImageIndex !== -1) {
       setCurSlide(variantImageIndex);
@@ -501,8 +495,10 @@ export default function ProductDetailPage() {
     }
   }, [selectedVariant?.id, imgs]);
 
+  /* ── goSlide: directly sets curSlide, no variant interference ── */
   const goSlide = (n: number) => {
     const total = imgs.length;
+    if (total === 0) return;
     const next = ((n % total) + total) % total;
     setCurSlide(next);
     if (thumbsRef.current) {
@@ -583,7 +579,7 @@ export default function ProductDetailPage() {
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [curSlide]);
+  }, [curSlide, imgs.length]);
 
   useEffect(() => {
     document.body.style.overflow = (enquiryOpen || zoomOpen) ? 'hidden' : '';
@@ -649,8 +645,8 @@ export default function ProductDetailPage() {
         .pd-gallery{position:sticky;top:24px;}
         .slider-wrap{position:relative;background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.1);cursor:zoom-in;}
         .slider-track{display:flex;width:100%;height:100%;transition:transform .42s cubic-bezier(.4,0,.2,1);}
-        .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:20px;flex-shrink:0;}
-        .slide img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease;}
+        .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0px;flex-shrink:0;}
+        .slide img{max-width:100%;max-height:100%;object-fit:cover!important;width:100%!important;transition:transform .4s ease;}
         .slider-wrap:hover .slide img{transform:scale(1.04);}
         .arrow-btn{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:#374151;box-shadow:0 2px 12px rgba(0,0,0,.12);transition:all .22s;font-size:18px;padding:0;}
         .arrow-btn:hover{background:#1872B5;color:#fff;border-color:#1872B5;transform:translateY(-50%) scale(1.1);}
@@ -663,40 +659,32 @@ export default function ProductDetailPage() {
         .badge-bxgy{background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;}
         .zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;backdrop-filter:blur(6px);pointer-events:none;opacity:0;transition:opacity .2s;}
         .slider-wrap:hover .zoom-hint{opacity:1;}
-        .slider-dots{display:flex;justify-content:center;gap:6px;margin-top:12px;}
+        .slider-dots{display:none;justify-content:center;gap:6px;margin-top:12px;}
         .sdot-item{width:7px;height:7px;border-radius:50%;background:#d1d5eb;cursor:pointer;transition:all .2s;border:none;padding:0;}
         .sdot-item.on{background:#1872B5;width:22px;border-radius:4px;}
         .thumbs-wrap{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
         .thumbs-wrap::-webkit-scrollbar{display:none;}
-        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;position:relative;}
-        .thumb img{width:100%;height:100%;object-fit:contain;padding:4px;}
-        .thumb.on,.thumb:hover{border-color:#1872B5;transform:translateY(-3px);box-shadow:0 6px 16px rgba(24,114,181,.22);}
+        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;position:relative;margin-top:3px;}
+        .thumb img{width:100%;height:100%;object-fit:cover;padding:0px;}
+        .thumb.on,.thumb:hover{border-color:#1872B5;transform:translateY(-3px);box-shadow:none;}
         .thumb-variant-badge{position:absolute;top:2px;right:2px;background:#1872B5;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;}
 
         .pd-info{animation:fadeIn .45s ease both;}
-        .pd-title {
-    font-family: 'Sora',sans-serif;
-    font-size: 21px;
-    font-weight: 700;
-    color: #0a214f;
-    line-height: 25px;
-    margin-bottom: 10px;
-}
+        .pd-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:#0a214f;line-height:25px;margin-bottom:10px;}
         .pd-sku{font-size:12px;color:#9ca3af;margin-bottom:18px;display:flex;align-items:center;gap:6px;}
         .pd-sku b{color:#374151;background:#f3f4f6;padding:2px 8px;border-radius:5px;}
 
-        /* ── REVIEWS SUMMARY ── */
-        .reviews-summary{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1.5px solid #e5e7eb;animation:slideDown .4s ease both;}
+        .reviews-summary{display:flex;align-items:center;gap:14px;margin-bottom:15px;padding-bottom:8px;border-bottom:1.5px solid #e5e7eb;animation:slideDown .4s ease both;}
         .reviews-stars{display:flex;gap:2px;}
         .reviews-star{font-size:20px;line-height:1;}
         .reviews-text{font-size:13px;font-weight:700;color:#374151;font-family:'Sora',sans-serif;}
 
-        .price-box{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:18px 20px;margin-bottom:16px;}
+        .price-box{background:transparent;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:-6px;}
         .price-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
-        .price-main{font-size:34px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;line-height:1;}
+        .price-main{font-size:18px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;line-height:1;}
         .price-main.with-discount{color:#059669;}
         .price-orig{font-size:18px;color:#9ca3af;text-decoration:line-through;}
-        .disc-tag{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
+        .disc-tag{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:8px;font-weight:800;padding:2px 9px;border-radius:20px;}
         .discount-applied-tag{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
         .bxgy-tag{background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
         .price-na{font-size:18px;color:#9ca3af;font-style:italic;}
@@ -712,24 +700,24 @@ export default function ProductDetailPage() {
         .bxgy-counter-icon{font-size:24px;}
         .disc-hint-strip{margin-top:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400e;font-weight:700;display:flex;align-items:center;gap:8px;}
 
-        .stock-pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;padding:7px 16px;border-radius:20px;margin-bottom:18px;}
+        .stock-pill{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:700;padding:7px 16px;border-radius:20px;margin-bottom:12px;}
         .stock-in{background:#d1fae5;color:#065f46;}
         .stock-out{background:#fee2e2;color:#991b1b;}
         .sp-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
         .sp-dot-in{background:#10b981;animation:pulse 1.6s infinite;}
         .sp-dot-out{background:#ef4444;}
 
-        .overview-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
-        .overview-box{font-size:14px;color:#374151;line-height:1.8;margin-bottom:20px;padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #e5e7eb;}
-        .divider{border:none;border-top:1px solid #e5e7eb;margin:20px 0;}
+        .overview-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:none;}
+        .overview-box{font-size:14px;color:#374151;line-height:20px;margin-bottom:-6px;padding:0;background:transparent;border-radius:12px;border:none;padding-block:1px;}
+        .divider{border:none;border-top:0px solid #e5e7eb;margin:10px 0;}
 
-        .vg-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+        .vg-label{font-size:11px;font-weight:800;color:#0a214f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
         .variant-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
-        .vc{position:relative;min-width:90px;background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:10px 16px;text-align:center;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.05);}
-        .vc:hover{border-color:#1872B5;box-shadow:0 4px 16px rgba(24,114,181,.15);transform:translateY(-2px);}
-        .vc.on{border-color:#1872B5;background:#eff6ff;box-shadow:0 4px 20px rgba(24,114,181,.22);}
-        .vc-off{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;white-space:nowrap;}
-        .vc-name{font-size:14px;font-weight:700;color:#0a214f;font-family:'Sora',sans-serif;}
+        .vc{position:relative;min-width:58px;background:#fff;border:2px solid #e5e7eb;border-radius:7px;padding:7px 9px;text-align:center;cursor:pointer;transition:all .18s;box-shadow:none!important;}
+        .vc:hover{border-color:#1872B5;}
+        .vc.on{border-color:#1872B5;background:#eff6ff;}
+        .vc-off{display:none;}
+        .vc-name{font-size:12px;font-weight:600;color:#0a214f;font-family:'Sora',sans-serif;}
         .vc-out{font-size:10px;color:#dc2626;font-weight:700;margin-top:3px;}
 
         .qty-section{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
@@ -738,7 +726,7 @@ export default function ProductDetailPage() {
         .qty-btn{width:42px;height:42px;border:none;background:#f9fafb;cursor:pointer;font-size:20px;font-weight:700;color:#374151;display:flex;align-items:center;justify-content:center;transition:all .15s;}
         .qty-btn:hover:not(:disabled){background:#1872B5;color:#fff;}
         .qty-btn:disabled{opacity:.4;cursor:not-allowed;}
-        .qty-num{width:52px;text-align:center;font-size:16px;font-weight:800;color:#0a214f;background:#fff;border-left:2px solid #e5e7eb;border-right:2px solid #e5e7eb;height:42px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;}
+        .qty-num{width:52px;text-align:center;font-size:13px;font-weight:800;color:#0a214f;background:#fff;border-left:2px solid #e5e7eb;border-right:2px solid #e5e7eb;height:42px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;}
         .qty-stock{font-size:12px;color:#9ca3af;font-weight:600;}
 
         .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
@@ -758,8 +746,7 @@ export default function ProductDetailPage() {
         .chip-cat{background:#eff6ff;color:#1872B5;border:1px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;text-decoration:none;display:inline-block;margin:2px;transition:background .2s;}
         .chip-cat:hover{background:#dbeafe;}
 
-        /* ════ PRODUCT TABS ════ */
-        .prod-tabs-section{max-width:1260px;margin:0 auto;padding:0 24px 40px;}
+        .prod-tabs-section{max-width:1260px;margin:48px auto 0;padding:0 24px 40px;}
         .prod-tabs-wrap{background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);}
         .prod-tabs-nav{display:flex;border-bottom:1.5px solid #e5e7eb;overflow-x:auto;scrollbar-width:none;background:#fafbfc;}
         .prod-tabs-nav::-webkit-scrollbar{display:none;}
@@ -784,6 +771,7 @@ export default function ProductDetailPage() {
         .prod-tab-content blockquote{border-left:4px solid #1872B5;padding:12px 18px;background:#eff6ff;border-radius:0 10px 10px 0;margin:12px 0;font-style:italic;color:#374151;}
 
         .reviews-tab-wrap{padding:24px 32px;animation:tabFadeIn .3s ease both;}
+        .rv-topbar{display:none!important;}
 
         .cart-toast{position:fixed;bottom:28px;right:28px;background:#065f46;color:#fff;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:10px;z-index:99998;box-shadow:0 8px 28px rgba(0,0,0,.22);animation:slideInRight .35s ease;pointer-events:none;}
 
@@ -833,207 +821,6 @@ export default function ProductDetailPage() {
         .rel-price{font-size:14px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;}
         .rel-orig{font-size:11px;color:#9ca3af;text-decoration:line-through;}
 
-
-
-.reviews-summary {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1.5px solid #e5e7eb;
-    animation: slideDown .4s ease both;
-}
-.price-box {
-    background: #ffffff00;
-    border: 0;
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: 16px;
-}
-.price-main {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1872B5;
-    font-family: 'Sora',sans-serif;
-    line-height: 1;
-}
-.disc-tag {
-    background: linear-gradient(135deg,#ef4444,#dc2626);
-    color: #fff;
-    font-size: 8px;
-    font-weight: 800;
-    padding: 2px 9px;
-    border-radius: 20px;
-}
-.price-box {
-    background: #ffffff00;
-    border: 0;
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: 13px;
-    margin-top: -6px;
-}
-.stock-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 7px 16px;
-    border-radius: 20px;
-    margin-bottom: 18px;
-}
-.overview-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 8px;
-    display: none;
-}
-.stock-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 7px 16px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-}
-.overview-box {
-    font-size: 14px;
-    color: #374151;
-    line-height: 20px;
-    margin-bottom: -6px;
-    padding: 10px 12px;
-    background: #fff;
-    border-radius: 12px;
-    border: 1.5px solid #e5e7eb;
-}
-span.vc-off {
-    display: none;
-}
-.vc {
-    position: relative;
-    min-width: 58px;
-    background: #fff;
-    border: 2px solid #e5e7eb;
-    border-radius: 7px;
-    padding: 7px 9px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .18s;
-    box-shadow: none!important;
-}
-
-.divider {
-    border: none;
-    border-top: 0px solid #e5e7eb;
-    margin: 10px 0;
-}
-.slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover!important;
-    transition: transform .4s ease;
-    width: 100%!important;
-}
-.slide {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-    flex-shrink: 0;
-}
-.thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    padding: 0px;
-}
-.slider-dots {
-    display: none;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-}
-.thumb {
-    width: 70px;
-    height: 70px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #fff;
-    flex-shrink: 0;
-    transition: all .22s;
-    margin-top: 3px;
-}
-.vc-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0a214f;
-    font-family: 'Sora',sans-serif;
-}
-.overview-box {
-    font-size: 14px;
-    color: #374151;
-    line-height: 20px;
-    margin-bottom: -6px;
-    padding: 0;
-    background: #ffffff00;
-    border-radius: 12px;
-    border: none;
-    padding-block: 1px;
-}
-.qty-num {
-    width: 52px;
-    text-align: center;
-    font-size: 13px;
-}
-.prod-tabs-section {
-    margin-top: 48px!important;
-}
-
-.vg-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #0a214f;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 12px;
-}
-.rv-topbar {
-    display: none;
-}
-.thumb.on, .thumb:hover {
-    border-color: #1872B5;
-    transform: translateY(-3px);
-    box-shadow: none;
-}
-
-
-.rv-topbar {
-    display: none!important;
-}
-
-.thumb-variant-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #1872B5;
-    color: #fff;
-    font-size: 7px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 3px;
-}
-
         @media(max-width:980px){
           .pd-grid{grid-template-columns:1fr;gap:28px;padding:0 16px 32px;margin:20px auto;}
           .pd-gallery{position:static;}
@@ -1045,58 +832,20 @@ span.vc-off {
         }
         @media(max-width:768px){
           .pd-title{font-size:20px;}
-          .price-main{font-size:28px;}
+          .price-main{font-size:24px;}
           .rel-grid{grid-template-columns:repeat(2,1fr);}
-          .reviews-summary{flex-direction:column;align-items:flex-start;gap:8px;}
-          .reviews-stars{margin-bottom:4px;}
+          .reviews-summary{flex-direction:unset;align-items:flex-start;gap:8px;}
         }
         @media(max-width:767px){
           .pd-title{font-size:18px;}
-          .price-main{font-size:24px;}
-          .rel-grid{grid-template-columns:1fr;gap:10px;}
+          .rel-grid{grid-template-columns:1fr 1fr;gap:10px;}
           .rel-section{padding:0 14px 48px;}
           .cta-btn{font-size:14px;padding:13px 16px;}
           .cart-toast{bottom:16px;right:16px;left:16px;font-size:13px;}
-          .prod-tab-btn{padding:14px 16px;font-size:13px;}
+          .prod-tab-btn{padding:11px 14px;font-size:13px;}
           .prod-tab-content,.reviews-tab-wrap{padding:18px 16px;}
-          .reviews-summary{gap:10px;}
-          .reviews-star{font-size:18px;}
-          .reviews-text{font-size:12px;}
-		  .reviews-summary {
-    flex-direction: unset;
-    align-items: flex-start;
-    gap: 8px;
-}
-.prod-tab-btn {
-    padding: 11px 14px;
-    font-size: 13px;
-}
-.rel-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.rel-head {
-    font-family: 'Sora',sans-serif;
-    font-size: 19px;
-    font-weight: 800;
-    color: #0a214f;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.pd-grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 0 16px 32px;
-    margin: 20px auto;
-    padding-bottom: 0;
-    margin-bottom: -14px;
-}
-
+          .rel-head{font-size:19px;}
+          .pd-grid{padding-bottom:0;margin-bottom:-14px;}
         }
       `}</style>
 
@@ -1126,14 +875,24 @@ span.vc-off {
         <div className="pd-gallery">
           {imgs.length > 0 ? (
             <>
-              <div className="slider-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onClick={() => imgs[curSlide]?.type !== 'video' && setZoomOpen(true)}>
+              <div
+                className="slider-wrap"
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                onClick={() => imgs[curSlide]?.type !== 'video' && setZoomOpen(true)}
+              >
                 <div className="slide-badges">
                   {product.is_featured && <span className="badge-feat">⭐ Featured</span>}
                   {variantDisc && !discount    && <span className="badge-sale">{variantDisc}% OFF</span>}
                   {discount && applicable && isBxgy  && <span className="badge-bxgy">🎁 {getBxgyLabel()}</span>}
                   {discount && applicable && !isBxgy && <span className="badge-discount">🏷️ {discountLabel}</span>}
                 </div>
-                {imgs.length > 1 && <button className="arrow-btn arrow-prev" onClick={e => { e.stopPropagation(); goSlide(curSlide - 1); }}>‹</button>}
+                {imgs.length > 1 && (
+                  <button
+                    className="arrow-btn arrow-prev"
+                    onClick={e => { e.stopPropagation(); goSlide(curSlide - 1); }}
+                  >‹</button>
+                )}
                 <div className="slider-track" style={{ transform: `translateX(-${curSlide * 100}%)` }}>
                   {imgs.map((im, i) => (
                     <div className="slide" key={i}>
@@ -1143,19 +902,24 @@ span.vc-off {
                     </div>
                   ))}
                 </div>
-                {imgs.length > 1 && <button className="arrow-btn arrow-next" onClick={e => { e.stopPropagation(); goSlide(curSlide + 1); }}>›</button>}
+                {imgs.length > 1 && (
+                  <button
+                    className="arrow-btn arrow-next"
+                    onClick={e => { e.stopPropagation(); goSlide(curSlide + 1); }}
+                  >›</button>
+                )}
                 {imgs[curSlide]?.type !== 'video' && <span className="zoom-hint">🔍 Click to zoom</span>}
               </div>
-              {imgs.length > 1 && imgs.length <= 8 && (
-                <div className="slider-dots">
-                  {imgs.map((_, i) => <button key={i} className={`sdot-item ${i === curSlide ? 'on' : ''}`} onClick={() => goSlide(i)} />)}
-                </div>
-              )}
+
               {imgs.length > 1 && (
                 <div className="thumbs-wrap" ref={thumbsRef}>
                   {imgs.map((im, i) => (
-                    <div key={i} className={`thumb ${i === curSlide ? 'on' : ''}`} onClick={() => goSlide(i)}>
-                      {im.variantId && <span className="thumb-variant-badge">✓ Var</span>}
+                    <div
+                      key={i}
+                      className={`thumb ${i === curSlide ? 'on' : ''}`}
+                      onClick={() => goSlide(i)}
+                    >
+                      {im.variantId && <span className="thumb-variant-badge">✓</span>}
                       {im.type === 'video'
                         ? <div style={{ width: '100%', height: '100%', background: '#0a214f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, borderRadius: 8 }}>▶</div>
                         : <img src={im.src} alt={im.alt} />}
@@ -1173,7 +937,6 @@ span.vc-off {
         <div className="pd-info">
           <h1 className="pd-title">{product.title}</h1>
 
-          {/* ── REVIEWS SUMMARY BELOW TITLE ── */}
           {reviewsData && reviewsData.total > 0 && (
             <div className="reviews-summary">
               <div className="reviews-stars">
@@ -1248,14 +1011,14 @@ span.vc-off {
           {/* Variants */}
           {product.variants?.length > 0 && (
             <div style={{ marginBottom: 22 }}>
-            <div className="vg-label">
-  {product.variants?.[0]?.attributes ? Object.keys(product.variants[0].attributes)[0] : 'Variant'}
-  {selectedVariant && (
-    <span style={{ color: '#1872B5', marginLeft: 8, textTransform: 'none', letterSpacing: 0, fontWeight: 800 }}>
-      — {selectedVariant.name}
-    </span>
-  )}
-</div>
+              <div className="vg-label">
+                {product.variants?.[0]?.attributes ? Object.keys(product.variants[0].attributes)[0] : 'Variant'}
+                {selectedVariant && (
+                  <span style={{ color: '#1872B5', marginLeft: 8, textTransform: 'none', letterSpacing: 0, fontWeight: 800 }}>
+                    — {selectedVariant.name}
+                  </span>
+                )}
+              </div>
               <div className="variant-cards">
                 {product.variants.map((v: any, idx: number) => {
                   const attrs = v.attributes || {};
@@ -1277,13 +1040,11 @@ span.vc-off {
 
           {/* Quantity */}
           <div className="qty-section">
-            
             <div className="qty-ctrl">
               <button className="qty-btn" onClick={decreaseQty} disabled={quantity <= 1}>−</button>
               <span className="qty-num">{quantity}</span>
               <button className="qty-btn" onClick={increaseQty} disabled={quantity >= maxStock}>+</button>
             </div>
-           
           </div>
 
           {/* BXGY Counter */}
@@ -1295,23 +1056,20 @@ span.vc-off {
           )}
 
           {/* CTA Buttons */}
-         {/* CTA Buttons */}
-<div className="cta-row">
-  {product.cta_button === 'enquire_now' ? (
-    // ✅ Sirf Enquire Now button
-    <button className="cta-btn cta-enq" style={{ flex: 1 }} onClick={() => setEnquiryOpen(true)}>
-      <span style={{ fontSize: 16 }}>✉️</span> Enquire Now
-    </button>
-  ) : (
-    // ✅ Sirf Add to Cart button (default)
-    <button className={`cta-btn cta-add ${addedAnim ? 'added' : ''}`} onClick={handleAddToCart} disabled={!price || !inStock}>
-      {addedAnim
-        ? <><span style={{ fontSize: 18, animation: 'checkPop .4s ease' }}>✓</span> Added {quantity > 1 ? `(${quantity})` : ''}!</>
-        : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>
-      }
-    </button>
-  )}
-</div>
+          <div className="cta-row">
+            {product.cta_button === 'enquire_now' ? (
+              <button className="cta-btn cta-enq" style={{ flex: 1 }} onClick={() => setEnquiryOpen(true)}>
+                <span style={{ fontSize: 16 }}>✉️</span> Enquire Now
+              </button>
+            ) : (
+              <button className={`cta-btn cta-add ${addedAnim ? 'added' : ''}`} onClick={handleAddToCart} disabled={!price || !inStock}>
+                {addedAnim
+                  ? <><span style={{ fontSize: 18, animation: 'checkPop .4s ease' }}>✓</span> Added {quantity > 1 ? `(${quantity})` : ''}!</>
+                  : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>
+                }
+              </button>
+            )}
+          </div>
 
           {/* Meta Table */}
           <table className="meta-tbl">
@@ -1332,12 +1090,9 @@ span.vc-off {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          PRODUCT TABS — Description + Extra + Reviews
-      ════════════════════════════════════════ */}
+      {/* ════ PRODUCT TABS ════ */}
       <div className="prod-tabs-section">
         <div className="prod-tabs-wrap">
-          {/* Tab Nav */}
           <nav className="prod-tabs-nav" role="tablist">
             {allTabs.map((tab, idx) => (
               <button
@@ -1352,7 +1107,6 @@ span.vc-off {
             ))}
           </nav>
 
-          {/* Tab Content */}
           {allTabs.map((tab, idx) => (
             <div key={idx} role="tabpanel" style={{ display: activeTab === idx ? 'block' : 'none' }}>
               {activeTab === idx && (
