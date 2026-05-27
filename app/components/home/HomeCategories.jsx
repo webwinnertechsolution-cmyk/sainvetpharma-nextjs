@@ -129,6 +129,25 @@ p.sabdj {
 		  .hc-card::before {
     display: none;
 }
+.hc-img-circle {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+.hc-img-circle {
+    border: dashed 2px #1872B5;
+}
+
+
         }
         @media (min-width: 768px) and (max-width: 1024px) {
           .hc-img-wrap { width: 86px; height: 86px; }
