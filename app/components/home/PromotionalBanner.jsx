@@ -221,7 +221,7 @@ export default function PromotionalBanner() {
 }
 
         /* Mobile Styles */
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .promotional-banner {
             min-height: 350px;
           }
@@ -267,7 +267,7 @@ export default function PromotionalBanner() {
           }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 767px) {
           .promotional-banner {
             min-height: 280px;
           }
@@ -294,6 +294,13 @@ export default function PromotionalBanner() {
             padding: 8px 20px;
             font-size: 13px;
           }
+		  .promotional-banner-wrapper {
+    position: relative; 
+    width: 100%;
+    overflow: hidden;
+    margin: 14px 0px;
+    margin-bottom: 3px;
+}  
         }
       `}</style>
 
