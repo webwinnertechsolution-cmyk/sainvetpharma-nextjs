@@ -164,11 +164,19 @@ const ProductSection = ({ section = null, products = [] }) => {
     const slideCount = Math.round(-offset / cardW);
     if (Math.abs(slideCount) > 0)
       setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
-    setOffset(0);
+    
+    // Reset offset after small delay to allow click handler to check
+    setTimeout(() => setOffset(0), 50);
   };
 
-  const shouldPreventNavigation = () => {
-    return isDragging || Math.abs(offset) > 5;
+  const shouldPreventNavigation = useRef(false);
+
+  const handleCardClick = (detailUrl) => {
+    if (Math.abs(offset) > 5) {
+      shouldPreventNavigation.current = true;
+      return;
+    }
+    router.push(detailUrl);
   };
 
   const handleTouchStart = (e) => {
@@ -194,7 +202,9 @@ const ProductSection = ({ section = null, products = [] }) => {
     const slideCount = Math.round(-offset / cardW);
     if (Math.abs(slideCount) > 0)
       setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
-    setOffset(0);
+    
+    // Reset offset after small delay to allow click handler to check
+    setTimeout(() => setOffset(0), 50);
   };
 
   const translateStep = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
@@ -669,11 +679,7 @@ const ProductSection = ({ section = null, products = [] }) => {
                       pointerEvents: isDragging ? 'none' : 'auto',
                       cursor: isDragging ? 'grabbing' : 'pointer',
                     }}
-                    onClick={() => {
-                      if (!shouldPreventNavigation()) {
-                        router.push(detailUrl);
-                      }
-                    }}
+                    onClick={() => handleCardClick(detailUrl)}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
