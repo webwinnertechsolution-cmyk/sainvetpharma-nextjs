@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useId } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getStoredUser } from '@/lib/googleAuth';
 
 const ProductSection = ({ section = null, products = [] }) => {
+  const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const instanceId = useId().replace(/:/g, '_');
@@ -163,6 +165,10 @@ const ProductSection = ({ section = null, products = [] }) => {
     if (Math.abs(slideCount) > 0)
       setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
     setOffset(0);
+  };
+
+  const shouldPreventNavigation = () => {
+    return isDragging || Math.abs(offset) > 5;
   };
 
   const handleTouchStart = (e) => {
@@ -663,7 +669,11 @@ const ProductSection = ({ section = null, products = [] }) => {
                       pointerEvents: isDragging ? 'none' : 'auto',
                       cursor: isDragging ? 'grabbing' : 'pointer',
                     }}
-                    onClick={() => !isDragging && (window.location.href = detailUrl)}
+                    onClick={() => {
+                      if (!shouldPreventNavigation()) {
+                        router.push(detailUrl);
+                      }
+                    }}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
