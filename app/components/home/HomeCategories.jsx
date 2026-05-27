@@ -220,7 +220,13 @@ p.sabdj {
     text-align: center;
 }
 
-
+p.sabdj {
+    font-size: 14px;
+    color: #1872B5;
+    margin: -3px 0 -1px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+}
         }
         @media (min-width: 768px) and (max-width: 1024px) {
           .hc-img-wrap { width: 86px; height: 86px; }
