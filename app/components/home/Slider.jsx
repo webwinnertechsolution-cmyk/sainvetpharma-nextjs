@@ -241,6 +241,24 @@ export default function Slider({ sliders }) {
           .rl-slide-btn { font-size: 13px; padding: 10px 20px; }
           .rl-arrow { opacity: 1 !important; width: 36px; height: 36px; }
           .byron-container { padding: 0 16px; }
+          .rl-slider-section .rl-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 32px!important;
+    height: 32px!important;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease, background 0.3s ease, box-shadow 0.3s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
         }
         @media (max-width: 1024px) and (min-width: 768px) {
           .rl-slider { height: 420px; }
