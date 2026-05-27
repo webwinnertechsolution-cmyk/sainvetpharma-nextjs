@@ -167,11 +167,9 @@ const ProductSection = ({ section = null, products = [] }) => {
   };
 
   const finalizeDrag = () => {
-    const cardW = getCardWidth();
-    const slideCount = dragDistance > 30 ? Math.sign(startX - currentX) : 0;
-    
-    if (slideCount !== 0) {
-      const newIndex = currentIndex + slideCount;
+    if (dragDistance > 30) {
+      const direction = startX - currentX > 0 ? 1 : -1;
+      const newIndex = currentIndex + direction;
       setCurrentIndex(Math.max(0, Math.min(newIndex, totalSlides - 1)));
     }
     
@@ -244,6 +242,23 @@ const ProductSection = ({ section = null, products = [] }) => {
   const cardFlexBasis = isMobile === true
     ? `calc((100vw - 28px - 14px) / 2)`
     : `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible})`;
+
+  // Arrow button handlers
+  const handlePrevClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleNextClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentIndex < totalSlides - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
 
   return (
     <div className="ps-wrap">
@@ -624,7 +639,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-prev"
-              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              onClick={handlePrevClick}
               disabled={currentIndex === 0}
               aria-label="Previous"
               type="button"
@@ -748,7 +763,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-next"
-              onClick={() => setCurrentIndex(Math.min(currentIndex + 1, totalSlides - 1))}
+              onClick={handleNextClick}
               disabled={currentIndex >= totalSlides - 1}
               aria-label="Next"
               type="button"
