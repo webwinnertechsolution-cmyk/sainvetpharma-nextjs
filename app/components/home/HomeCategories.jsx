@@ -144,7 +144,7 @@ p.sabdj {
 .hc-overflow {
     overflow: hidden;
     padding-top: 43px;
-    margin-top: -52px;
+    margin-top: -59px;
     flex: 1;
     min-width: 0;
 }
