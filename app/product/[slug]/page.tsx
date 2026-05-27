@@ -468,7 +468,6 @@ export default function ProductDetailPage() {
       imgs.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || product.title, type: gi.type || 'image', variantId: null })
     );
     
-    // ✅ ADD VARIANT IMAGES
     (product.variants || []).forEach((variant: any) => {
       if (variant.image) {
         imgs.push({ 
@@ -485,21 +484,6 @@ export default function ProductDetailPage() {
   };
 
   const imgs = getImages();
-  
-  // ✅ When variant changes, swap to its image
-  useEffect(() => {
-    if (!selectedVariant) return;
-    const variantImageIndex = imgs.findIndex(img => img.variantId === selectedVariant.id);
-    if (variantImageIndex !== -1) {
-      setCurSlide(variantImageIndex);
-      if (thumbsRef.current) {
-        const thumbW = 70; const gap = 8;
-        const containerW = thumbsRef.current.offsetWidth;
-        const scrollTo = variantImageIndex * (thumbW + gap) - containerW / 2 + thumbW / 2;
-        thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
-      }
-    }
-  }, [selectedVariant?.id, imgs]);
 
   const goSlide = (n: number) => {
     const total = imgs.length;
@@ -833,207 +817,6 @@ export default function ProductDetailPage() {
         .rel-price{font-size:14px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;}
         .rel-orig{font-size:11px;color:#9ca3af;text-decoration:line-through;}
 
-
-
-.reviews-summary {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1.5px solid #e5e7eb;
-    animation: slideDown .4s ease both;
-}
-.price-box {
-    background: #ffffff00;
-    border: 0;
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: 16px;
-}
-.price-main {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1872B5;
-    font-family: 'Sora',sans-serif;
-    line-height: 1;
-}
-.disc-tag {
-    background: linear-gradient(135deg,#ef4444,#dc2626);
-    color: #fff;
-    font-size: 8px;
-    font-weight: 800;
-    padding: 2px 9px;
-    border-radius: 20px;
-}
-.price-box {
-    background: #ffffff00;
-    border: 0;
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: 13px;
-    margin-top: -6px;
-}
-.stock-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 7px 16px;
-    border-radius: 20px;
-    margin-bottom: 18px;
-}
-.overview-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 8px;
-    display: none;
-}
-.stock-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 7px 16px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-}
-.overview-box {
-    font-size: 14px;
-    color: #374151;
-    line-height: 20px;
-    margin-bottom: -6px;
-    padding: 10px 12px;
-    background: #fff;
-    border-radius: 12px;
-    border: 1.5px solid #e5e7eb;
-}
-span.vc-off {
-    display: none;
-}
-.vc {
-    position: relative;
-    min-width: 58px;
-    background: #fff;
-    border: 2px solid #e5e7eb;
-    border-radius: 7px;
-    padding: 7px 9px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .18s;
-    box-shadow: none!important;
-}
-
-.divider {
-    border: none;
-    border-top: 0px solid #e5e7eb;
-    margin: 10px 0;
-}
-.slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover!important;
-    transition: transform .4s ease;
-    width: 100%!important;
-}
-.slide {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-    flex-shrink: 0;
-}
-.thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    padding: 0px;
-}
-.slider-dots {
-    display: none;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-}
-.thumb {
-    width: 70px;
-    height: 70px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #fff;
-    flex-shrink: 0;
-    transition: all .22s;
-    margin-top: 3px;
-}
-.vc-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0a214f;
-    font-family: 'Sora',sans-serif;
-}
-.overview-box {
-    font-size: 14px;
-    color: #374151;
-    line-height: 20px;
-    margin-bottom: -6px;
-    padding: 0;
-    background: #ffffff00;
-    border-radius: 12px;
-    border: none;
-    padding-block: 1px;
-}
-.qty-num {
-    width: 52px;
-    text-align: center;
-    font-size: 13px;
-}
-.prod-tabs-section {
-    margin-top: 48px!important;
-}
-
-.vg-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #0a214f;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 12px;
-}
-.rv-topbar {
-    display: none;
-}
-.thumb.on, .thumb:hover {
-    border-color: #1872B5;
-    transform: translateY(-3px);
-    box-shadow: none;
-}
-
-
-.rv-topbar {
-    display: none!important;
-}
-
-.thumb-variant-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #1872B5;
-    color: #fff;
-    font-size: 7px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 3px;
-}
-
         @media(max-width:980px){
           .pd-grid{grid-template-columns:1fr;gap:28px;padding:0 16px 32px;margin:20px auto;}
           .pd-gallery{position:static;}
@@ -1062,41 +845,6 @@ span.vc-off {
           .reviews-summary{gap:10px;}
           .reviews-star{font-size:18px;}
           .reviews-text{font-size:12px;}
-		  .reviews-summary {
-    flex-direction: unset;
-    align-items: flex-start;
-    gap: 8px;
-}
-.prod-tab-btn {
-    padding: 11px 14px;
-    font-size: 13px;
-}
-.rel-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.rel-head {
-    font-family: 'Sora',sans-serif;
-    font-size: 19px;
-    font-weight: 800;
-    color: #0a214f;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.pd-grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 0 16px 32px;
-    margin: 20px auto;
-    padding-bottom: 0;
-    margin-bottom: -14px;
-}
-
         }
       `}</style>
 
@@ -1277,13 +1025,11 @@ span.vc-off {
 
           {/* Quantity */}
           <div className="qty-section">
-            
             <div className="qty-ctrl">
               <button className="qty-btn" onClick={decreaseQty} disabled={quantity <= 1}>−</button>
               <span className="qty-num">{quantity}</span>
               <button className="qty-btn" onClick={increaseQty} disabled={quantity >= maxStock}>+</button>
             </div>
-           
           </div>
 
           {/* BXGY Counter */}
@@ -1295,23 +1041,20 @@ span.vc-off {
           )}
 
           {/* CTA Buttons */}
-         {/* CTA Buttons */}
-<div className="cta-row">
-  {product.cta_button === 'enquire_now' ? (
-    // ✅ Sirf Enquire Now button
-    <button className="cta-btn cta-enq" style={{ flex: 1 }} onClick={() => setEnquiryOpen(true)}>
-      <span style={{ fontSize: 16 }}>✉️</span> Enquire Now
-    </button>
-  ) : (
-    // ✅ Sirf Add to Cart button (default)
-    <button className={`cta-btn cta-add ${addedAnim ? 'added' : ''}`} onClick={handleAddToCart} disabled={!price || !inStock}>
-      {addedAnim
-        ? <><span style={{ fontSize: 18, animation: 'checkPop .4s ease' }}>✓</span> Added {quantity > 1 ? `(${quantity})` : ''}!</>
-        : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>
-      }
-    </button>
-  )}
-</div>
+          <div className="cta-row">
+            {product.cta_button === 'enquire_now' ? (
+              <button className="cta-btn cta-enq" style={{ flex: 1 }} onClick={() => setEnquiryOpen(true)}>
+                <span style={{ fontSize: 16 }}>✉️</span> Enquire Now
+              </button>
+            ) : (
+              <button className={`cta-btn cta-add ${addedAnim ? 'added' : ''}`} onClick={handleAddToCart} disabled={!price || !inStock}>
+                {addedAnim
+                  ? <><span style={{ fontSize: 18, animation: 'checkPop .4s ease' }}>✓</span> Added {quantity > 1 ? `(${quantity})` : ''}!</>
+                  : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>
+                }
+              </button>
+            )}
+          </div>
 
           {/* Meta Table */}
           <table className="meta-tbl">
