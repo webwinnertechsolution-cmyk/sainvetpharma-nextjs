@@ -313,6 +313,15 @@ function ReviewsSection({ productId, productTitle }) {
     transition: all .22s;
     box-shadow: 0 4px 14px rgba(24,114,181,.28);
 }
+.rv-mod-hd {
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    padding: 9px 18px 12px;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+}
+
+
+
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
