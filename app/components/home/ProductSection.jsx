@@ -22,6 +22,7 @@ const ProductSection = ({ section = null, products = [] }) => {
   const [wishlistLoading, setWishlistLoading] = useState(new Set());
   const trackRef = useRef(null);
   const isWishlistClick = useRef(false);
+  const dragDistance = useRef(0);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -140,6 +141,7 @@ const ProductSection = ({ section = null, products = [] }) => {
       return;
     }
     
+    dragDistance.current = 0;
     setIsDragging(true);
     setStartX(e.clientX);
     setOffset(0);
@@ -147,7 +149,9 @@ const ProductSection = ({ section = null, products = [] }) => {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    setOffset(e.clientX - startX);
+    const diff = e.clientX - startX;
+    setOffset(diff);
+    dragDistance.current = Math.abs(diff);
   };
 
   const handleMouseLeave = () => {
@@ -164,16 +168,14 @@ const ProductSection = ({ section = null, products = [] }) => {
     const slideCount = Math.round(-offset / cardW);
     if (Math.abs(slideCount) > 0)
       setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
-    
-    // Reset offset after small delay to allow click handler to check
-    setTimeout(() => setOffset(0), 50);
+    setOffset(0);
+    dragDistance.current = 0;
   };
 
   const shouldPreventNavigation = useRef(false);
 
   const handleCardClick = (detailUrl) => {
-    if (Math.abs(offset) > 5) {
-      shouldPreventNavigation.current = true;
+    if (dragDistance.current > 5) {
       return;
     }
     router.push(detailUrl);
@@ -185,6 +187,7 @@ const ProductSection = ({ section = null, products = [] }) => {
       return;
     }
     
+    dragDistance.current = 0;
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
     setOffset(0);
@@ -192,7 +195,9 @@ const ProductSection = ({ section = null, products = [] }) => {
 
   const handleTouchMove = (e) => {
     if (!isDragging) return;
-    setOffset(e.touches[0].clientX - startX);
+    const diff = e.touches[0].clientX - startX;
+    setOffset(diff);
+    dragDistance.current = Math.abs(diff);
   };
 
   const handleTouchEnd = () => {
@@ -202,9 +207,8 @@ const ProductSection = ({ section = null, products = [] }) => {
     const slideCount = Math.round(-offset / cardW);
     if (Math.abs(slideCount) > 0)
       setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
-    
-    // Reset offset after small delay to allow click handler to check
-    setTimeout(() => setOffset(0), 50);
+    setOffset(0);
+    dragDistance.current = 0;
   };
 
   const translateStep = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
