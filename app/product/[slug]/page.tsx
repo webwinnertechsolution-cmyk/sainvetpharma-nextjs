@@ -228,6 +228,13 @@ function ReviewsSection({ productId, productTitle }) {
     border-radius: 3px;
     display: none;
 }
+.variant-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: -8px;
+    margin-top: -6px;
+}
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
