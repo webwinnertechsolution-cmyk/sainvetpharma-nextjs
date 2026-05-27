@@ -15,7 +15,7 @@ const ProductSection = ({ section = null, products = [] }) => {
   const [isMobile, setIsMobile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const [currentX, setCurrentX] = useState(0);
   const [dragDistance, setDragDistance] = useState(0);
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
@@ -133,78 +133,83 @@ const ProductSection = ({ section = null, products = [] }) => {
   };
 
   const handleMouseDown = (e) => {
+    // Don't start drag if clicking on wishlist button or buttons inside card
+    if (e.target.closest('.ps-wish-btn') || e.target.closest('button')) {
+      return;
+    }
+    
     setIsDragging(true);
     setStartX(e.clientX);
-    setOffset(0);
+    setCurrentX(e.clientX);
     setDragDistance(0);
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    const newOffset = e.clientX - startX;
-    setOffset(newOffset);
-    setDragDistance(Math.abs(newOffset));
+    
+    const newX = e.clientX;
+    const distance = newX - startX;
+    setCurrentX(newX);
+    setDragDistance(Math.abs(distance));
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
       setIsDragging(false);
-      handleDragEnd();
+      finalizeDrag();
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
     if (!isDragging) return;
     setIsDragging(false);
-    handleDragEnd();
+    finalizeDrag();
   };
 
-  const handleDragEnd = () => {
+  const finalizeDrag = () => {
     const cardW = getCardWidth();
-    const slideCount = Math.round(-offset / cardW);
-    if (Math.abs(slideCount) > 0) {
-      setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
+    const slideCount = dragDistance > 30 ? Math.sign(startX - currentX) : 0;
+    
+    if (slideCount !== 0) {
+      const newIndex = currentIndex + slideCount;
+      setCurrentIndex(Math.max(0, Math.min(newIndex, totalSlides - 1)));
     }
-    setOffset(0);
+    
     setDragDistance(0);
   };
 
   const handleTouchStart = (e) => {
+    if (e.target.closest('.ps-wish-btn') || e.target.closest('button')) {
+      return;
+    }
+    
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
-    setOffset(0);
+    setCurrentX(e.touches[0].clientX);
     setDragDistance(0);
   };
 
   const handleTouchMove = (e) => {
     if (!isDragging) return;
-    const newOffset = e.touches[0].clientX - startX;
-    setOffset(newOffset);
-    setDragDistance(Math.abs(newOffset));
+    
+    const newX = e.touches[0].clientX;
+    const distance = newX - startX;
+    setCurrentX(newX);
+    setDragDistance(Math.abs(distance));
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    handleDragEnd();
+    finalizeDrag();
   };
 
-  const handleCardClick = (e, detailUrl) => {
-    // Agar 30px se jada drag hua to click prevent karo
-    if (dragDistance > 30) {
-      e.preventDefault();
-      return;
-    }
-    // Wishlist button pe click, to link follow karne do nahi
-    if (e.target.closest('.ps-wish-btn')) {
-      e.preventDefault();
-      return;
-    }
-  };
+  // Calculate offset for visual feedback during drag
+  const dragOffset = isDragging ? (currentX - startX) : 0;
 
   const translateStep = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
   const baseTransform = `calc(-${currentIndex} * ${translateStep})`;
-  const finalTransform = isDragging ? `calc(${baseTransform} + ${offset}px)` : baseTransform;
+  const finalTransform = `calc(${baseTransform} + ${dragOffset}px)`;
 
   const getImageUrl = (imageName) =>
     imageName ? `${API_URL}/uploads/products/${imageName}` : null;
@@ -393,7 +398,6 @@ const ProductSection = ({ section = null, products = [] }) => {
           flex-direction: column;
           text-decoration: none;
           color: inherit;
-          cursor: pointer;
         }
 
         .ps-card:hover {
@@ -669,13 +673,16 @@ const ProductSection = ({ section = null, products = [] }) => {
                 return (
                   <Link
                     key={product.id}
-                    href={detailUrl}
+                    href={dragDistance > 30 ? '#' : detailUrl}
                     className="ps-card"
                     style={{
                       flex: `0 0 ${cardFlexBasis}`,
-                      pointerEvents: isDragging ? 'none' : 'auto',
                     }}
-                    onClick={(e) => handleCardClick(e, detailUrl)}
+                    onClick={(e) => {
+                      if (dragDistance > 30) {
+                        e.preventDefault();
+                      }
+                    }}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
