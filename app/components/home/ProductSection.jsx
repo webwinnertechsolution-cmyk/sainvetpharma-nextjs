@@ -2,20 +2,26 @@
 
 import { useState, useRef, useEffect, useId } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getStoredUser } from '@/lib/googleAuth';
 
 const ProductSection = ({ section = null, products = [] }) => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
+  const router = useRouter();
   const instanceId = useId().replace(/:/g, '_');
 
   const [productList] = useState(products);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [dragDistance, setDragDistance] = useState(0);
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [wishlistLoading, setWishlistLoading] = useState(new Set());
   const trackRef = useRef(null);
+  const overflowRef = useRef(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -126,16 +132,79 @@ const ProductSection = ({ section = null, products = [] }) => {
     return firstCard ? firstCard.offsetWidth + GAP : 0;
   };
 
-  const handlePrevClick = () => {
-    setCurrentIndex(Math.max(0, currentIndex - 1));
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setOffset(0);
+    setDragDistance(0);
   };
 
-  const handleNextClick = () => {
-    setCurrentIndex(Math.min(currentIndex + 1, totalSlides - 1));
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const newOffset = e.clientX - startX;
+    setOffset(newOffset);
+    setDragDistance(Math.abs(newOffset));
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      handleDragEnd();
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    handleDragEnd();
+  };
+
+  const handleDragEnd = () => {
+    const cardW = getCardWidth();
+    const slideCount = Math.round(-offset / cardW);
+    if (Math.abs(slideCount) > 0) {
+      setCurrentIndex(Math.max(0, Math.min(currentIndex + slideCount, totalSlides - 1)));
+    }
+    setOffset(0);
+    setDragDistance(0);
+  };
+
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setOffset(0);
+    setDragDistance(0);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const newOffset = e.touches[0].clientX - startX;
+    setOffset(newOffset);
+    setDragDistance(Math.abs(newOffset));
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    handleDragEnd();
+  };
+
+  const handleCardClick = (e, detailUrl) => {
+    // Agar 30px se jada drag hua to click prevent karo
+    if (dragDistance > 30) {
+      e.preventDefault();
+      return;
+    }
+    // Wishlist button pe click, to link follow karne do nahi
+    if (e.target.closest('.ps-wish-btn')) {
+      e.preventDefault();
+      return;
+    }
   };
 
   const translateStep = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
   const baseTransform = `calc(-${currentIndex} * ${translateStep})`;
+  const finalTransform = isDragging ? `calc(${baseTransform} + ${offset}px)` : baseTransform;
 
   const getImageUrl = (imageName) =>
     imageName ? `${API_URL}/uploads/products/${imageName}` : null;
@@ -251,6 +320,11 @@ const ProductSection = ({ section = null, products = [] }) => {
           overflow: hidden;
           flex: 1;
           min-width: 0;
+          cursor: grab;
+        }
+
+        .ps-overflow.dragging { 
+          cursor: grabbing;
         }
 
         .ps-track {
@@ -376,7 +450,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           position: absolute;
           top: 8px;
           right: 8px;
-          z-index: 10;
+          z-index: 11;
           width: 32px;
           height: 32px;
           border-radius: 50%;
@@ -536,11 +610,17 @@ const ProductSection = ({ section = null, products = [] }) => {
           )}
         </div>
 
-        <div className="ps-slider-wrapper">
+        <div
+          className="ps-slider-wrapper"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-prev"
-              onClick={handlePrevClick}
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
               disabled={currentIndex === 0}
               aria-label="Previous"
               type="button"
@@ -549,13 +629,19 @@ const ProductSection = ({ section = null, products = [] }) => {
             </button>
           )}
 
-          <div className="ps-overflow">
+          <div
+            className={`ps-overflow ${isDragging ? 'dragging' : ''}`}
+            ref={overflowRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="ps-track"
               ref={trackRef}
               style={{
-                transform: baseTransform,
-                transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                transform: finalTransform,
+                transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               }}
             >
               {productList.map((product) => {
@@ -587,7 +673,9 @@ const ProductSection = ({ section = null, products = [] }) => {
                     className="ps-card"
                     style={{
                       flex: `0 0 ${cardFlexBasis}`,
+                      pointerEvents: isDragging ? 'none' : 'auto',
                     }}
+                    onClick={(e) => handleCardClick(e, detailUrl)}
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)}
                   >
@@ -653,7 +741,7 @@ const ProductSection = ({ section = null, products = [] }) => {
           {showArrows && (
             <button
               className="ps-arrow ps-arrow-next"
-              onClick={handleNextClick}
+              onClick={() => setCurrentIndex(Math.min(currentIndex + 1, totalSlides - 1))}
               disabled={currentIndex >= totalSlides - 1}
               aria-label="Next"
               type="button"
