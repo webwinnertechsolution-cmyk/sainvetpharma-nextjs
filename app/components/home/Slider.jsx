@@ -246,8 +246,8 @@ export default function Slider({ sliders }) {
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
-    width: 32px!important;
-    height: 32px!important;
+    width: 25px!important;
+    height: 25px!important;
     background: rgba(255,255,255,0.9);
     border: none;
     border-radius: 50%;
@@ -285,6 +285,12 @@ export default function Slider({ sliders }) {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+}
+button.rl-arrow.rl-arrow-next {
+    left: 4px;
+}
+button.rl-arrow.rl-arrow-prev {
+    right: 4px;
 }
         }
         @media (max-width: 1024px) and (min-width: 768px) {
