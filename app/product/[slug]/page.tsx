@@ -174,151 +174,7 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-success h4{font-family:'Sora',sans-serif;font-size:19px;color:#065f46;margin:0 0 6px;}
         .rv-success p{font-size:13px;color:#6b7280;}
         .rv-err-msg{background:#fee2e2;color:#991b1b;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;}
-        .slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover!important;
-    transition: transform .4s ease;
-    width: 100%!important;
-}
-.slide {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-    flex-shrink: 0;
-}
-.slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-    display: none;
-}
-.thumb {
-    width: 70px;
-    height: 70px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #fff;
-    flex-shrink: 0;
-    transition: all .22s;
-    position: relative;
-    margin-top: 3px!important;
-}
-.thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover!important;
-    padding: 0px!important;
-}
-.thumb-variant-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #1872B5;
-    color: #fff;
-    font-size: 7px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 3px;
-    display: none;
-}
-.variant-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: -8px;
-    margin-top: -6px;
-}
-.prod-tab-content {
-    padding: 20px 18px;
-    animation: tabFadeIn .3s ease both;
-    min-height: 120px;
-    font-size: 13px;
-    line-height: 19px;
-}
-.rv-card {
-    background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 8px 12px;
-    animation: rvFadeUp .3s ease both;
-    transition: box-shadow .2s,border-color .2s;
-}
-.rv-avatar {
-    width: 29px;
-    height: 29px;
-    border-radius: 50%;
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 800;
-    font-family: 'Sora',sans-serif;
-    flex-shrink: 0;
-}
-.rv-rname {
-    font-size: 11px;
-    font-weight: 800;
-    color: #0a214f;
-    margin-bottom: -7px;
-}
-.rv-card-hd {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 3px;
-}
-.rv-text {
-    font-size: 12px;
-    color: #4b5563;
-    line-height: 1.75;
-}
-.reviews-tab-wrap {
-    padding: 14px 18px;
-    animation: tabFadeIn .3s ease both;
-}
-.rv-avg-big {
-    font-family: 'Sora',sans-serif;
-    font-size: 35px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1;
-    text-align: center;
-}
-.rv-cta-big {
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    font-family: 'Sora',sans-serif;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all .22s;
-    box-shadow: 0 4px 14px rgba(24,114,181,.28);
-}
-.rv-mod-hd {
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    padding: 9px 18px 12px;
-    border-radius: 20px 20px 0 0;
-    position: relative;
-}
+    
 
 
 
@@ -989,6 +845,156 @@ export default function ProductDetailPage() {
           .prod-tabs-section,.rel-section{padding-left:16px;padding-right:16px;}
           .prod-tab-content,.reviews-tab-wrap{padding:20px 18px;}
         }
+
+
+            .slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover!important;
+    transition: transform .4s ease;
+    width: 100%!important;
+}
+.slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+    flex-shrink: 0;
+}
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    display: none;
+}
+.thumb {
+    width: 70px;
+    height: 70px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    flex-shrink: 0;
+    transition: all .22s;
+    position: relative;
+    margin-top: 3px!important;
+}
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover!important;
+    padding: 0px!important;
+}
+.thumb-variant-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #1872B5;
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: none;
+}
+.variant-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: -8px;
+    margin-top: -6px;
+}
+.prod-tab-content {
+    padding: 20px 18px;
+    animation: tabFadeIn .3s ease both;
+    min-height: 120px;
+    font-size: 13px;
+    line-height: 19px;
+}
+.rv-card {
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 8px 12px;
+    animation: rvFadeUp .3s ease both;
+    transition: box-shadow .2s,border-color .2s;
+}
+.rv-avatar {
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Sora',sans-serif;
+    flex-shrink: 0;
+}
+.rv-rname {
+    font-size: 11px;
+    font-weight: 800;
+    color: #0a214f;
+    margin-bottom: -7px;
+}
+.rv-card-hd {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
+}
+.rv-text {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.75;
+}
+.reviews-tab-wrap {
+    padding: 14px 18px;
+    animation: tabFadeIn .3s ease both;
+}
+.rv-avg-big {
+    font-family: 'Sora',sans-serif;
+    font-size: 35px;
+    font-weight: 800;
+    color: #0a214f;
+    line-height: 1;
+    text-align: center;
+}
+.rv-cta-big {
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: 'Sora',sans-serif;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all .22s;
+    box-shadow: 0 4px 14px rgba(24,114,181,.28);
+}
+.rv-mod-hd {
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    padding: 9px 18px 12px;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+}
+
+
+
         @media(max-width:768px){
           .pd-title{font-size:20px;}
           .price-main{font-size:28px;}
