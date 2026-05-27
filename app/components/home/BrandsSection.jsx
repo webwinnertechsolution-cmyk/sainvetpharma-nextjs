@@ -190,7 +190,12 @@ a.br-view-all {
     margin-top: 58px;
     margin-bottom: 33px;
 }
-
+.br-wrap {
+    padding: 52px 0 74px;
+    background: #D0EDFB;
+    margin-top: 58px;
+    margin-bottom: 22px;
+}
         /* ── Mobile ── */
         @media (max-width: 767px) {
           .br-wrap { padding: 22px 0 28px; }
@@ -205,6 +210,12 @@ a.br-view-all {
           .br-arrow-prev { left: -6px; }
           .br-arrow-next { right: -6px; }
           .br-view-all { font-size: 12px; }
+          .br-wrap {
+    padding: 52px 0 74px;
+    background: #D0EDFB;
+    margin-top: -1px;
+    margin-bottom: 4px;
+}
         }
       `}</style>
 
