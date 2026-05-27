@@ -362,9 +362,7 @@ button.rl-arrow.rl-arrow-prev {
     box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
 
-.hc-card::before {
-    display: none;
-}
+
         }
         @media (max-width: 1024px) and (min-width: 768px) {
           .rl-slider { height: 420px; }
