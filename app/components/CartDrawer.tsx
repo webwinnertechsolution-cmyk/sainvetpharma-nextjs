@@ -263,7 +263,77 @@ export default function CartDrawer() {
         .cd-btn:hover{background:linear-gradient(135deg,#1560a0,#1872B5);transform:translateY(-1px);}
         .cd-cont{width:100%;padding:11px;background:#f9fafb;color:#374151;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;text-align:center;display:block;text-decoration:none;transition:all .2s;}
         .cd-cont:hover{background:#f3f4f6;border-color:#1872B5;color:#1872B5;}
-        @media(max-width:480px){.cd-drawer{width:100vw;}}
+
+.cd-htitle {
+    font-family: 'Sora',sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+.cd-header {
+    background: linear-gradient(135deg,#1872B5,#2596e1);
+    padding: 8px 18px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.cd-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 1.4;
+    margin-bottom: 0px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cd-price {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1872B5;
+    font-family: 'Sora',sans-serif;
+}
+.cd-vtag {
+    font-size: 10px;
+    color: #6b7280;
+    font-weight: 600;
+    background: #f3f4f6;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 1px;
+}
+.cd-tv {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0a214f;
+    font-family: 'Sora',sans-serif;
+}
+button.cd-cont {
+    display: none;
+}
+
+        
+        @media(max-width:767px){.cd-drawer{width:100vw;}
+        .cd-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 14px;
+    margin-bottom: 0px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+        
+        
+        }
       `}</style>
 
       <div className={`cd-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
