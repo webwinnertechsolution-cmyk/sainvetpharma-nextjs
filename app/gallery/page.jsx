@@ -52,82 +52,89 @@ export default function GalleryPage() {
     font-size: 34px !important;
     font-weight: 700 !important;
 }
+
 .gal-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg,#eff6ff,#dbeafe);
-    color: #1872B5;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    padding: 6px 18px;
-    border-radius: 20px;
-    border: 1px solid #bfdbfe;
-    margin-bottom: 11px;
-}
-.gal-title {
-    font-family: 'Sora',sans-serif;
-    font-size: 27px;
-    font-weight: 800;
-    color: #0a214f;
-    margin: 0 0 -31px;
-    letter-spacing: -.02em;
-}
-.gal-type-badge {
-    display: none;
-}
-.gallery-banner-content h1 {
-    font-size: 30px !important;
-    font-weight: 700 !important;
-    margin-bottom: 0!important;
-}
-.gal-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg,#eff6ff,#dbeafe);
-    color: #1872B5;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    padding: 3px 7px;
-    border-radius: 20px;
-    border: 1px solid #bfdbfe;
-    margin-bottom: 8px;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: linear-gradient(135deg,#eff6ff,#dbeafe) !important;
+    color: #1872B5 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .12em !important;
+    padding: 6px 18px !important;
+    border-radius: 20px !important;
+    border: 1px solid #bfdbfe !important;
+    margin-bottom: 11px !important;
 }
 
 .gal-title {
-    font-family: 'Sora',sans-serif;
-    font-size: 30px;
-    font-weight: 800;
-    color: #0a214f;
-    margin: 0 0 -31px;
-    letter-spacing: -.02em;
+    font-family: 'Sora',sans-serif !important;
+    font-size: 27px !important;
+    font-weight: 800 !important;
+    color: #0a214f !important;
+    margin: 0 0 -31px !important;
+    letter-spacing: -.02em !important;
 }
+
+.gal-type-badge {
+    display: none !important;
+}
+
+.gallery-banner-content h1 {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0 !important;
+}
+
+.gal-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: linear-gradient(135deg,#eff6ff,#dbeafe) !important;
+    color: #1872B5 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .12em !important;
+    padding: 3px 7px !important;
+    border-radius: 20px !important;
+    border: 1px solid #bfdbfe !important;
+    margin-bottom: 8px !important;
+}
+
+.gal-title {
+    font-family: 'Sora',sans-serif !important;
+    font-size: 30px !important;
+    font-weight: 800 !important;
+    color: #0a214f !important;
+    margin: 0 0 -31px !important;
+    letter-spacing: -.02em !important;
+}
+
 .gal-tab {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 19px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    background: #fff;
-    color: #6b7280;
-    transition: all .25s;
-    border: 1.5px solid #e5e7eb;
-    position: relative;
-    user-select: none;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 19px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    border: none !important;
+    outline: none !important;
+    background: #fff !important;
+    color: #6b7280 !important;
+    transition: all .25s !important;
+    border: 1.5px solid #e5e7eb !important;
+    position: relative !important;
+    user-select: none !important;
 }
+
 .gallery-section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 42px 24px;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 42px 24px !important;
 }
 
 
