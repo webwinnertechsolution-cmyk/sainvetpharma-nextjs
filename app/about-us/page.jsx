@@ -803,6 +803,11 @@ export default function AboutPage() {
     font-size: 14px;
     line-height: 20px;
 }
+.off-desc p {
+    margin-bottom: 14px;
+    font-size: 14px!important;
+    line-height: 20px!important;
+}
         /* ════════════════════════════════ RESPONSIVE ════════════════════════════════ */
         @media (max-width: 1024px) {
           .cv-grid {
