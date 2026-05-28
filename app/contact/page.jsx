@@ -293,6 +293,61 @@ export default function ContactPage() {
         .ct-right.revealed{animation:fadeRight .7s ease both 0.15s;margin-bottom:-32px;}
         .ct-form-left.revealed{animation:fadeLeft .7s ease both;}
         .ct-form-right.revealed{animation:fadeRight .7s ease both 0.15s;}
+.ct-banner-content h1 {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
+    font-family: 'Sora',sans-serif;
+    color: #fff;
+    margin: 0 0 0px !important;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 20px rgba(0,0,0,.25);
+}
+.section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg,#eff6ff,#dbeafe);
+    padding: 5px 16px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #bfdbfe;
+    margin-bottom: 11px;
+}
+.ct-main-heading {
+    font-family: 'Sora',sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0a214f;
+    line-height: 1.3;
+    margin-bottom: 5px;
+}
+.ct-sub {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 20px;
+    margin-bottom: 32px;
+    max-width: 90%;
+}
+.ct-form-heading {
+    font-family: 'Sora',sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0a214f;
+    line-height: 1.3;
+    margin-bottom: 7px;
+}
+.ct-form-sub {
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.7;
+    margin-bottom: 11px;
+    margin-top: -4px;
+}
 
         /* ── Responsive ── */
         @media(max-width:767px){
@@ -317,6 +372,81 @@ export default function ContactPage() {
           .ct-banner-content h1{
             font-size:28px !important;
           }
+          .ct-banner-content h1 {
+    font-size: 20px !important;
+}
+.ct-banner-content p {
+    font-size: 12px!important;
+}
+.ct-main-heading {
+    font-size: 16px;
+}
+
+.ct-left.revealed {
+    animation: fadeLeft .7s ease both;
+    padding-bottom: 0px;
+}
+.ct-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: -38px;
+}
+.ct-img-wrap {
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 20px 56px rgba(24,114,181,.18);
+    position: relative;
+    background: #f0f0f0;
+    min-height: 272px;
+}
+
+.ct-form-img {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 48px rgba(0,0,0,.25);
+    background: #f0f0f0;
+    min-height: 100%;
+}
+.ct-form-heading {
+    font-size: 16px;
+}
+.ct-form-sub {
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 17px;
+    margin-bottom: 11px;
+    margin-top: -4px;
+}
+.ct-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-bottom: 10px;
+}
+.ct-form-group {
+    margin-bottom: 5px;
+}
+.ct-submit {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: #fff;
+    color: #1872B5;
+    font-family: 'Sora',sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    transition: all .25s;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    margin-top: 4px;
+}
+.ct-info-section {
+    padding: 27px 16px 24px;
+}
+
         }
       `}</style>
 
