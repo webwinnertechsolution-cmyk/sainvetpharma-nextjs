@@ -246,6 +246,7 @@ function BlogPageInner() {
         .cnt{display:inline-block;margin-left:5px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;}
       `}</style>
 
+      {/* ── Banner ── */}
       <div className="blog-banner">
         <div className="blog-banner-orb" />
         <div className="blog-banner-orb2" />
@@ -257,6 +258,7 @@ function BlogPageInner() {
         </div>
       </div>
 
+      {/* ── Breadcrumb ── */}
       <div style={{ background: '#1872B5', padding: '10px 0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 6, fontSize: 13, color: 'rgba(255,255,255,.75)', alignItems: 'center' }}>
           <Link href="/" style={{ color: 'rgba(255,255,255,.75)', textDecoration: 'none' }}>Home</Link>
@@ -265,10 +267,73 @@ function BlogPageInner() {
         </div>
       </div>
 
-  
+      {/* ── Filter Bar ── */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #dbeafe', padding: '18px 0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 2px 12px rgba(24,114,181,.07)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+
+          {/* Filter Tabs */}
+          <div style={{ display: 'flex', gap: 4, background: '#f5f7fa', borderRadius: 30, padding: 4, alignSelf: 'center', flexShrink: 0 }}>
+            <button className={`ftab ${filterTab === 'category' ? 'on' : ''}`} onClick={() => handleFilterTab('category')}>Categories</button>
+            <button className={`ftab ${filterTab === 'tag' ? 'on' : ''}`} onClick={() => handleFilterTab('tag')}>Tags</button>
+          </div>
+
+          {/* Chips */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {filterTab === 'category' ? (
+              <div className="chips-row">
+                <button className={`chip ${!activeCategory ? 'on' : ''}`} onClick={() => handleCategory(null)}>
+                  All
+                  <span className="cnt" style={{ background: !activeCategory ? 'rgba(255,255,255,.25)' : '#eff6ff', color: !activeCategory ? '#fff' : '#1872B5' }}>
+                    {blogs.length}
+                  </span>
+                </button>
+                {categories.map(cat => {
+                  const count = blogs.filter(b => (b.categories || []).some(c => c.id === cat.id)).length;
+                  return (
+                    <button key={cat.id} className={`chip ${activeCategory === cat.id ? 'on' : ''}`} onClick={() => handleCategory(cat.id)}>
+                      {cat.name}
+                      <span className="cnt" style={{ background: activeCategory === cat.id ? 'rgba(255,255,255,.25)' : '#eff6ff', color: activeCategory === cat.id ? '#fff' : '#1872B5' }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="chips-row">
+                {tags.length === 0 ? (
+                  <span style={{ fontSize: 13, color: '#9ca3af', alignSelf: 'center' }}>No tags found</span>
+                ) : tags.map(tag => (
+                  <button key={tag.id} className={`tchip ${activeTag === tag.id ? 'on' : ''}`} onClick={() => handleTag(tag.id)}>
+                    #{tag.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Search */}
+          <div className="search-box" style={{ flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search articles…"
+              value={search}
+              onChange={handleSearch}
+            />
+            {search && (
+              <button onClick={() => { setSearch(''); setPage(1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 16, lineHeight: 1, padding: 0 }}>✕</button>
+            )}
+          </div>
+        </div>
       </div>
 
+      {/* ── Main Content ── */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 24px 60px' }}>
+
+        {/* Results info */}
         {!loading && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
             <p style={{ fontSize: 13, color: '#9ca3af', fontWeight: 600, margin: 0 }}>
@@ -284,6 +349,7 @@ function BlogPageInner() {
           </div>
         )}
 
+        {/* Grid / Empty / Skeleton */}
         {loading ? (
           <div className="blog-grid">
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -303,6 +369,7 @@ function BlogPageInner() {
           </div>
         )}
 
+        {/* Pagination */}
         {!loading && totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 48 }}>
             <button className="page-btn" onClick={() => setPage(p => p - 1)} disabled={page === 1}>‹</button>
