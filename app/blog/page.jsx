@@ -268,7 +268,7 @@ function BlogPageInner() {
       </div>
 
       {/* ── Filter Bar ── */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #dbeafe', padding: '18px 0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 2px 12px rgba(24,114,181,.07)' }}>
+      <div className="aweqweqer" style={{ background: '#fff', borderBottom: '1px solid #dbeafe', padding: '18px 0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 2px 12px rgba(24,114,181,.07)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* Filter Tabs */}
