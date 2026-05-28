@@ -184,6 +184,19 @@ export default function Footer({ footerNew }) {
     margin: 0 -15px;
     padding-inline: 10px;
 }
+
+.footer-col-1, .footer-col-2, .footer-col-3 {
+    width: 100%;
+    padding-bottom: 12px;
+    padding-inline: 0;
+}
+.footer-col-3 {
+    width: 1oo;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
         }
       `}</style>
 
