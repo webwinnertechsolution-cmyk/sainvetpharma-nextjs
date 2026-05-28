@@ -266,30 +266,7 @@ function BlogPageInner() {
       </div>
 
       <div style={{ background: '#fff', borderBottom: '1px solid #dbeafe', padding: '12px 0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 2px 12px rgba(24,114,181,.08)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
-            <div className="search-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input placeholder="Search articles…" value={search} onChange={handleSearch} />
-            </div>
-            <div style={{ width: 1, height: 28, background: '#dbeafe', flexShrink: 0 }} />
-            <div style={{ display: 'flex', background: '#f0f7ff', borderRadius: 30, padding: 3, gap: 2 }}>
-              <button className={`ftab ${filterTab === 'category' ? 'on' : ''}`} onClick={() => handleFilterTab('category')}>
-                🗂 Categories
-                <span className="cnt" style={{ background: filterTab === 'category' ? 'rgba(255,255,255,.25)' : '#dbeafe', color: filterTab === 'category' ? '#fff' : '#1872B5' }}>
-                  {categories.length}
-                </span>
-              </button>
-              <button className={`ftab ${filterTab === 'tag' ? 'on' : ''}`} onClick={() => handleFilterTab('tag')}>
-                🏷 Tags
-                <span className="cnt" style={{ background: filterTab === 'tag' ? 'rgba(255,255,255,.25)' : '#dbeafe', color: filterTab === 'tag' ? '#fff' : '#1872B5' }}>
-                  {tags.length}
-                </span>
-              </button>
-            </div>
-          </div>
+        
 
           <div className="chips-row">
             {filterTab === 'category' ? (
