@@ -446,7 +446,13 @@ export default function ContactPage() {
 .ct-info-section {
     padding: 27px 16px 24px;
 }
-
+.ct-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: -38px;
+}
         }
       `}</style>
 
