@@ -114,21 +114,10 @@ export default function GalleryPage() {
 }
 
 .gal-tab {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
+
     padding: 8px 19px !important;
     font-size: 14px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    border: none !important;
-    outline: none !important;
-    background: #fff !important;
-    color: #6b7280 !important;
-    transition: all .25s !important;
-    border: 1.5px solid #e5e7eb !important;
-    position: relative !important;
-    user-select: none !important;
+    
 }
 
 .gallery-section {
@@ -182,12 +171,10 @@ export default function GalleryPage() {
 }
 
 .gal-tabs {
-    display: flex !important;
-    justify-content: center !important;
+    
     gap: 0 !important;
     margin-bottom: 27px !important;
-    animation: fadeUp .6s .1s ease both !important;
-    opacity: 0 !important;
+
 }
 
 .gallery-banner-content p {
