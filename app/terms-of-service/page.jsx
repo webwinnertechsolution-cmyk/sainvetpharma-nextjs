@@ -177,6 +177,20 @@ export default function TermsOfServicePage() {
 .tos-header {
     margin-bottom: 24px;
 } 
+.tos-body p {
+    font-size: 14px;
+    color: #374151;
+    line-height: 20px;
+    margin-bottom: 14px;
+    text-align: left;
+}
+
+.tos-banner-content h1 {
+    font-size: 34px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0!important;
+}
+
         @media(max-width:768px){
           .tos-banner{height:150px;}
           .tos-main-heading{font-size:22px;}
@@ -195,8 +209,16 @@ export default function TermsOfServicePage() {
 .tos-banner {
     height: 121px;
 }
-
-
+.tos-banner-content h1 {
+    /* font-size: 34px !important; */
+    /* font-weight: 700 !important; */
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-bottom: -3px !important;
+}
+.tos-main-heading {
+    font-size: 17px;
+}
         }
       `}</style>
 
