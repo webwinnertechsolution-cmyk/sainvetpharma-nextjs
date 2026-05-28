@@ -190,7 +190,54 @@ export default function FAQPage() {
     font-weight: 700 !important;
 }
 
-
+.faq-banner-content h1 {
+    font-size: 34px !important;
+    font-weight: 700 !important;
+    margin: 0px 0px 0px!important;
+}
+.faq-question-text {
+    flex: 1;
+    font-family: 'Sora',sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 1.5;
+}
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 16px;
+    transition: all .2s;
+}
+.faq-answer {
+    padding: 15px 16px 17px;
+    border-top: 1px solid #f0f0f0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 19px;
+    animation: fadeUp .3s ease;
+}
+.faq-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 41px 24px;
+}
+.faq-accordion-wrap {
+    margin-top: 0px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
 
         /* ── Responsive ── */
         @media(max-width:768px){
@@ -227,6 +274,44 @@ export default function FAQPage() {
 .faq-question {
     padding: 13px 20px;
 }
+.faq-banner-content p {
+    font-size: 12px;
+}
+.faq-banner-content h1 {
+    /* font-size: 34px !important; */
+    /* font-weight: 700 !important; */
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0px !important;
+}
+.faq-section {
+    padding: 26px 16px;
+}
+.faq-question-text {
+    font-size: 12px;
+}
+.faq-question {
+    padding: 11px 20px;
+}
+.faq-answer {
+    padding: 15px 16px 17px;
+    border-top: 1px solid #f0f0f0;
+    color: #4b5563;
+    font-size: 12px;
+    line-height: 17px;
+    animation: fadeUp .3s ease;
+    padding-top: 13px!important;
+}
+.faq-accordion-wrap {
+    margin-top: 0px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
 
 
         }
