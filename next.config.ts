@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['127.0.0.1', 'sainivetpharma-api.web-winners.com'],
+    domains: ['127.0.0.1', 'api.sainivetpharma.com'],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -15,11 +15,11 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'https://sainivetpharma-api.web-winners.com/api/:path*',
+          destination: 'https://api.sainivetpharma.com/api/:path*',
         },
         {
           source: '/uploads/:path*',
-          destination: 'https://sainivetpharma-api.web-winners.com/uploads/:path*',
+          destination: 'https://api.sainivetpharma.com/uploads/:path*',
         },
       ],
     };
