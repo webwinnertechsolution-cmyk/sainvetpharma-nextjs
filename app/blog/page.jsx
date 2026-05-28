@@ -242,6 +242,15 @@ function BlogPageInner() {
         .blog-banner-content{position:relative;z-index:2;text-align:center;animation:bannerIn .6s ease both;}
         .blog-banner-content h1{font-size:34px !important;font-weight:700 !important;}
         .chips-row{display:flex;gap:8px;flex-wrap:wrap;}
+        .aweqweqer {
+    display: none;
+}
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 14px;
+}
+
         @media(max-width:640px){.chips-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;}.chips-row::-webkit-scrollbar{height:3px;}.chips-row::-webkit-scrollbar-thumb{background:#bfdbfe;border-radius:4px;}}
         .cnt{display:inline-block;margin-left:5px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;}
       `}</style>
