@@ -992,14 +992,140 @@ export default function ProductDetailPage() {
     border-radius: 20px 20px 0 0;
     position: relative;
 }
+.pd-title {
+    font-family: 'Sora',sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 25px;
+    margin-bottom: 7px;
+}
+.reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid #e5e7eb;
+    animation: slideDown .4s ease both;
+}
 
-
-
-        @media(max-width:768px){
+        @media(max-width:767px){
           .pd-title{font-size:20px;}
           .price-main{font-size:28px;}
           .rel-grid{grid-template-columns:1fr 1fr;gap:10px;}
           .reviews-summary{flex-direction:unset;align-items:flex-start;gap:8px;}
+          .rel-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+.arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.95);
+    border: 1.5px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    color: #374151;
+    box-shadow: 0 2px 12px rgba(0,0,0,.12);
+    transition: all .22s;
+    font-size: 18px;
+    padding: 0;
+}
+.pd-title {
+    font-size: 16px;
+}
+.pd-title {
+    font-family: 'Sora',sans-serif;
+    
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 19px;
+    margin-bottom: 5px;
+}
+.price-main {
+    font-size: 16px;
+}
+.overview-box {
+    font-size: 12px;
+    color: #374151;
+    line-height: 15px;
+    margin-bottom: -6px;
+    padding: 0;
+    background: #ffffff00;
+    border-radius: 12px;
+    border: none;
+    padding-block: 1px;
+}
+.qty-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.cta-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Sora',sans-serif;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    text-decoration: none;
+    transition: all .22s;
+    position: relative;
+    overflow: hidden;
+}
+.meta-tbl td {
+    padding: 6px 16px;
+    vertical-align: middle;
+}
+.chip-cat {
+    background: #eff6ff;
+    color: #1872B5;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    margin: 2px;
+    transition: background .2s;
+}
+.rel-head {
+    font-family: 'Sora',sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0a214f;
+    margin-bottom: 17px;
+    padding-bottom: 7px;
+    border-bottom: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rv-avg-big {
+    font-family: 'Sora',sans-serif;
+    font-size: 29px;
+    font-weight: 800;
+    color: #0a214f;
+    line-height: 1;
+    text-align: center;
+}
         }
       `}</style>
 
