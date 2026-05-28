@@ -12,6 +12,8 @@ const BlogSection = ({ blogs = [] }) => {
   const [startX, setStartX]             = useState(0);
   const [offset, setOffset]             = useState(0);
   const trackRef = useRef(null);
+  const hasDragged = useRef(false);     // ✅ Track actual drag
+  const DRAG_THRESHOLD = 5;             // ✅ Min px to count as drag
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -26,35 +28,85 @@ const BlogSection = ({ blogs = [] }) => {
   const totalSlides  = Math.max(1, blogs.length - itemsVisible + 1);
   const showArrows   = blogs.length > itemsVisible;
 
-  /* ── Drag helpers ── */
+  /* ── Card width helper ── */
   const getCardWidth = () => {
     const firstCard = trackRef.current?.querySelector('.bs-card');
     return firstCard ? firstCard.offsetWidth + GAP : 0;
   };
 
-  const handleMouseDown  = (e) => { setIsDragging(true); setStartX(e.clientX); setOffset(0); };
-  const handleMouseMove  = (e) => { if (!isDragging) return; setOffset(e.clientX - startX); };
-  const handleMouseLeave = ()  => { if (isDragging) { setIsDragging(false); setOffset(0); } };
-  const handleMouseUp    = ()  => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const cardW = getCardWidth();
-    const slide = Math.round(-offset / cardW);
-    if (Math.abs(slide) > 0)
-      setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+  /* ── Mouse handlers ── */
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.clientX);
     setOffset(0);
+    hasDragged.current = false; // ✅ reset on every new press
   };
 
-  const handleTouchStart = (e) => { setIsDragging(true); setStartX(e.touches[0].clientX); setOffset(0); };
-  const handleTouchMove  = (e) => { if (!isDragging) return; setOffset(e.touches[0].clientX - startX); };
-  const handleTouchEnd   = ()  => {
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > DRAG_THRESHOLD) {
+      hasDragged.current = true; // ✅ real drag happened
+    }
+    setOffset(diff);
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      if (hasDragged.current) {
+        const cardW = getCardWidth();
+        const slide = Math.round(-offset / cardW);
+        if (Math.abs(slide) > 0)
+          setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+      }
+      setOffset(0);
+      setTimeout(() => { hasDragged.current = false; }, 0);
+    }
+  };
+
+  const handleMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    const cardW = getCardWidth();
-    const slide = Math.round(-offset / cardW);
-    if (Math.abs(slide) > 0)
-      setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+    if (hasDragged.current) {
+      const cardW = getCardWidth();
+      const slide = Math.round(-offset / cardW);
+      if (Math.abs(slide) > 0)
+        setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+    }
     setOffset(0);
+    // ✅ Delay reset so onClick fires before we clear the flag
+    setTimeout(() => { hasDragged.current = false; }, 0);
+  };
+
+  /* ── Touch handlers ── */
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setOffset(0);
+    hasDragged.current = false; // ✅ reset
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.touches[0].clientX - startX;
+    if (Math.abs(diff) > DRAG_THRESHOLD) {
+      hasDragged.current = true; // ✅ real drag
+    }
+    setOffset(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (hasDragged.current) {
+      const cardW = getCardWidth();
+      const slide = Math.round(-offset / cardW);
+      if (Math.abs(slide) > 0)
+        setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+    }
+    setOffset(0);
+    setTimeout(() => { hasDragged.current = false; }, 0);
   };
 
   /* ── Transform ── */
@@ -112,9 +164,7 @@ const BlogSection = ({ blogs = [] }) => {
         .bs-overflow.dragging { cursor: grabbing; }
         .bs-track {
           display: flex; gap: ${GAP}px; padding: 10px 0 11px;
-          transition: ${isDragging ? 'none' : 'transform .6s cubic-bezier(.25,.46,.45,.94)'};
           will-change: transform;
-          transform: translateX(${finalTransform});
         }
 
         /* ── Arrows ── */
@@ -143,7 +193,6 @@ const BlogSection = ({ blogs = [] }) => {
           box-shadow: 0 2px 10px rgba(0,0,0,.07);
           display: flex; flex-direction: column;
           text-decoration: none; color: inherit; cursor: pointer;
-          pointer-events: ${isDragging ? 'none' : 'auto'};
         }
         .bs-card:hover {
           border-color: #1872B5;
@@ -326,7 +375,14 @@ a.bs-view-all {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="bs-track" ref={trackRef}>
+            <div
+              className="bs-track"
+              ref={trackRef}
+              style={{
+                transform: `translateX(${finalTransform})`,
+                transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              }}
+            >
               {blogs.map((blog) => {
                 const imgSrc   = getImageUrl(blog.featured_image);
                 const category = blog.categories?.[0]?.name || '';
@@ -336,7 +392,10 @@ a.bs-view-all {
                     key={blog.id}
                     href={`/blog/${blog.slug}`}
                     className="bs-card"
-                    onClick={(e) => isDragging && e.preventDefault()}
+                    onClick={(e) => {
+                      // ✅ Block redirect only if actual drag happened
+                      if (hasDragged.current) e.preventDefault();
+                    }}
                   >
                     <div className="bs-img">
                       {imgSrc ? (
