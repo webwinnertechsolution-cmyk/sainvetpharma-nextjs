@@ -374,6 +374,13 @@ export default function EnhancedHeader({ logo, menus }) {
     letter-spacing: 0.5px;
     font-family: 'Sora', sans-serif;
 }
+.search-view-all {
+    display: none;
+}
+
+
+
+
         }
       `}</style>
 
