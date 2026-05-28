@@ -11,61 +11,75 @@ function CollectionsPageInner() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  const [allProducts, setAllProducts]       = useState([]);
-  const [products, setProducts]             = useState([]);
-  const [categories, setCategories]         = useState([]);
-  const [tags, setTags]                     = useState([]);
-  const [variantsWithCounts, setVariantsWithCounts] = useState([]); // NEW
-  const [loading, setLoading]               = useState(true);
-  const [apiError, setApiError]             = useState(null);
-  const [hoveredId, setHoveredId]           = useState(null);
-  const [drawerOpen, setDrawerOpen]         = useState(false);
-  const [secOpen, setSecOpen]               = useState({
-    categories: true,
-    tags: false,
-    price: false,
-    variants: false, // NEW
-  });
+  const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts]       = useState([]);
+  const [categories, setCategories]   = useState([]);
+  const [tags, setTags]               = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [apiError, setApiError]       = useState(null); // ⬅️ NEW: Error tracking
+  const [hoveredId, setHoveredId]     = useState(null);
+  const [drawerOpen, setDrawerOpen]   = useState(false);
+  const [secOpen, setSecOpen]         = useState({ categories: true, tags: false, price: false });
 
-  const [minInput, setMinInput]     = useState('');
-  const [maxInput, setMaxInput]     = useState('');
+  const [minInput, setMinInput]   = useState('');
+  const [maxInput, setMaxInput]   = useState('');
   const [appliedMin, setAppliedMin] = useState('');
   const [appliedMax, setAppliedMax] = useState('');
 
-  const category        = searchParams.get('category');
-  const tag             = searchParams.get('tag');
-  const sort            = searchParams.get('sort') || 'latest';
-  const page            = searchParams.get('page') || '1';
-  const variantsParam   = searchParams.get('variants') || ''; // NEW
+  const category = searchParams.get('category');
+  const tag      = searchParams.get('tag');
+  const sort     = searchParams.get('sort') || 'latest';
+  const page     = searchParams.get('page') || '1';
 
-  /* ── Fetch ── */
+  /* ── Fetch with Better Error Handling ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setApiError(null);
       try {
         const qs = new URLSearchParams();
-        if (category)      qs.append('category', category);
-        if (tag)           qs.append('tag', tag);
-        if (variantsParam) qs.append('variants', variantsParam); // NEW
+        if (category) qs.append('category', category);
+        if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
         qs.append('page', page);
 
         const fullUrl = `${API_URL}/api/shop?${qs}`;
+        
+        // 🔍 DEBUGGING: Log the full URL
         console.log('📍 Fetching from:', fullUrl);
+        console.log('📍 API_URL env:', process.env.NEXT_PUBLIC_API_URL);
 
         const res = await fetch(fullUrl);
+        
+        // 🔍 DEBUGGING: Log response status
         console.log('📍 Response Status:', res.status, res.statusText);
 
-        if (!res.ok) throw new Error(`API returned ${res.status}: ${res.statusText}`);
+        if (!res.ok) {
+          throw new Error(`API returned ${res.status}: ${res.statusText}`);
+        }
 
         const data = await res.json();
+        
+        // 🔍 DEBUGGING: Log full response data
         console.log('✅ API Response Data:', data);
+        console.log('📊 Products count:', data.products?.length || 0);
+        console.log('📂 Categories count:', data.categories?.length || 0);
+        console.log('🏷️ Tags count:', data.tags?.length || 0);
 
-        setAllProducts(data.products            || []);
-        setCategories(data.categories           || []);
-        setTags(data.tags                       || []);
-        setVariantsWithCounts(data.variants     || []); // NEW — backend must send variants[]
+        // ⚠️ VALIDATION: Check if data structure is correct
+        if (!data.products) {
+          console.warn('⚠️ Missing "products" key in response');
+        }
+        if (!data.categories) {
+          console.warn('⚠️ Missing "categories" key in response');
+        }
+        if (!data.tags) {
+          console.warn('⚠️ Missing "tags" key in response');
+        }
+
+        setAllProducts(data.products   || []);
+        setCategories(data.categories  || []);
+        setTags(data.tags              || []);
 
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -74,29 +88,23 @@ function CollectionsPageInner() {
         setAllProducts([]);
         setCategories([]);
         setTags([]);
-        setVariantsWithCounts([]);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [category, tag, variantsParam, sort, page]);
+  }, [category, tag, sort, page]);
 
   /* ── Client-side price filter ── */
   useEffect(() => {
     if (!appliedMin && !appliedMax) { setProducts(allProducts); return; }
     const min = appliedMin !== '' ? parseFloat(appliedMin) : -Infinity;
     const max = appliedMax !== '' ? parseFloat(appliedMax) :  Infinity;
-    setProducts(allProducts.filter((p: any) => {
+    setProducts(allProducts.filter(p => {
       const price = getEffectivePrice(p);
       return price !== null && price >= min && price <= max;
     }));
   }, [allProducts, appliedMin, appliedMax]);
-
-  /* ── Open variant filter section if variants param is active ── */
-  useEffect(() => {
-    if (variantsParam) setSecOpen(prev => ({ ...prev, variants: true }));
-  }, [variantsParam]);
 
   /* ── Helpers ── */
   function getEffectivePrice(p: any) {
@@ -127,11 +135,11 @@ function CollectionsPageInner() {
     return pct >= 1 ? { pct, compare, selling } : null;
   }
 
-  const imgUrl     = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
-  const galleryUrl = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
+  const imgUrl     = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
+  const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
 
-  /* ── Nav helpers ── */
-  const buildUrl = useCallback((overrides: any = {}) => {
+  /* ── Nav ── */
+  const buildUrl = useCallback((overrides = {}) => {
     const u = new URLSearchParams(searchParams.toString());
     Object.entries(overrides).forEach(([k, v]) => {
       if (v === null || v === '') u.delete(k); else u.set(k, String(v));
@@ -140,41 +148,14 @@ function CollectionsPageInner() {
     return `/collections?${u.toString()}`;
   }, [searchParams]);
 
-  const applySort     = (val: any) => router.push(buildUrl({ sort: val }));
-  const applyCategory = (slug: any) => { router.push(buildUrl({ category: slug || null })); setDrawerOpen(false); };
-  const applyTag      = (slug: any, checked: any) => {
-    router.push(buildUrl({ tag: checked ? slug : null }));
-    setDrawerOpen(false);
-  };
+  const applySort     = (val: any)           => router.push(buildUrl({ sort: val }));
+  const applyCategory = (slug: any)          => { router.push(buildUrl({ category: slug || null })); setDrawerOpen(false); };
+  const applyTag      = (slug: any, checked: any) => { router.push(buildUrl({ tag: checked ? slug : null })); setDrawerOpen(false); };
 
   const applyPrice = () => { setAppliedMin(minInput); setAppliedMax(maxInput); setDrawerOpen(false); };
   const clearPrice = () => { setMinInput(''); setMaxInput(''); setAppliedMin(''); setAppliedMax(''); };
-
-  /* ── NEW: Variant filter helpers ── */
-  const selectedVariants: string[] = variantsParam
-    ? variantsParam.split(',').map((v: string) => v.trim()).filter(Boolean)
-    : [];
-
-  const applyVariantFilter = (variantName: string, checked: boolean) => {
-    let updated: string[];
-    if (checked) {
-      updated = [...selectedVariants, variantName];
-    } else {
-      updated = selectedVariants.filter((v) => v !== variantName);
-    }
-    router.push(buildUrl({ variants: updated.length > 0 ? updated.join(',') : null }));
-  };
-
-  // Group variants by type (same as Blade: $groupedVariants = $variantsWithCounts->groupBy('type'))
-  const groupedVariants: Record<string, any[]> = variantsWithCounts.reduce((acc: any, v: any) => {
-    const key = v.type || 'Other';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(v);
-    return acc;
-  }, {});
-
-  const clearAll = () => { clearPrice(); router.push('/collections'); };
-  const toggleSec = (k: any) => setSecOpen(prev => ({ ...prev, [k]: !prev[k] }));
+  const clearAll   = () => { clearPrice(); router.push('/collections'); };
+  const toggleSec  = (k: any) => setSecOpen(prev => ({ ...prev, [k]: !prev[k] }));
 
   useEffect(() => {
     const h = (e: any) => { if (e.key === 'Escape') setDrawerOpen(false); };
@@ -186,12 +167,9 @@ function CollectionsPageInner() {
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
-  const hasFilters  = category || tag || appliedMin || appliedMax || variantsParam;
+  const hasFilters  = category || tag || appliedMin || appliedMax;
   const priceActive = appliedMin || appliedMax;
 
-  /* ════════════════════════════════════════════
-     SIDEBAR JSX — now includes Variants + Tags
-  ════════════════════════════════════════════ */
   const sidebarJSX = (
     <>
       <div className="sb-head">
@@ -209,7 +187,6 @@ function CollectionsPageInner() {
         </div>
       </div>
 
-      {/* ── CATEGORIES ── */}
       <div className="filter-sec">
         <button className={`filter-toggle ${secOpen.categories ? 'open' : ''}`} onClick={() => toggleSec('categories')}>
           CATEGORIES <span className="f-arrow">{secOpen.categories ? '▲' : '▼'}</span>
@@ -230,72 +207,6 @@ function CollectionsPageInner() {
         )}
       </div>
 
-      {/* ── PRICE RANGE ── */}
-      <div className="filter-sec">
-        <button className={`filter-toggle ${secOpen.price ? 'open' : ''}`} onClick={() => toggleSec('price')}>
-          PRICE RANGE
-          {priceActive && <span className="price-active-dot" />}
-          <span className="f-arrow">{secOpen.price ? '▲' : '▼'}</span>
-        </button>
-        {secOpen.price && (
-          <div className="filter-body">
-            {(minInput || maxInput) && (
-              <div className="price-preview">₹{minInput || '0'} — ₹{maxInput || '∞'}</div>
-            )}
-            <div className="price-row">
-              <input type="number" className="price-inp" placeholder="₹ Min" value={minInput} min="0"
-                onChange={e => setMinInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
-              <span className="price-sep">—</span>
-              <input type="number" className="price-inp" placeholder="₹ Max" value={maxInput} min="0"
-                onChange={e => setMaxInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
-            </div>
-            <div style={{ display:'flex', gap:8 }}>
-              <button className="price-go" onClick={applyPrice} style={{ flex:2 }}>Go</button>
-              {priceActive && <button className="price-clear" onClick={clearPrice} style={{ flex:1 }}>Clear</button>}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── VARIANTS (NEW — ported from Blade) ── */}
-      {variantsWithCounts.length > 0 && (
-        <div className="filter-sec">
-          <button className={`filter-toggle ${secOpen.variants ? 'open' : ''}`} onClick={() => toggleSec('variants')}>
-            VARIANTS
-            {selectedVariants.length > 0 && <span className="price-active-dot" />}
-            <span className="f-arrow">{secOpen.variants ? '▲' : '▼'}</span>
-          </button>
-          {secOpen.variants && (
-            <div className="filter-body">
-              {Object.entries(groupedVariants).map(([typeName, variantGroup]) => (
-                <div key={typeName} className="variant-group">
-                  <div className="variant-group-title">{typeName}</div>
-                  {variantGroup.map((variant: any) => {
-                    const isChecked = selectedVariants.includes(variant.name);
-                    return (
-                      <label key={variant.id ?? variant.name} className="variant-item">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          style={{ display:'none' }}
-                          onChange={e => applyVariantFilter(variant.name, e.target.checked)}
-                        />
-                        <span className={`variant-check ${isChecked ? 'checked' : ''}`}>
-                          {isChecked && '✓'}
-                        </span>
-                        <span className="variant-label">{variant.name}</span>
-                        <span className="chk-cnt">{variant.product_count ?? 0}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── TAGS (NEW — ported from Blade) ── */}
       {tags.length > 0 && (
         <div className="filter-sec">
           <button className={`filter-toggle ${secOpen.tags ? 'open' : ''}`} onClick={() => toggleSec('tags')}>
@@ -316,6 +227,31 @@ function CollectionsPageInner() {
           )}
         </div>
       )}
+
+      <div className="filter-sec">
+        <button className={`filter-toggle ${secOpen.price ? 'open' : ''}`} onClick={() => toggleSec('price')}>
+          PRICE {priceActive && <span className="price-active-dot" />}
+          <span className="f-arrow">{secOpen.price ? '▲' : '▼'}</span>
+        </button>
+        {secOpen.price && (
+          <div className="filter-body">
+            {(minInput || maxInput) && (
+              <div className="price-preview">₹{minInput || '0'} — ₹{maxInput || '∞'}</div>
+            )}
+            <div className="price-row">
+              <input type="number" className="price-inp" placeholder="Min ₹" value={minInput} min="0"
+                onChange={e => setMinInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
+              <span className="price-sep">—</span>
+              <input type="number" className="price-inp" placeholder="Max ₹" value={maxInput} min="0"
+                onChange={e => setMaxInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button className="price-go" onClick={applyPrice} style={{ flex:2 }}>Apply</button>
+              {priceActive && <button className="price-clear" onClick={clearPrice} style={{ flex:1 }}>Clear</button>}
+            </div>
+          </div>
+        )}
+      </div>
 
       <button className="apply-filter-btn" onClick={() => setDrawerOpen(false)}>✓ Done</button>
     </>
@@ -338,53 +274,29 @@ function CollectionsPageInner() {
         .mob-overlay.open { display:block; opacity:1; }
         .mob-drawer { display:none; position:fixed; top:0; left:-300px; width:285px; height:100%; background:#fff; z-index:999; overflow-y:auto; transition:left .32s cubic-bezier(.4,0,.2,1); }
         .mob-drawer.open { left:0; box-shadow:4px 0 28px rgba(0,0,0,.22); }
-
-        /* Sidebar head */
         .sb-head { background:#1872B5; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
         .sb-head-title { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
         .sb-clear { font-size:11.5px; color:rgba(255,255,255,.8); background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); padding:3px 10px; border-radius:20px; cursor:pointer; font-family:'Nunito',sans-serif; transition:all .2s; }
         .sb-clear:hover { background:rgba(255,255,255,.28); color:#fff; }
         .sb-close { background:rgba(255,255,255,.15); border:none; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; transition:background .2s; }
         .sb-close:hover { background:rgba(255,255,255,.28); }
-
-        /* Filter sections */
         .filter-sec { border-bottom:1px solid #e5e7eb; }
-        .filter-sec:last-of-type { border-bottom:none; }
         .filter-toggle { width:100%; padding:13px 18px; background:none; border:none; display:flex; align-items:center; justify-content:space-between; font-family:'Nunito',sans-serif; font-size:12px; font-weight:800; color:#1c1c1c; cursor:pointer; text-transform:uppercase; letter-spacing:.06em; transition:background .15s; }
         .filter-toggle:hover { background:#f5f7fa; }
-        .f-arrow { font-size:9px; color:#1872B5; margin-left:auto; }
-        .price-active-dot { width:7px; height:7px; border-radius:50%; background:#1872B5; display:inline-block; margin-left:6px; flex-shrink:0; }
+        .f-arrow { font-size:9px; color:#1872B5; }
+        .price-active-dot { width:7px; height:7px; border-radius:50%; background:#1872B5; display:inline-block; margin-left:6px; }
         .filter-body { padding:4px 18px 14px; }
-
-        /* Category links */
-        .cat-link { width:100%; display:flex; align-items:center; justify-content:space-between; padding:9px 0; font-size:13px; font-weight:600; color:#374151; background:none; border:none; border-bottom:1px solid #f3f4f6; cursor:pointer; text-align:left; font-family:'Nunito',sans-serif; transition:color .15s; gap:8px; }
-        .cat-link:last-child { border-bottom:none; }
+        .cat-link { width:100%; display:flex; align-items:center; justify-content:space-between; padding:9px 0; font-size:13px; font-weight:600; color:#374151; background:none; border:none; border-bottom:1px solid #f3f4f6; cursor:pointer; text-align:left; font-family:'Nunito',sans-serif; transition:color .15s; }
         .cat-link:hover { color:#1872B5; }
         .cat-link.active { color:#1872B5; font-weight:800; }
-        .cat-count { font-size:11px; font-weight:700; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:10px; min-width:24px; text-align:center; flex-shrink:0; }
+        .cat-count { font-size:11px; font-weight:700; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:10px; min-width:24px; text-align:center; }
         .cat-link.active .cat-count { background:#1872B5; color:#fff; }
-
-        /* Checkboxes (tags) */
         .chk-item { display:flex; align-items:center; gap:9px; padding:8px 0; cursor:pointer; font-size:13px; color:#374151; border-bottom:1px solid #f9fafb; transition:color .15s; font-family:'Nunito',sans-serif; }
-        .chk-item:last-child { border-bottom:none; }
         .chk-item:hover { color:#1872B5; }
         .custom-chk { width:17px; height:17px; border:2px solid #e5e7eb; border-radius:4px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; font-size:10px; font-weight:900; color:#fff; }
         .custom-chk.checked { background:#1872B5; border-color:#1872B5; }
         .chk-label { flex:1; font-weight:600; }
-        .chk-cnt { font-size:11px; color:#9ca3af; flex-shrink:0; }
-
-        /* Variants */
-        .variant-group { margin-top:8px; }
-        .variant-group:first-child { margin-top:0; }
-        .variant-group-title { font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:#1872B5; padding:8px 0 4px; font-family:'Nunito',sans-serif; border-bottom:2px solid #dbeafe; margin-bottom:4px; }
-        .variant-item { display:flex; align-items:center; gap:9px; padding:7px 0; cursor:pointer; font-size:13px; color:#374151; border-bottom:1px solid #f9fafb; transition:color .15s; font-family:'Nunito',sans-serif; }
-        .variant-item:last-child { border-bottom:none; }
-        .variant-item:hover { color:#1872B5; }
-        .variant-check { width:17px; height:17px; border:2px solid #e5e7eb; border-radius:4px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; font-size:10px; font-weight:900; color:#fff; }
-        .variant-check.checked { background:#1872B5; border-color:#1872B5; }
-        .variant-label { flex:1; font-weight:600; }
-
-        /* Price inputs */
+        .chk-cnt { font-size:11px; color:#9ca3af; }
         .price-preview { font-size:12px; font-weight:700; color:#1872B5; background:#eff6ff; padding:5px 10px; border-radius:7px; margin-bottom:10px; font-family:'Nunito',sans-serif; }
         .price-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
         .price-inp { flex:1; padding:6px 8px; height:36px; border:1.5px solid #e5e7eb; border-radius:7px; font-family:'Nunito',sans-serif; font-size:13px; color:#1c1c1c; outline:none; transition:border-color .2s; width:100%; }
@@ -396,8 +308,6 @@ function CollectionsPageInner() {
         .price-clear:hover { background:#e5e7eb; }
         .apply-filter-btn { display:none; width:calc(100% - 36px); margin:12px 18px 16px; padding:11px; background:#1872B5; color:#fff; border:none; border-radius:9px; font-family:'Sora',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(24,114,181,.25); text-align:center; }
         .apply-filter-btn:hover { background:#1560a0; transform:translateY(-1px); }
-
-        /* Top bar */
         .col-topbar { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); padding:12px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
         .col-result { font-size:14px; color:#6b7280; font-family:'Nunito',sans-serif; }
         .col-result strong { color:#111827; }
@@ -405,13 +315,9 @@ function CollectionsPageInner() {
         .mob-filter-btn { display:none; align-items:center; gap:8px; background:#1872B5; color:#fff; border:none; border-radius:9px; padding:9px 16px; font-family:'Sora',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
         .col-sort { padding:8px 32px 8px 14px; border:1.5px solid #e5e7eb; border-radius:9px; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:#111827; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E") no-repeat right 10px center; appearance:none; outline:none; cursor:pointer; height:38px; transition:border-color .2s; }
         .col-sort:focus { border-color:#1872B5; }
-
-        /* Active filter chips */
         .active-filters { display:flex; flex-wrap:wrap; gap:7px; padding:0 0 14px; }
         .af-chip { display:inline-flex; align-items:center; gap:5px; background:#dbeafe; color:#1872B5; border:none; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; font-family:'Nunito',sans-serif; cursor:pointer; transition:background .15s; }
         .af-chip:hover { background:#bfdbfe; }
-
-        /* Product grid */
         .col-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
         .col-card { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.07); overflow:hidden; display:flex; flex-direction:column; text-decoration:none; color:inherit; position:relative; transition:all .22s ease; cursor:pointer; }
         .col-card:hover { border-color:#1872B5; box-shadow:0 8px 28px rgba(24,114,181,.18); transform:translateY(-3px); }
@@ -440,14 +346,13 @@ function CollectionsPageInner() {
         .col-spinner { width:44px; height:44px; border-radius:50%; border:4px solid #dbeafe; border-top-color:#1872B5; animation:spin .8s linear infinite; display:inline-block; }
         .error-banner { background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-family:'Nunito',sans-serif; font-size:13px; }
         @keyframes spin { to { transform:rotate(360deg); } }
-        .wh-btn.active { background:#fff; }
+        .wh-btn.active { background: #fff; }
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
         @media(max-width:900px) {
           .col-layout { grid-template-columns:1fr; }
           .col-sidebar-desktop { display:none !important; }
           .mob-filter-btn { display:flex !important; }
           .mob-drawer { display:block; }
-          .apply-filter-btn { display:block !important; }
           .col-grid { grid-template-columns:repeat(2,1fr); }
         }
         @media(max-width:480px) {
@@ -457,6 +362,7 @@ function CollectionsPageInner() {
         }
       `}</style>
 
+      {/* ⚠️ ERROR BANNER */}
       {apiError && (
         <div className="error-banner">
           ❌ <strong>API Error:</strong> {apiError}
@@ -466,7 +372,6 @@ function CollectionsPageInner() {
       <div className={`mob-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
       <div className={`mob-drawer ${drawerOpen ? 'open' : ''}`}>{sidebarJSX}</div>
 
-      {/* Header */}
       <div className="col-header">
         <div className="col-header-inner">
           <div className="col-title">
@@ -486,7 +391,6 @@ function CollectionsPageInner() {
         <aside className="col-sidebar-desktop">{sidebarJSX}</aside>
 
         <div>
-          {/* Top bar */}
           <div className="col-topbar">
             <span className="col-result">
               Showing <strong>{products.length}</strong>
@@ -504,16 +408,14 @@ function CollectionsPageInner() {
               </button>
               <select className="col-sort" value={sort} onChange={e => applySort(e.target.value)}>
                 <option value="latest">Latest</option>
-                <option value="oldest">Oldest</option>
-                <option value="price_low">Price: Low → High</option>
-                <option value="price_high">Price: High → Low</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
                 <option value="name_asc">Name: A–Z</option>
                 <option value="featured">Featured First</option>
               </select>
             </div>
           </div>
 
-          {/* Active filter chips */}
           {hasFilters && (
             <div className="active-filters">
               {category && (
@@ -531,20 +433,9 @@ function CollectionsPageInner() {
                   💰 ₹{appliedMin || '0'} – ₹{appliedMax || '∞'} ×
                 </button>
               )}
-              {/* Per-variant chips — same logic as Blade */}
-              {selectedVariants.map((v) => {
-                const withoutV = selectedVariants.filter((x) => x !== v);
-                return (
-                  <button key={v} className="af-chip"
-                    onClick={() => router.push(buildUrl({ variants: withoutV.length > 0 ? withoutV.join(',') : null }))}>
-                    {v} ×
-                  </button>
-                );
-              })}
             </div>
           )}
 
-          {/* Product grid */}
           <div className="col-grid">
             {loading && <div className="col-loader"><div className="col-spinner" /></div>}
 
