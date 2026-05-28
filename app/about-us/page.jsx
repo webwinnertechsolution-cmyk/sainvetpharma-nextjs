@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import VideoSection from '../components/home/VideoSection';
 
-// ── API URLs (Empty - proxy will handle) ──
 const API_URL = '';
 const IMAGE_BASE_URL = '';
 
@@ -14,33 +13,72 @@ export default function AboutPage() {
   const [coreValues, setCoreValues] = useState([]);
   const [experience, setExperience] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiDebug, setApiDebug] = useState({});
   const [visibleSections, setVisibleSections] = useState({});
 
   // ── Fetch all data on mount ──
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/offerings`, { credentials: 'omit' })
-        .then(r => r.json())
-        .catch(() => null),
-      fetch(`/api/core-values-main`, { credentials: 'omit' })
-        .then(r => r.json())
-        .catch(() => null),
-      fetch(`/api/core-values`, { credentials: 'omit' })
-        .then(r => r.json())
-        .catch(() => []),
-      fetch(`/api/experience-the-power`, { credentials: 'omit' })
-        .then(r => r.json())
-        .catch(() => null),
-    ]).then(([off, cvm, cv, exp]) => {
-      setOffering(off);
-      setCoreValuesMain(cvm);
-      setCoreValues(Array.isArray(cv) ? cv : []);
-      setExperience(exp);
+    const fetchAllData = async () => {
+      const debug = {};
+
+      try {
+        console.log('📍 Fetching /api/offerings...');
+        const offRes = await fetch(`/api/offerings`, { credentials: 'omit' });
+        console.log('Status:', offRes.status);
+        const offData = await offRes.json();
+        console.log('Data:', offData);
+        debug.offerings = { ok: offRes.ok, status: offRes.status };
+        setOffering(offData || null);
+      } catch (err) {
+        console.error('Error:', err);
+        debug.offerings = { error: err.message };
+        setOffering(null);
+      }
+
+      try {
+        console.log('📍 Fetching /api/core-values-main...');
+        const cvmRes = await fetch(`/api/core-values-main`, { credentials: 'omit' });
+        const cvmData = await cvmRes.json();
+        debug.coreValuesMain = { ok: cvmRes.ok, status: cvmRes.status };
+        setCoreValuesMain(cvmData || null);
+      } catch (err) {
+        console.error('Error:', err);
+        debug.coreValuesMain = { error: err.message };
+        setCoreValuesMain(null);
+      }
+
+      try {
+        console.log('📍 Fetching /api/core-values...');
+        const cvRes = await fetch(`/api/core-values`, { credentials: 'omit' });
+        const cvData = await cvRes.json();
+        debug.coreValues = { ok: cvRes.ok, status: cvRes.status, isArray: Array.isArray(cvData), count: Array.isArray(cvData) ? cvData.length : 0 };
+        setCoreValues(Array.isArray(cvData) ? cvData : []);
+      } catch (err) {
+        console.error('Error:', err);
+        debug.coreValues = { error: err.message };
+        setCoreValues([]);
+      }
+
+      try {
+        console.log('📍 Fetching /api/experience-the-power...');
+        const expRes = await fetch(`/api/experience-the-power`, { credentials: 'omit' });
+        const expData = await expRes.json();
+        debug.experience = { ok: expRes.ok, status: expRes.status };
+        setExperience(expData || null);
+      } catch (err) {
+        console.error('Error:', err);
+        debug.experience = { error: err.message };
+        setExperience(null);
+      }
+
+      setApiDebug(debug);
       setLoading(false);
-    });
+    };
+
+    fetchAllData();
   }, []);
 
-  // ── Intersection Observer for scroll-reveal animations ──
+  // ── Intersection Observer ──
   useEffect(() => {
     const obs = new IntersectionObserver(
       entries => {
@@ -59,32 +97,6 @@ export default function AboutPage() {
     document.querySelectorAll('[data-section]').forEach(el => obs.observe(el));
     return () => obs.disconnect();
   }, [loading]);
-
-  // ── Icon/Image Renderer ──
-  const renderIcon = (iconStr, heading) => {
-    const imgExts = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'];
-    const isImg = imgExts.some(ext => iconStr?.toLowerCase().includes(ext));
-
-    if (isImg) {
-      return (
-        <img
-          src={`/uploads/corevalues/${iconStr}`}
-          alt={heading}
-          style={{ width: 88, height: 88, objectFit: 'cover', borderRadius: '50%' }}
-          onError={(e) => {
-            e.target.style.display = 'none';
-          }}
-        />
-      );
-    }
-
-    return (
-      <i
-        className={iconStr}
-        style={{ fontSize: 34, color: '#fff' }}
-      />
-    );
-  };
 
   // ── Loading State ──
   if (loading) {
@@ -115,7 +127,7 @@ export default function AboutPage() {
   return (
     <div style={{ background: '#f5f7fa', minHeight: '100vh', fontFamily: "'Nunito', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
         
         * {
           box-sizing: border-box;
@@ -748,66 +760,6 @@ export default function AboutPage() {
           padding-bottom: 40px;
         }
 
-.ab-banner-content h1 {
-    font-family: 'Sora', sans-serif;
-    font-size: 33px;
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 0px;
-    letter-spacing: -0.02em;
-    text-shadow: 0 2px 20px rgba(0,0,0,.25);
-}
-.ab-section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 43px 40px;
-}
-.section-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    color: #1872B5;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid #bfdbfe;
-    margin-bottom: 11px;
-}
-.off-heading {
-    font-family: 'Sora', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1.3;
-    margin-bottom: 6px;
-}
-.off-desc {
-    font-size: 15px;
-    color: #4b5563;
-    line-height: 1.85;
-}
-.exp-heading {
-    font-family: 'Sora', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1.3;
-    margin-bottom: 6px;
-}
-.exp-desc p {
-    margin-bottom: 14px;
-    font-size: 14px;
-    line-height: 20px;
-}
-.off-desc p {
-    margin-bottom: 14px;
-    font-size: 14px!important;
-    line-height: 20px!important;
-}
         /* ════════════════════════════════ RESPONSIVE ════════════════════════════════ */
         @media (max-width: 1024px) {
           .cv-grid {
@@ -905,68 +857,51 @@ export default function AboutPage() {
             grid-template-columns: 1fr;
           }
 
-          .ab-section {
-            padding: 40px 16px;
-          }
           .ab-banner-content h1 {
-    font-size: 18px !important;
-}
-.ab-banner-content p {
-    color: rgba(255,255,255,.7);
-    font-size: 12px;
-    font-weight: 600;
-    margin: 0;
-}
-.ab-section {
-    padding: 26px 16px;
-}
-.section-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    color: #1872B5;
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 3px 5px;
-    border-radius: 20px;
-    border: 1px solid #bfdbfe;
-    margin-bottom: 8px;
-}
-.off-heading, .exp-heading {
-    font-size: 16px;
-}
-.off-heading {
-    font-family: 'Sora', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1.3;
-    margin-bottom: 4px;
-}
-.off-desc p {
-    margin-bottom: 14px;
-    font-size: 14px;
-    line-height: 20px;
-}
-.stats-inner {
-    grid-template-columns: 1fr 1fr;
-}
-.stat-num {
-    font-size: 20px;
-}
-.stat-label {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-.exp-grid {
-    gap: 20px;
-}
+            font-size: 18px !important;
+          }
+
+          .ab-banner-content p {
+            color: rgba(255,255,255,.7);
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0;
+          }
+
+          .ab-section {
+            padding: 26px 16px;
+          }
+
+          .section-tag {
+            font-size: 9px;
+            padding: 3px 5px;
+            margin-bottom: 8px;
+          }
+
+          .off-heading, .exp-heading {
+            font-size: 20px;
+          }
+
+          .off-desc p {
+            font-size: 14px;
+            line-height: 20px;
+          }
+
+          .stats-inner {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .stat-num {
+            font-size: 20px;
+          }
+
+          .stat-label {
+            font-size: 12px;
+          }
+
+          .exp-grid {
+            gap: 20px;
+          }
         }
       `}</style>
 
@@ -1014,7 +949,9 @@ export default function AboutPage() {
                     alt={offering.alt_tag || 'Offering'}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'flex';
+                      if (e.target.nextElementSibling) {
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }
                     }}
                   />
                   <div
@@ -1084,9 +1021,8 @@ export default function AboutPage() {
           <div className="cv-inner">
             {/* Heading */}
             <div className={`cv-heading-wrap ${visibleSections.corevalues ? 'revealed' : ''}`} data-section="corevalues">
-              {coreValuesMain?.heading1 && (
-                <h2 className="cv-main-heading">Meet our Team</h2>
-              )}
+              <div className="cv-tag">TEAM</div>
+              <h2 className="cv-main-heading">Meet Our Team</h2>
             </div>
 
             {/* Grid */}
@@ -1149,7 +1085,9 @@ export default function AboutPage() {
                     alt={experience.alt_tag || 'Experience the Power'}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.parentElement.nextElementSibling.style.display = 'flex';
+                      if (e.target.parentElement?.nextElementSibling) {
+                        e.target.parentElement.nextElementSibling.style.display = 'flex';
+                      }
                     }}
                   />
                   <div className="exp-img-accent" />
