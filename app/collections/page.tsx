@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import WishlistHeart from '@/app/components/WishlistHeart';
 
-const API_URL = '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 function CollectionsPageInner() {
   const searchParams = useSearchParams();
@@ -16,6 +16,7 @@ function CollectionsPageInner() {
   const [categories, setCategories]   = useState([]);
   const [tags, setTags]               = useState([]);
   const [loading, setLoading]         = useState(true);
+  const [apiError, setApiError]       = useState(null); // ⬅️ NEW: Error tracking
   const [hoveredId, setHoveredId]     = useState(null);
   const [drawerOpen, setDrawerOpen]   = useState(false);
   const [secOpen, setSecOpen]         = useState({ categories: true, tags: false, price: false });
@@ -30,23 +31,63 @@ function CollectionsPageInner() {
   const sort     = searchParams.get('sort') || 'latest';
   const page     = searchParams.get('page') || '1';
 
-  /* ── Fetch ── */
+  /* ── Fetch with Better Error Handling ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setApiError(null);
       try {
         const qs = new URLSearchParams();
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
         qs.append('page', page);
-        const res  = await fetch(`${API_URL}/api/shop?${qs}`);
+
+        const fullUrl = `${API_URL}/api/shop?${qs}`;
+        
+        // 🔍 DEBUGGING: Log the full URL
+        console.log('📍 Fetching from:', fullUrl);
+        console.log('📍 API_URL env:', process.env.NEXT_PUBLIC_API_URL);
+
+        const res = await fetch(fullUrl);
+        
+        // 🔍 DEBUGGING: Log response status
+        console.log('📍 Response Status:', res.status, res.statusText);
+
+        if (!res.ok) {
+          throw new Error(`API returned ${res.status}: ${res.statusText}`);
+        }
+
         const data = await res.json();
+        
+        // 🔍 DEBUGGING: Log full response data
+        console.log('✅ API Response Data:', data);
+        console.log('📊 Products count:', data.products?.length || 0);
+        console.log('📂 Categories count:', data.categories?.length || 0);
+        console.log('🏷️ Tags count:', data.tags?.length || 0);
+
+        // ⚠️ VALIDATION: Check if data structure is correct
+        if (!data.products) {
+          console.warn('⚠️ Missing "products" key in response');
+        }
+        if (!data.categories) {
+          console.warn('⚠️ Missing "categories" key in response');
+        }
+        if (!data.tags) {
+          console.warn('⚠️ Missing "tags" key in response');
+        }
+
         setAllProducts(data.products   || []);
         setCategories(data.categories  || []);
         setTags(data.tags              || []);
+
       } catch (err) {
-        console.error(err);
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        console.error('❌ Fetch Error:', errorMsg);
+        setApiError(errorMsg);
+        setAllProducts([]);
+        setCategories([]);
+        setTags([]);
       } finally {
         setLoading(false);
       }
@@ -95,7 +136,7 @@ function CollectionsPageInner() {
   }
 
   const imgUrl     = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
-const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
+  const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
 
   /* ── Nav ── */
   const buildUrl = useCallback((overrides = {}) => {
@@ -303,6 +344,7 @@ const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/produc
         .col-empty p  { font-size:14px; color:#9ca3af; font-family:'Nunito',sans-serif; }
         .col-loader { grid-column:1/-1; text-align:center; padding:60px; }
         .col-spinner { width:44px; height:44px; border-radius:50%; border:4px solid #dbeafe; border-top-color:#1872B5; animation:spin .8s linear infinite; display:inline-block; }
+        .error-banner { background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-family:'Nunito',sans-serif; font-size:13px; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .wh-btn.active { background: #fff; }
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
@@ -319,6 +361,13 @@ const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/produc
           .col-topbar { padding:10px 14px; }
         }
       `}</style>
+
+      {/* ⚠️ ERROR BANNER */}
+      {apiError && (
+        <div className="error-banner">
+          ❌ <strong>API Error:</strong> {apiError}
+        </div>
+      )}
 
       <div className={`mob-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
       <div className={`mob-drawer ${drawerOpen ? 'open' : ''}`}>{sidebarJSX}</div>
@@ -394,7 +443,7 @@ const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/produc
               <div className="col-empty">
                 <div className="col-empty-icon">📦</div>
                 <h3>No products found</h3>
-                <p>Try adjusting your filters.</p>
+                <p>Try adjusting your filters or check the console for API errors.</p>
               </div>
             )}
 
