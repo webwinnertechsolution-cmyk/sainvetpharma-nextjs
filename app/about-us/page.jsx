@@ -967,6 +967,16 @@ export default function AboutPage() {
 .exp-grid {
     gap: 20px;
 }
+.cv-grid {
+    grid-template-columns: 1fr 1fr;
+}
+.cv-card-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0a214f;
+    line-height: 1.3;
+}
         }
       `}</style>
 
