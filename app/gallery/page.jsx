@@ -78,6 +78,57 @@ export default function GalleryPage() {
 .gal-type-badge {
     display: none;
 }
+.gallery-banner-content h1 {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0!important;
+}
+.gal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg,#eff6ff,#dbeafe);
+    color: #1872B5;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    padding: 3px 7px;
+    border-radius: 20px;
+    border: 1px solid #bfdbfe;
+    margin-bottom: 8px;
+}
+
+.gal-title {
+    font-family: 'Sora',sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: #0a214f;
+    margin: 0 0 -31px;
+    letter-spacing: -.02em;
+}
+.gal-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 19px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: #fff;
+    color: #6b7280;
+    transition: all .25s;
+    border: 1.5px solid #e5e7eb;
+    position: relative;
+    user-select: none;
+}
+.gallery-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 42px 24px;
+}
 
 
 
@@ -101,6 +152,37 @@ export default function GalleryPage() {
 .gal-container {
     padding-inline: 0;
 }
+.gallery-banner-content h1 {
+    /* font-size: 34px !important; */
+    /* font-weight: 700 !important; */
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0px !important;
+}
+.gal-title {
+    font-size: 20px;
+}
+.gal-grid {
+    grid-template-columns: 1fr 1fr;
+}
+.gal-container {
+  
+    margin: 0 auto;
+    padding: 0 0px;
+}
+.gal-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 27px;
+    animation: fadeUp .6s .1s ease both;
+    opacity: 0;
+}
+.gallery-banner-content p {
+    font-size: 12px!important;
+}
+
+
 
         }
 		
