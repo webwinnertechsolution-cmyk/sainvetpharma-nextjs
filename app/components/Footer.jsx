@@ -128,6 +128,62 @@ export default function Footer({ footerNew }) {
             width: 100%;
             padding-bottom: 25px;
           }
+		  .footer-wrap {
+    background-color: #1872B5;
+    padding: 27px 0 0;
+}
+
+.footer-col-1 {
+    width: 50%;
+    padding: 0;
+    box-sizing: border-box;
+    padding-right: 0px;
+}
+.footer-content {
+    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    line-height: 17px;
+    font-family: 'Inter', sans-serif;
+}
+.footer-col-1, .footer-col-2, .footer-col-3 {
+    width: 100%;
+    padding-bottom: 15px;
+}
+.footer-col-1, .footer-col-2, .footer-col-3 {
+    width: 100%;
+    padding-bottom: 12px;
+}
+.footer-heading {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+}
+.footer-links li a {
+    color: rgba(255,255,255,0.75) !important;
+    text-decoration: none;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+    padding: 1px 0;
+}
+.footer-col-3 {
+    width: 30%;
+    padding: 0;
+    box-sizing: border-box;
+}
+.footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+    padding-inline: 10px;
+}
         }
       `}</style>
 
