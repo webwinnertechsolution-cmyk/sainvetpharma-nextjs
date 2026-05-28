@@ -1883,6 +1883,18 @@ export default function BlogDetailPage() {
     text-decoration: none;
     transition: all 0.2s;
 }
+.mobile-drawer {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    background: #fff;
+    z-index: 99999;
+    overflow-y: auto;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+}
         }
       `}</style>
 
