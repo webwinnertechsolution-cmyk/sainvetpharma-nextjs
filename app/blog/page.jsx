@@ -265,39 +265,7 @@ function BlogPageInner() {
         </div>
       </div>
 
-      <div style={{ background: '#fff', borderBottom: '1px solid #dbeafe', padding: '12px 0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 2px 12px rgba(24,114,181,.08)' }}>
-        
-
-          <div className="chips-row">
-            {filterTab === 'category' ? (
-              <>
-                <button className={`chip ${!activeCategory ? 'on' : ''}`} onClick={() => handleCategory(null)}>All Posts</button>
-                {categories.map(c => {
-                  const count = blogs.filter(b => (b.categories || []).some(bc => bc.id === c.id)).length;
-                  return (
-                    <button key={c.id} className={`chip ${activeCategory === c.id ? 'on' : ''}`} onClick={() => handleCategory(c.id)}>
-                      {c.name}
-                      <span className="cnt" style={{ background: activeCategory === c.id ? 'rgba(255,255,255,.2)' : '#eff6ff', color: activeCategory === c.id ? '#fff' : '#1872B5' }}>{count}</span>
-                    </button>
-                  );
-                })}
-              </>
-            ) : (
-              <>
-                <button className={`tchip ${!activeTag ? 'on' : ''}`} onClick={() => handleTag(null)}>All Tags</button>
-                {tags.map(t => {
-                  const count = blogs.filter(b => (b.tags || []).some(bt => bt.id === t.id)).length;
-                  return (
-                    <button key={t.id} className={`tchip ${activeTag === t.id ? 'on' : ''}`} onClick={() => handleTag(t.id)}>
-                      #{t.name}
-                      <span className="cnt" style={{ background: activeTag === t.id ? 'rgba(255,255,255,.2)' : '#eff6ff', color: activeTag === t.id ? '#fff' : '#1872B5' }}>{count}</span>
-                    </button>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </div>
+  
       </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 24px 60px' }}>
