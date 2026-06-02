@@ -225,7 +225,7 @@ export default function Slider({ sliders }) {
 .rl-slider {
     position: relative;
     width: 100%;
-    height: 85vh;
+    height: 70vh;
 }
 .rl-dot.active {
     background: #1872B5;
