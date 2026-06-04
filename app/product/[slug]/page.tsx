@@ -437,6 +437,8 @@ export default function ProductDetailPage() {
   }, [slug]);
 
   /* ── Fetch reviews ── */
+
+  
   useEffect(() => {
     if (!product?.id) return;
     fetch(`${API_URL}/api/products/${product.id}/reviews`)
@@ -648,6 +650,36 @@ export default function ProductDetailPage() {
     return () => { document.body.style.overflow = ''; };
   }, [enquiryOpen, zoomOpen]);
 
+
+  
+{/* Seo Settings */}
+
+useEffect(() => {
+  if (!product) return;
+
+  document.title = product.meta_title || product.title;
+
+  const setMeta = (name, content, prop = false) => {
+    let el = document.querySelector(`${prop ? `[property="${name}"]` : `[name="${name}"]`}`);
+    if (!el) {
+      el = document.createElement('meta');
+      prop ? el.setAttribute('property', name) : el.setAttribute('name', name);
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', content || '');
+  };
+
+  setMeta('description', product.meta_description);
+  setMeta('keywords', product.meta_keywords);
+  setMeta('og:title', product.og_title || product.title, true);
+  setMeta('og:description', product.og_description, true);
+  setMeta('og:image', product.og_image ? `${API_URL}/uploads/products/og/${product.og_image}` : '', true);
+
+}, [product]);
+
+
+
+  
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', flexDirection: 'column', gap: 16, fontFamily: 'Nunito,sans-serif' }}>
       <div style={{ width: 48, height: 48, borderRadius: '50%', border: '4px solid #dbeafe', borderTopColor: '#1872B5', animation: 'spin .8s linear infinite' }} />
