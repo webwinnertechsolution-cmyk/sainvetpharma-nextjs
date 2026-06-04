@@ -462,6 +462,28 @@ export default function BlogDetailPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
 
+  useEffect(() => {
+  if (!blog) return;
+  
+  document.title = blog.meta_title || blog.title;
+  
+  const setMeta = (name, content, prop = false) => {
+    let el = document.querySelector(`${prop ? '[property' : '[name'}="${name}"]`);
+    if (!el) {
+      el = document.createElement('meta');
+      prop ? el.setAttribute('property', name) : el.setAttribute('name', name);
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', content || '');
+  };
+
+  setMeta('description', blog.meta_description);
+  setMeta('keywords', blog.meta_keywords);
+  setMeta('og:title', blog.og_title || blog.title, true);
+  setMeta('og:description', blog.og_description, true);
+  setMeta('og:image', blog.og_image ? `${API_URL}/uploads/blogs/og/${blog.og_image}` : '', true);
+
+}, [blog]);
   // ── Intersection Observer for Content Animation ──
   useEffect(() => {
     if (loading) return;
