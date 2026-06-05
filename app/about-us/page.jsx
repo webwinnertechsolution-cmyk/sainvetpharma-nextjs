@@ -40,6 +40,28 @@ export default function AboutPage() {
     });
   }, []);
 
+
+  useEffect(() => {
+  fetch(`/api/page-seo/about`)
+    .then(r => r.json())
+    .then(seo => {
+      if (!seo.error) {
+        document.title = seo.title || 'About Us';
+        const setMeta = (name, content, prop = false) => {
+          let el = document.querySelector(prop ? `[property="${name}"]` : `[name="${name}"]`);
+          if (!el) { el = document.createElement('meta'); prop ? el.setAttribute('property', name) : el.setAttribute('name', name); document.head.appendChild(el); }
+          el.setAttribute('content', content || '');
+        };
+        setMeta('description', seo.meta_description);
+        setMeta('keywords', seo.meta_keywords);
+        setMeta('og:title', seo.og_title, true);
+        setMeta('og:description', seo.og_description, true);
+      }
+    })
+    .catch(() => {});
+}, []);
+
+  
   // ── Intersection Observer for scroll-reveal animations ──
   useEffect(() => {
     const obs = new IntersectionObserver(
