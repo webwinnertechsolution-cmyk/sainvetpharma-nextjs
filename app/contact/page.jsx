@@ -83,6 +83,7 @@ export default function ContactPage() {
         setMeta('keywords', seo.meta_keywords);
         setMeta('og:title', seo.og_title, true);
         setMeta('og:description', seo.og_description, true);
+        setMeta('og:image', seo.og_image ? `${API_URL}/uploads/pages/${seo.og_image}` : '', true);
       }
     })
     .catch(() => {});
