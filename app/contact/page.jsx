@@ -36,25 +36,6 @@ export default function ContactPage() {
     }
 
 
-useEffect(() => {
-  fetch(`/api/page-seo/contact`)
-    .then(r => r.json())
-    .then(seo => {
-      if (!seo.error) {
-        document.title = seo.title || 'Contact Us';
-        const setMeta = (name, content, prop = false) => {
-          let el = document.querySelector(prop ? `[property="${name}"]` : `[name="${name}"]`);
-          if (!el) { el = document.createElement('meta'); prop ? el.setAttribute('property', name) : el.setAttribute('name', name); document.head.appendChild(el); }
-          el.setAttribute('content', content || '');
-        };
-        setMeta('description', seo.meta_description);
-        setMeta('keywords', seo.meta_keywords);
-        setMeta('og:title', seo.og_title, true);
-        setMeta('og:description', seo.og_description, true);
-      }
-    })
-    .catch(() => {});
-}, []);
 
 
 
@@ -85,6 +66,27 @@ useEffect(() => {
       // Default data रहेगा, error नहीं दिखेगा
     }
   };
+
+
+  useEffect(() => {
+  fetch(`/api/page-seo/contact`)
+    .then(r => r.json())
+    .then(seo => {
+      if (!seo.error) {
+        document.title = seo.title || 'Contact Us';
+        const setMeta = (name, content, prop = false) => {
+          let el = document.querySelector(prop ? `[property="${name}"]` : `[name="${name}"]`);
+          if (!el) { el = document.createElement('meta'); prop ? el.setAttribute('property', name) : el.setAttribute('name', name); document.head.appendChild(el); }
+          el.setAttribute('content', content || '');
+        };
+        setMeta('description', seo.meta_description);
+        setMeta('keywords', seo.meta_keywords);
+        setMeta('og:title', seo.og_title, true);
+        setMeta('og:description', seo.og_description, true);
+      }
+    })
+    .catch(() => {});
+}, []);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
