@@ -89,7 +89,7 @@ const HomeCategories = ({ categories = [] }) => {
     display: none;
 }
 p.sabdj {
-    font-size: 17px;
+    font-size: 15px;
     color: #1872B5;
     margin: 6px 0 0;
     font-family: 'Nunito', sans-serif;
