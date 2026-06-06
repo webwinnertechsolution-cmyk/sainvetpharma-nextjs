@@ -71,25 +71,27 @@ export default function PromotionalBanner() {
     <section className="promotional-banner-wrapper">
       <style>{`
         .promotional-banner-wrapper {
-          position: relative;
-          width: 100%;
-          overflow: hidden;
-          margin: 40px 0;
-        }
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin: 40px 0;  /* ← change to: margin: 0; */
+}
 
-        .promotional-banner {
-          position: relative;
-          width: 100%;
-          min-height: 400px;
-          background-position: center;
-          background-size: cover;
-          background-repeat: no-repeat;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 16px;
-          overflow: hidden;
-        }
+.promotional-banner {
+  position: relative;
+  width: 100%;
+  min-height: 75vh;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;  /* ← 16px se 0 karo */
+  overflow: hidden;
+}
+
+
 
         .promotional-banner::before {
           content: '';
