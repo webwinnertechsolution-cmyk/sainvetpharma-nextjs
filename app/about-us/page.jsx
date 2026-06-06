@@ -782,7 +782,7 @@ export default function AboutPage() {
 .ab-section {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 43px 40px;
+    padding: 50px 40px;
 }
 .section-tag {
     display: inline-flex;
