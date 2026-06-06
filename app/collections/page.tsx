@@ -104,7 +104,8 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
-		qs.append('per_page', '1000');   
+		qs.append('per_page', '1000');  
+        qs.append('all', 'true'); 		
 		
 		 
         // No page param sent — backend returns all products
