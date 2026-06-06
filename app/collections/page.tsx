@@ -104,6 +104,9 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
+		qs.append('per_page', '1000');   
+		
+		 
         // No page param sent — backend returns all products
 
         const res = await fetch(`${API_URL}/api/shop?${qs}`);
