@@ -63,7 +63,7 @@ const HomeCategories = ({ categories = [] }) => {
         .hc-img-circle { width: 104px; height: 102px; border-radius: 50%; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 6px 18px rgba(0,0,0,0.13); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
         .hc-card:hover .hc-img-circle { transform: scale(1.08); }
         .hc-img-circle img { width: 100%; height: 100%; object-fit: contain; }
-        .hc-title { font-family: 'Sora', sans-serif; font-size: 18px; line-height: 24px; font-weight: 800; color: #1a2e44; margin: 0; transition: color 0.2s; }
+        .hc-title { font-family: 'Sora', sans-serif; font-size: 14px; line-height: 24px; font-weight: 800; color: #1a2e44; margin: 0; transition: color 0.2s; }
         .hc-card:hover .hc-title { color: #1872B5; }
         
         /* Hover arrows (hidden by default on desktop, visible on hover) */
