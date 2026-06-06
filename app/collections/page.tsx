@@ -6,6 +6,7 @@ import Link from 'next/link';
 import WishlistHeart from '@/app/components/WishlistHeart';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const PRODUCTS_PER_PAGE = 12;
 
 /* ── Pagination Component ── */
 function Pagination({ currentPage, totalPages, onPageChange }: {
@@ -40,7 +41,6 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
       >
         ‹ Prev
       </button>
-
       <div className="pg-numbers">
         {getPages().map((p, i) =>
           p === '...' ? (
@@ -56,7 +56,6 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
           )
         )}
       </div>
-
       <button
         className="pg-btn pg-arrow"
         disabled={currentPage === totalPages}
@@ -72,17 +71,16 @@ function CollectionsPageInner() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  const [allProducts, setAllProducts] = useState([]);
-  const [products, setProducts]       = useState([]);
-  const [categories, setCategories]   = useState([]);
-  const [tags, setTags]               = useState([]);
-  const [totalPages, setTotalPages]   = useState(1);
-  const [totalCount, setTotalCount]   = useState(0);
-  const [loading, setLoading]         = useState(true);
-  const [apiError, setApiError]       = useState(null);
-  const [hoveredId, setHoveredId]     = useState(null);
-  const [drawerOpen, setDrawerOpen]   = useState(false);
-  const [secOpen, setSecOpen]         = useState({ categories: true, tags: false, price: false });
+  const [allProducts, setAllProducts]   = useState<any[]>([]);
+  const [filtered, setFiltered]         = useState<any[]>([]);
+  const [paginated, setPaginated]       = useState<any[]>([]);
+  const [categories, setCategories]     = useState<any[]>([]);
+  const [tags, setTags]                 = useState<any[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [apiError, setApiError]         = useState<string | null>(null);
+  const [hoveredId, setHoveredId]       = useState<any>(null);
+  const [drawerOpen, setDrawerOpen]     = useState(false);
+  const [secOpen, setSecOpen]           = useState({ categories: true, tags: false, price: false });
 
   const [minInput, setMinInput]     = useState('');
   const [maxInput, setMaxInput]     = useState('');
@@ -94,7 +92,9 @@ function CollectionsPageInner() {
   const sort     = searchParams.get('sort') || 'latest';
   const page     = parseInt(searchParams.get('page') || '1', 10);
 
-  /* ── Fetch ── */
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
+
+  /* ── Fetch ALL products (no page param to backend) ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -104,45 +104,45 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
-        qs.append('page', String(page));
+        // No page param sent — backend returns all products
 
         const res = await fetch(`${API_URL}/api/shop?${qs}`);
         if (!res.ok) throw new Error(`API returned ${res.status}: ${res.statusText}`);
 
         const data = await res.json();
-
-        setAllProducts(data.products   || []);
-        setCategories(data.categories  || []);
-        setTags(data.tags              || []);
-        // Support both { total_pages, totalPages } from backend
-        setTotalPages(data.total_pages || data.totalPages || 1);
-        setTotalCount(data.total_count || data.totalCount || data.products?.length || 0);
-
+        setAllProducts(data.products  || []);
+        setCategories(data.categories || []);
+        setTags(data.tags             || []);
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        setApiError(errorMsg as any);
+        const msg = err instanceof Error ? err.message : String(err);
+        setApiError(msg);
         setAllProducts([]);
         setCategories([]);
         setTags([]);
-        setTotalPages(1);
-        setTotalCount(0);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [category, tag, sort, page]);
+  }, [category, tag, sort]);
 
-  /* ── Client-side price filter ── */
+  /* ── Apply price filter → filtered list ── */
   useEffect(() => {
-    if (!appliedMin && !appliedMax) { setProducts(allProducts); return; }
+    if (!appliedMin && !appliedMax) { setFiltered(allProducts); return; }
     const min = appliedMin !== '' ? parseFloat(appliedMin) : -Infinity;
     const max = appliedMax !== '' ? parseFloat(appliedMax) :  Infinity;
-    setProducts(allProducts.filter((p: any) => {
+    setFiltered(allProducts.filter(p => {
       const price = getEffectivePrice(p);
       return price !== null && price >= min && price <= max;
     }));
   }, [allProducts, appliedMin, appliedMax]);
+
+  /* ── Slice for current page ── */
+  useEffect(() => {
+    const safePage = Math.min(page, Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE)));
+    const start    = (safePage - 1) * PRODUCTS_PER_PAGE;
+    setPaginated(filtered.slice(start, start + PRODUCTS_PER_PAGE));
+  }, [filtered, page]);
 
   /* ── Helpers ── */
   function getEffectivePrice(p: any) {
@@ -176,7 +176,7 @@ function CollectionsPageInner() {
   const imgUrl     = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
   const galleryUrl = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
 
-  /* ── Nav ── */
+  /* ── Nav helpers ── */
   const buildUrl = useCallback((overrides: any = {}) => {
     const u = new URLSearchParams(searchParams.toString());
     Object.entries(overrides).forEach(([k, v]) => {
@@ -188,7 +188,10 @@ function CollectionsPageInner() {
   const applySort     = (val: any) => router.push(buildUrl({ sort: val, page: 1 }));
   const applyCategory = (slug: any) => { router.push(buildUrl({ category: slug || null, page: 1 })); setDrawerOpen(false); };
   const applyTag      = (slug: any, checked: any) => { router.push(buildUrl({ tag: checked ? slug : null, page: 1 })); setDrawerOpen(false); };
-  const applyPage     = (p: number) => { router.push(buildUrl({ page: p })); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const applyPage     = (p: number) => {
+    router.push(buildUrl({ page: p }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const applyPrice = () => { setAppliedMin(minInput); setAppliedMax(maxInput); router.push(buildUrl({ page: 1 })); setDrawerOpen(false); };
   const clearPrice = () => { setMinInput(''); setMaxInput(''); setAppliedMin(''); setAppliedMax(''); };
@@ -385,77 +388,16 @@ function CollectionsPageInner() {
         .error-banner { background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-family:'Nunito',sans-serif; font-size:13px; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .wh-btn.active { background: #fff; }
-
         /* ── Pagination ── */
-        .pagination-wrap {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          margin-top: 32px;
-          padding: 20px 0 4px;
-          flex-wrap: wrap;
-        }
-        .pg-numbers {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-        .pg-num {
-          width: 38px;
-          height: 38px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 9px;
-          border: 1.5px solid #e5e7eb;
-          background: #fff;
-          font-family: 'Nunito', sans-serif;
-          font-size: 14px;
-          font-weight: 700;
-          color: #374151;
-          cursor: pointer;
-          transition: all .18s ease;
-        }
-        .pg-num:hover { border-color: #1872B5; color: #1872B5; background: #eff6ff; }
-        .pg-num.active {
-          background: #1872B5;
-          border-color: #1872B5;
-          color: #fff;
-          box-shadow: 0 4px 12px rgba(24,114,181,.3);
-          transform: translateY(-1px);
-        }
-        .pg-ellipsis {
-          width: 32px;
-          text-align: center;
-          font-size: 15px;
-          color: #9ca3af;
-          font-family: 'Nunito', sans-serif;
-          font-weight: 700;
-          user-select: none;
-        }
-        .pg-btn {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 0 16px;
-          height: 38px;
-          border-radius: 9px;
-          border: 1.5px solid #e5e7eb;
-          background: #fff;
-          font-family: 'Nunito', sans-serif;
-          font-size: 13px;
-          font-weight: 700;
-          color: #374151;
-          cursor: pointer;
-          transition: all .18s ease;
-          white-space: nowrap;
-        }
-        .pg-btn:hover:not(:disabled) { border-color: #1872B5; color: #1872B5; background: #eff6ff; }
-        .pg-btn:disabled { opacity: .4; cursor: not-allowed; }
-
+        .pagination-wrap { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:32px; padding:20px 0 4px; flex-wrap:wrap; }
+        .pg-numbers { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
+        .pg-num { width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:9px; border:1.5px solid #e5e7eb; background:#fff; font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:#374151; cursor:pointer; transition:all .18s ease; }
+        .pg-num:hover { border-color:#1872B5; color:#1872B5; background:#eff6ff; }
+        .pg-num.active { background:#1872B5; border-color:#1872B5; color:#fff; box-shadow:0 4px 12px rgba(24,114,181,.3); transform:translateY(-1px); }
+        .pg-ellipsis { width:32px; text-align:center; font-size:15px; color:#9ca3af; font-family:'Nunito',sans-serif; font-weight:700; user-select:none; }
+        .pg-btn { display:flex; align-items:center; gap:5px; padding:0 16px; height:38px; border-radius:9px; border:1.5px solid #e5e7eb; background:#fff; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:#374151; cursor:pointer; transition:all .18s ease; white-space:nowrap; }
+        .pg-btn:hover:not(:disabled) { border-color:#1872B5; color:#1872B5; background:#eff6ff; }
+        .pg-btn:disabled { opacity:.4; cursor:not-allowed; }
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
         @media(max-width:900px) {
           .col-layout { grid-template-columns:1fr; }
@@ -487,7 +429,7 @@ function CollectionsPageInner() {
         <div className="col-header-inner">
           <div className="col-title">
             {category ? categories.find((c: any) => c.slug === category)?.name || 'Shop'
-              : tag    ? `#${tags.find((t: any) => t.slug === tag)?.name || tag}`
+              : tag    ? `${tags.find((t: any) => t.slug === tag)?.name || tag}`
               : 'All Products'}
           </div>
           <div className="col-bc">
@@ -504,8 +446,10 @@ function CollectionsPageInner() {
         <div>
           <div className="col-topbar">
             <span className="col-result">
-              Showing <strong>{products.length}</strong>
-              {totalCount > 0 && <> of <strong>{totalCount}</strong></>} products
+              {filtered.length > 0
+                ? <>Showing <strong>{(page - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(page * PRODUCTS_PER_PAGE, filtered.length)}</strong> of <strong>{filtered.length}</strong> products</>
+                : <>Showing <strong>0</strong> products</>
+              }
               {category && <> in <strong>{categories.find((c: any) => c.slug === category)?.name}</strong></>}
               {totalPages > 1 && <> — Page <strong>{page}</strong> of <strong>{totalPages}</strong></>}
             </span>
@@ -551,15 +495,15 @@ function CollectionsPageInner() {
           <div className="col-grid">
             {loading && <div className="col-loader"><div className="col-spinner" /></div>}
 
-            {!loading && products.length === 0 && (
+            {!loading && paginated.length === 0 && (
               <div className="col-empty">
                 <div className="col-empty-icon">📦</div>
                 <h3>No products found</h3>
-                <p>Try adjusting your filters or check the console for API errors.</p>
+                <p>Try adjusting your filters or browse all products.</p>
               </div>
             )}
 
-            {!loading && products.map((product: any) => {
+            {!loading && paginated.map((product: any) => {
               const disc    = getDiscount(product);
               const inStock = product.stock_quantity > 0;
               const price   = disc?.selling ?? getEffectivePrice(product);
