@@ -116,10 +116,7 @@ export default function Footer({ footerNew }) {
     object-fit: contain;
     margin-bottom: -16px;
 }
-        .footer-copyright a {
-		color: #86c036;
-		text-decoration: none;
-	}
+        .footer-copyright a { color: #DA200B; text-decoration: none; }
 		.footer-col-1 {
     width: 50%;
     padding: 0 15px 40px;
