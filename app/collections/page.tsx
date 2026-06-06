@@ -7,6 +7,67 @@ import WishlistHeart from '@/app/components/WishlistHeart';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+/* ── Pagination Component ── */
+function Pagination({ currentPage, totalPages, onPageChange }: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const getPages = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end   = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="pagination-wrap">
+      <button
+        className="pg-btn pg-arrow"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        ‹ Prev
+      </button>
+
+      <div className="pg-numbers">
+        {getPages().map((p, i) =>
+          p === '...' ? (
+            <span key={`ellipsis-${i}`} className="pg-ellipsis">…</span>
+          ) : (
+            <button
+              key={p}
+              className={`pg-num ${currentPage === p ? 'active' : ''}`}
+              onClick={() => onPageChange(p as number)}
+            >
+              {p}
+            </button>
+          )
+        )}
+      </div>
+
+      <button
+        className="pg-btn pg-arrow"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next ›
+      </button>
+    </div>
+  );
+}
+
 function CollectionsPageInner() {
   const searchParams = useSearchParams();
   const router       = useRouter();
@@ -15,23 +76,25 @@ function CollectionsPageInner() {
   const [products, setProducts]       = useState([]);
   const [categories, setCategories]   = useState([]);
   const [tags, setTags]               = useState([]);
+  const [totalPages, setTotalPages]   = useState(1);
+  const [totalCount, setTotalCount]   = useState(0);
   const [loading, setLoading]         = useState(true);
-  const [apiError, setApiError]       = useState(null); // ⬅️ NEW: Error tracking
+  const [apiError, setApiError]       = useState(null);
   const [hoveredId, setHoveredId]     = useState(null);
   const [drawerOpen, setDrawerOpen]   = useState(false);
   const [secOpen, setSecOpen]         = useState({ categories: true, tags: false, price: false });
 
-  const [minInput, setMinInput]   = useState('');
-  const [maxInput, setMaxInput]   = useState('');
+  const [minInput, setMinInput]     = useState('');
+  const [maxInput, setMaxInput]     = useState('');
   const [appliedMin, setAppliedMin] = useState('');
   const [appliedMax, setAppliedMax] = useState('');
 
   const category = searchParams.get('category');
   const tag      = searchParams.get('tag');
   const sort     = searchParams.get('sort') || 'latest';
-  const page     = searchParams.get('page') || '1';
+  const page     = parseInt(searchParams.get('page') || '1', 10);
 
-  /* ── Fetch with Better Error Handling ── */
+  /* ── Fetch ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -41,53 +104,28 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
-        qs.append('page', page);
+        qs.append('page', String(page));
 
-        const fullUrl = `${API_URL}/api/shop?${qs}`;
-        
-        // 🔍 DEBUGGING: Log the full URL
-        console.log('📍 Fetching from:', fullUrl);
-        console.log('📍 API_URL env:', process.env.NEXT_PUBLIC_API_URL);
-
-        const res = await fetch(fullUrl);
-        
-        // 🔍 DEBUGGING: Log response status
-        console.log('📍 Response Status:', res.status, res.statusText);
-
-        if (!res.ok) {
-          throw new Error(`API returned ${res.status}: ${res.statusText}`);
-        }
+        const res = await fetch(`${API_URL}/api/shop?${qs}`);
+        if (!res.ok) throw new Error(`API returned ${res.status}: ${res.statusText}`);
 
         const data = await res.json();
-        
-        // 🔍 DEBUGGING: Log full response data
-        console.log('✅ API Response Data:', data);
-        console.log('📊 Products count:', data.products?.length || 0);
-        console.log('📂 Categories count:', data.categories?.length || 0);
-        console.log('🏷️ Tags count:', data.tags?.length || 0);
-
-        // ⚠️ VALIDATION: Check if data structure is correct
-        if (!data.products) {
-          console.warn('⚠️ Missing "products" key in response');
-        }
-        if (!data.categories) {
-          console.warn('⚠️ Missing "categories" key in response');
-        }
-        if (!data.tags) {
-          console.warn('⚠️ Missing "tags" key in response');
-        }
 
         setAllProducts(data.products   || []);
         setCategories(data.categories  || []);
         setTags(data.tags              || []);
+        // Support both { total_pages, totalPages } from backend
+        setTotalPages(data.total_pages || data.totalPages || 1);
+        setTotalCount(data.total_count || data.totalCount || data.products?.length || 0);
 
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
-        console.error('❌ Fetch Error:', errorMsg);
-        setApiError(errorMsg);
+        setApiError(errorMsg as any);
         setAllProducts([]);
         setCategories([]);
         setTags([]);
+        setTotalPages(1);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
@@ -100,7 +138,7 @@ function CollectionsPageInner() {
     if (!appliedMin && !appliedMax) { setProducts(allProducts); return; }
     const min = appliedMin !== '' ? parseFloat(appliedMin) : -Infinity;
     const max = appliedMax !== '' ? parseFloat(appliedMax) :  Infinity;
-    setProducts(allProducts.filter(p => {
+    setProducts(allProducts.filter((p: any) => {
       const price = getEffectivePrice(p);
       return price !== null && price >= min && price <= max;
     }));
@@ -135,24 +173,24 @@ function CollectionsPageInner() {
     return pct >= 1 ? { pct, compare, selling } : null;
   }
 
-  const imgUrl     = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
-  const galleryUrl = (n) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
+  const imgUrl     = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
+  const galleryUrl = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/gallery/${n}` : null;
 
   /* ── Nav ── */
-  const buildUrl = useCallback((overrides = {}) => {
+  const buildUrl = useCallback((overrides: any = {}) => {
     const u = new URLSearchParams(searchParams.toString());
     Object.entries(overrides).forEach(([k, v]) => {
       if (v === null || v === '') u.delete(k); else u.set(k, String(v));
     });
-    u.delete('page');
     return `/collections?${u.toString()}`;
   }, [searchParams]);
 
-  const applySort     = (val: any)           => router.push(buildUrl({ sort: val }));
-  const applyCategory = (slug: any)          => { router.push(buildUrl({ category: slug || null })); setDrawerOpen(false); };
-  const applyTag      = (slug: any, checked: any) => { router.push(buildUrl({ tag: checked ? slug : null })); setDrawerOpen(false); };
+  const applySort     = (val: any) => router.push(buildUrl({ sort: val, page: 1 }));
+  const applyCategory = (slug: any) => { router.push(buildUrl({ category: slug || null, page: 1 })); setDrawerOpen(false); };
+  const applyTag      = (slug: any, checked: any) => { router.push(buildUrl({ tag: checked ? slug : null, page: 1 })); setDrawerOpen(false); };
+  const applyPage     = (p: number) => { router.push(buildUrl({ page: p })); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-  const applyPrice = () => { setAppliedMin(minInput); setAppliedMax(maxInput); setDrawerOpen(false); };
+  const applyPrice = () => { setAppliedMin(minInput); setAppliedMax(maxInput); router.push(buildUrl({ page: 1 })); setDrawerOpen(false); };
   const clearPrice = () => { setMinInput(''); setMaxInput(''); setAppliedMin(''); setAppliedMax(''); };
   const clearAll   = () => { clearPrice(); router.push('/collections'); };
   const toggleSec  = (k: any) => setSecOpen(prev => ({ ...prev, [k]: !prev[k] }));
@@ -240,10 +278,10 @@ function CollectionsPageInner() {
             )}
             <div className="price-row">
               <input type="number" className="price-inp" placeholder="Min ₹" value={minInput} min="0"
-                onChange={e => setMinInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
+                onChange={e => setMinInput(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && applyPrice()} />
               <span className="price-sep">—</span>
               <input type="number" className="price-inp" placeholder="Max ₹" value={maxInput} min="0"
-                onChange={e => setMaxInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyPrice()} />
+                onChange={e => setMaxInput(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && applyPrice()} />
             </div>
             <div style={{ display:'flex', gap:8 }}>
               <button className="price-go" onClick={applyPrice} style={{ flex:2 }}>Apply</button>
@@ -347,6 +385,77 @@ function CollectionsPageInner() {
         .error-banner { background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-family:'Nunito',sans-serif; font-size:13px; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .wh-btn.active { background: #fff; }
+
+        /* ── Pagination ── */
+        .pagination-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 32px;
+          padding: 20px 0 4px;
+          flex-wrap: wrap;
+        }
+        .pg-numbers {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .pg-num {
+          width: 38px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9px;
+          border: 1.5px solid #e5e7eb;
+          background: #fff;
+          font-family: 'Nunito', sans-serif;
+          font-size: 14px;
+          font-weight: 700;
+          color: #374151;
+          cursor: pointer;
+          transition: all .18s ease;
+        }
+        .pg-num:hover { border-color: #1872B5; color: #1872B5; background: #eff6ff; }
+        .pg-num.active {
+          background: #1872B5;
+          border-color: #1872B5;
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(24,114,181,.3);
+          transform: translateY(-1px);
+        }
+        .pg-ellipsis {
+          width: 32px;
+          text-align: center;
+          font-size: 15px;
+          color: #9ca3af;
+          font-family: 'Nunito', sans-serif;
+          font-weight: 700;
+          user-select: none;
+        }
+        .pg-btn {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0 16px;
+          height: 38px;
+          border-radius: 9px;
+          border: 1.5px solid #e5e7eb;
+          background: #fff;
+          font-family: 'Nunito', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          color: #374151;
+          cursor: pointer;
+          transition: all .18s ease;
+          white-space: nowrap;
+        }
+        .pg-btn:hover:not(:disabled) { border-color: #1872B5; color: #1872B5; background: #eff6ff; }
+        .pg-btn:disabled { opacity: .4; cursor: not-allowed; }
+
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
         @media(max-width:900px) {
           .col-layout { grid-template-columns:1fr; }
@@ -354,15 +463,17 @@ function CollectionsPageInner() {
           .mob-filter-btn { display:flex !important; }
           .mob-drawer { display:block; }
           .col-grid { grid-template-columns:repeat(2,1fr); }
+          .apply-filter-btn { display:block; }
         }
         @media(max-width:480px) {
           .col-grid { gap:10px; }
           .col-layout { padding:0 14px 40px; }
           .col-topbar { padding:10px 14px; }
+          .pg-num { width:34px; height:34px; font-size:13px; }
+          .pg-btn { padding:0 12px; height:34px; font-size:12px; }
         }
       `}</style>
 
-      {/* ⚠️ ERROR BANNER */}
       {apiError && (
         <div className="error-banner">
           ❌ <strong>API Error:</strong> {apiError}
@@ -394,8 +505,9 @@ function CollectionsPageInner() {
           <div className="col-topbar">
             <span className="col-result">
               Showing <strong>{products.length}</strong>
-              {allProducts.length !== products.length && <> of <strong>{allProducts.length}</strong></>} products
+              {totalCount > 0 && <> of <strong>{totalCount}</strong></>} products
               {category && <> in <strong>{categories.find((c: any) => c.slug === category)?.name}</strong></>}
+              {totalPages > 1 && <> — Page <strong>{page}</strong> of <strong>{totalPages}</strong></>}
             </span>
             <div className="topbar-right">
               <button className="mob-filter-btn" onClick={() => setDrawerOpen(true)}>
@@ -419,12 +531,12 @@ function CollectionsPageInner() {
           {hasFilters && (
             <div className="active-filters">
               {category && (
-                <button className="af-chip" onClick={() => router.push(buildUrl({ category: null }))}>
+                <button className="af-chip" onClick={() => router.push(buildUrl({ category: null, page: 1 }))}>
                   📁 {categories.find((c: any) => c.slug === category)?.name || category} ×
                 </button>
               )}
               {tag && (
-                <button className="af-chip" onClick={() => router.push(buildUrl({ tag: null }))}>
+                <button className="af-chip" onClick={() => router.push(buildUrl({ tag: null, page: 1 }))}>
                   🏷️ #{tags.find((t: any) => t.slug === tag)?.name || tag} ×
                 </button>
               )}
@@ -493,6 +605,15 @@ function CollectionsPageInner() {
               );
             })}
           </div>
+
+          {/* ── Pagination ── */}
+          {!loading && totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={applyPage}
+            />
+          )}
         </div>
       </div>
     </div>
