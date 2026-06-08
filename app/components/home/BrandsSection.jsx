@@ -20,7 +20,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const GAP          = 14;
+  const GAP          = 20;
   const maxVisible   = isMobile ? 3 : 7;
   const itemsVisible = Math.min(maxVisible, brands.length);
   const totalSlides  = Math.max(1, brands.length - itemsVisible + 1);
