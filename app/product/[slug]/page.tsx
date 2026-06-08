@@ -946,6 +946,7 @@ useEffect(() => {
     min-height: 120px;
     font-size: 13px;
     line-height: 19px;
+    color: #171717 !important;
 }
 .rv-card {
     background: #fff;
@@ -1159,12 +1160,7 @@ useEffect(() => {
     text-align: center;
 }
         }
-      `}
-	  
-	  
-	  .prod-tab-content {
-    color: #171717 !important;
-}</style>
+      `}</style>
 
       {/* Breadcrumb */}
       <div className="pd-bc-bar">
