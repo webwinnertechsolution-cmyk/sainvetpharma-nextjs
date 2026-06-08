@@ -1159,7 +1159,12 @@ useEffect(() => {
     text-align: center;
 }
         }
-      `}</style>
+      `}
+	  
+	  
+	  .prod-tab-content {
+    color: #171717 !important;
+}</style>
 
       {/* Breadcrumb */}
       <div className="pd-bc-bar">
