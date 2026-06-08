@@ -153,7 +153,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           transform: translateY(-2px);
         }
         .br-card img {
-          max-width: 100%; max-height: 60px;
+          max-width: 100%; max-height: 100px;
           width: 150px;
     height: 80px;
           object-fit: contain;
