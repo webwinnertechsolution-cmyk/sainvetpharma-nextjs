@@ -157,16 +157,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((a, i) => a + i.quantity, 0);
 
   const totalPrice = items.reduce((a, i) => {
-    const effectivePrice = i.discountedPrice ?? i.price;
-    return a + effectivePrice * i.quantity;
-  }, 0);
+  if (i.variant?.includes('__FREE__')) return a; // FREE items skip karo
+  const effectivePrice = i.discountedPrice ?? i.price;
+  return a + effectivePrice * i.quantity;
+}, 0);
 
-  const totalSavings = items.reduce((a, i) => {
-    if (i.discountedPrice !== undefined && i.discountedPrice < i.price) {
-      return a + (i.price - i.discountedPrice) * i.quantity;
-    }
-    return a;
-  }, 0);
+const totalSavings = items.reduce((a, i) => {
+  if (i.variant?.includes('__FREE__')) {
+    return a + i.price * i.quantity; // FREE item = poora price saved
+  }
+  if (i.discountedPrice !== undefined && i.discountedPrice < i.price) {
+    return a + (i.price - i.discountedPrice) * i.quantity;
+  }
+  return a;
+}, 0);
 
   return (
     <CartContext.Provider value={{
