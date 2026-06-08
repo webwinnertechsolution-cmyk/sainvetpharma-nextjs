@@ -30,59 +30,30 @@ const CartContext = createContext<CartContextType | null>(null);
 
 // ── BXGY recalculate helper ──────────────────────────────────
 function recalculateBxgy(items: CartItem[]): CartItem[] {
-  // Har product ke liye paid aur free items alag karo
   const productIds = [...new Set(items.map(i => i.id))];
-
   let newItems: CartItem[] = [];
 
   for (const productId of productIds) {
     const productItems = items.filter(i => i.id === productId);
-
-    // Free aur paid alag karo
     const paidItems = productItems.filter(i => !i.variant?.includes('__FREE__'));
     const freeItems = productItems.filter(i => i.variant?.includes('__FREE__'));
 
-    // Agar koi free item hai to BXGY check karo
+    newItems.push(...paidItems);
+
     if (freeItems.length > 0) {
-      const freeItem = freeItems[0]; // template ke liye
-      const paidItem = paidItems[0];
-
-      if (!paidItem) {
-        // Paid item nahi hai to free bhi remove karo
-        continue;
-      }
-
+      const freeItem = freeItems[0];
       const paidQty = paidItems.reduce((a, i) => a + i.quantity, 0);
-
-      // Free qty calculate karo — freeItem ke discountLabel se buy_quantity nikalo
-      // Lekin hum variant name se track karte hain __FREE__
-      // Buy quantity pata karne ke liye: paidQty / freeQty ratio use karo
-      // Simple approach: pehle se jo ratio tha woh maintain karo
-      // Actually: free item ka variant mein buy_quantity store karo
-
-      // __FREE__3__ format mein buy_quantity store kiya hai
       const match = freeItem.variant?.match(/__FREE__(\d+)__/);
-      const buyQty = match ? parseInt(match[1]) : 3; // default 3
-      const getQty = 1; // default 1 (extend karo agar chahiye)
-
+      const buyQty = match ? parseInt(match[1]) : 2;
       const sets = Math.floor(paidQty / buyQty);
-      const newFreeQty = sets * getQty;
+      const newFreeQty = sets * 1;
 
-      // Paid items add karo as is
-      newItems.push(...paidItems);
-
-      // Free items recalculate karo
       if (newFreeQty > 0) {
-        newItems.push({
-          ...freeItem,
-          quantity: newFreeQty,
-        });
+        newItems.push({ ...freeItem, quantity: newFreeQty });
       }
-      // Agar newFreeQty === 0 to free item add hi mat karo
-    } else {
-      // Koi free item nahi, as is add karo
-      newItems.push(...paidItems);
+      // newFreeQty === 0 toh free item add nahi hoti ✅
     }
+    // ✅ Free item nahi hai — koi action nahi (product page se add hogi)
   }
 
   return newItems;
