@@ -81,20 +81,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setItems(prev => {
-      const existing = prev.find(i => i.id === item.id && i.variant === item.variant);
-      if (existing) {
-        return prev.map(i =>
-          i.id === item.id && i.variant === item.variant
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-    setDrawerOpen(true);
-  };
+const addToCart = (item: Omit<CartItem, 'quantity'>) => {
+  setItems(prev => {
+    const existing = prev.find(i => i.id === item.id && i.variant === item.variant);
+    let updated: CartItem[];
+    if (existing) {
+      updated = prev.map(i =>
+        i.id === item.id && i.variant === item.variant
+          ? { ...i, quantity: i.quantity + 1 }
+          : i
+      );
+    } else {
+      updated = [...prev, { ...item, quantity: 1 }];
+    }
+    return recalculateBxgy(updated); // ✅ yeh line add karo
+  });
+  setDrawerOpen(true);
+};
 
   const removeFromCart = (id: number, variant?: string) => {
     setItems(prev => {
