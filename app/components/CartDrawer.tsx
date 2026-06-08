@@ -45,6 +45,9 @@ export default function CartDrawer() {
       .catch(() => {});
   }, []);
 
+
+  
+
   // ✅ NAYA: Items ke liye discount check karo
   useEffect(() => {
     if (items.length === 0) {
@@ -101,7 +104,7 @@ export default function CartDrawer() {
     };
 
     checkDiscounts();
-  }, [items]);
+  }, [JSON.stringify(items)]); 
 
   // ── Shipping fetch — drawer open aur totalPrice change dono pe ──
   useEffect(() => {
@@ -157,10 +160,9 @@ export default function CartDrawer() {
   const grandTotal = totalPrice + (shippingCharge ?? 0);
 
   // ✅ Quantity update handler with discount recalculation
-  const handleQuantityChange = (itemId: number, variant: string | undefined, newQty: number) => {
-    updateQty(itemId, variant, newQty);
-    // Discount recalculate hoga useEffect se automatically
-  };
+const handleQuantityChange = (itemId, variant, newQty) => {
+  updateQty(itemId, variant, newQty);
+};
 
   return (
     <>
