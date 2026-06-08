@@ -112,7 +112,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           will-change: transform;
           transform: translateX(${finalTransform});
         }
-
+       
         /* ── Arrows ── */
         .br-arrow {
           position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
@@ -139,8 +139,8 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         /* ── Brand Card ── */
         .br-card {
           flex: 0 0 calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible});
-          min-width: 0; border-radius: 12px;
-          border: 1.5px solid #e5e7eb; padding: 10px;
+          max-width:150px; /*--border-radius: 12px;
+          border: 1.5px solid #e5e7eb; padding: 10px; --*/
           height: 80px;
           display: flex; align-items: center; justify-content: center;
           transition: all .22s ease;
@@ -148,8 +148,8 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           pointer-events: ${isDragging ? 'none' : 'auto'};
         }
         .br-card:hover {
-          border-color: #5a7a1e;
-          box-shadow: 0 4px 18px rgba(90,122,30,.2);
+         /*-- border-color: #5a7a1e;
+          box-shadow: 0 4px 18px rgba(90,122,30,.2); --*/
           transform: translateY(-2px);
         }
         .br-card img {
