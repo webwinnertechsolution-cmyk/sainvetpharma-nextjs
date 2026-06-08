@@ -23,7 +23,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   const GAP          = 20;
   const maxVisible   = isMobile ? 3 : 7;
   const itemsVisible = Math.min(maxVisible, brands.length);
-  const totalSlides  = Math.max(1, brands.length - itemsVisible + 1);
+  const totalSlides  = brands.length > itemsVisible ? brands.length - itemsVisible + 1 : 1;
   const showArrows   = brands.length > itemsVisible;
 
   /* ── Drag helpers ── */
