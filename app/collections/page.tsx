@@ -360,7 +360,7 @@ function CollectionsPageInner() {
         .col-bc a { color:rgba(255,255,255,.65); text-decoration:none; }
         .col-bc a:hover { color:#fff; }
         .col-layout { max-width:1400px; margin:28px auto; padding:0 24px 60px; display:grid; grid-template-columns:250px 1fr; gap:24px; align-items:start; }
-        .col-sidebar-desktop { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow:hidden; position:sticky; top:20px; }
+        .col-sidebar-desktop { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow:hidden; position:sticky; top:100px; }
         .mob-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:998; opacity:0; transition:opacity .3s; }
         .mob-overlay.open { display:block; opacity:1; }
         .mob-drawer { display:none; position:fixed; top:0; left:-300px; width:285px; height:100%; background:#fff; z-index:999; overflow-y:auto; transition:left .32s cubic-bezier(.4,0,.2,1); }
