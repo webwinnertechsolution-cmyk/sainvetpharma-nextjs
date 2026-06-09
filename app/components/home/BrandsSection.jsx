@@ -74,8 +74,8 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         * { box-sizing: border-box; }
 
         .br-wrap {
-          padding: 28px 0 36px;
-          background: #88A73B;
+          padding: 40px 0;
+          background: transparent; /* NO BACKGROUND */
         }
         .br-inner {
           max-width: 1400px; margin: 0 auto; padding: 0 24px;
@@ -83,22 +83,14 @@ const BrandsSection = ({ section = null, brands = [] }) => {
 
         /* ── Header ── */
         .br-header {
-          display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 20px; margin-top: 8px;
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 24px;
         }
         .br-header h2 {
-          font-size: 24px; font-weight: 500; color: #fff;
+          font-size: 24px; font-weight: 700; color: #0a214f;
           font-family: 'Sora', sans-serif; margin: 0;
         }
-        .br-view-all {
-          font-size: 13px; font-weight: 600; color: #fff;
-          text-decoration: none; display: flex; align-items: center;
-          gap: 4px; white-space: nowrap; transition: opacity .2s;
-          font-family: 'Nunito', sans-serif;
-        }
-        .br-view-all:hover { opacity: 0.75; }
-        .br-view-all:hover svg { transform: translateX(3px); }
-        .br-view-all svg { transition: transform .2s; }
+        .br-view-all { display: none; }
 
         /* ── Slider wrapper ── */
         .br-slider-wrapper {
@@ -107,7 +99,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         .br-overflow { overflow: hidden; flex: 1; min-width: 0; cursor: grab; }
         .br-overflow.dragging { cursor: grabbing; }
         .br-track {
-          display: flex; gap: ${GAP}px; padding: 6px 0 8px;
+          display: flex; gap: ${GAP}px; padding: 6px 0;
           transition: ${isDragging ? 'none' : 'transform .6s cubic-bezier(.25,.46,.45,.94)'};
           will-change: transform;
           transform: translateX(${finalTransform});
@@ -116,21 +108,20 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         /* ── Arrows ── */
         .br-arrow {
           position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-          width: 34px; height: 34px; border-radius: 50%;
+          width: 36px; height: 36px; border-radius: 50%;
           background: #fff; border: 1.5px solid #e5e7eb;
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; opacity: 0;
-          transition: opacity .3s, box-shadow .3s, background .3s;
+          transition: opacity .3s, box-shadow .3s;
           box-shadow: 0 2px 8px rgba(0,0,0,.1); color: #374151;
         }
         .br-slider-wrapper:hover .br-arrow { opacity: 1; }
         .br-arrow:hover:not(:disabled) {
-          background: #fff !important;
           box-shadow: 0 4px 16px rgba(0,0,0,.18);
         }
         .br-arrow:disabled { opacity: .3 !important; cursor: not-allowed; pointer-events: none; }
-        .br-arrow-prev { left: -19px; }
-        .br-arrow-next { right: -19px; }
+        .br-arrow-prev { left: -18px; }
+        .br-arrow-next { right: -18px; }
         .br-arrow svg {
           width: 16px; height: 16px; fill: none; stroke: currentColor;
           stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
@@ -139,23 +130,22 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         /* ── Brand Card ── */
         .br-card {
           flex: 0 0 calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible});
-          max-width:150px; /*--border-radius: 12px;
-          border: 1.5px solid #e5e7eb; padding: 10px; --*/
+          max-width: 150px;
           height: 80px;
           display: flex; align-items: center; justify-content: center;
-          transition: all .22s ease;
+          transition: transform .22s ease;
           text-decoration: none; cursor: pointer;
           pointer-events: ${isDragging ? 'none' : 'auto'};
+          background: transparent;
         }
         .br-card:hover {
-         /*-- border-color: #5a7a1e;
-          box-shadow: 0 4px 18px rgba(90,122,30,.2); --*/
-          transform: translateY(-2px);
+          transform: translateY(-3px);
         }
         .br-card img {
-          max-width: 100%; max-height: 100px;
+          max-width: 100%;
+          max-height: 80px;
           width: 150px;
-    height: 80px;
+          height: 80px;
           object-fit: contain;
           filter: grayscale(30%); opacity: 0.85;
           transition: all .22s ease;
@@ -168,72 +158,32 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           border-radius: 8px; display: flex; align-items: center;
           justify-content: center; color: #d1d5db; font-size: 20px;
         }
-.br-wrap {    padding: 28px 0 36px;    background: #D0EDFB;}
-a.br-view-all {
-    display: none;
-}
-.br-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    margin-top: 8px;
-}
-.br-header h2 {
-    font-size: 27px;
-    font-weight: 800;
-    color: #0a214f;
-    font-family: 'Sora', sans-serif;
-    margin: 0;
-}
-.br-wrap {
-    padding: 52px 0 74px;
-    background: #D0EDFB;
-    margin-top: 58px;
-    margin-bottom: 33px;
-}
-.br-wrap {
-    padding: 52px 0 74px;
-    background: #D0EDFB;
-    margin-top: 58px;
-    margin-bottom: 22px;
-}
+
         /* ── Mobile ── */
         @media (max-width: 767px) {
-          .br-wrap { padding: 22px 0 28px; }
+          .br-wrap { padding: 24px 0; }
           .br-inner { padding: 0 14px; }
+          .br-header { margin-bottom: 16px; }
+          .br-header h2 { font-size: 18px; }
+          
           .br-card {
             flex: 0 0 calc((100% - ${2 * GAP}px) / 3) !important;
-            height: 60px; padding: 8px;
+            height: 60px;
+            max-width: 100px;
           }
-          .br-card img { max-height: 44px; }
-          .br-header h2 { font-size: 18px; }
-          .br-arrow { opacity: 1 !important; width: 28px; height: 28px; }
+          .br-card img { 
+            max-height: 60px; 
+            width: 100px; 
+            height: 60px; 
+          }
+          
+          .br-arrow { 
+            opacity: 1 !important; 
+            width: 28px; 
+            height: 28px; 
+          }
           .br-arrow-prev { left: -6px; }
           .br-arrow-next { right: -6px; }
-          .br-view-all { font-size: 12px; }
-          .br-wrap {
-    padding: 52px 0 74px;
-    background: #D0EDFB;
-    margin-top: -1px;
-    margin-bottom: 4px;
-}
-.br-header h2 {
-    font-size: 20px;
-}
-.br-wrap {
-    padding: 23px 0 33px;
-    background: #D0EDFB;
-    margin-top: -1px;
-    margin-bottom: 4px;
-}
-.br-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 9px;
-    margin-top: 8px;
-}
         }
       `}</style>
 
@@ -241,14 +191,6 @@ a.br-view-all {
         {/* Header */}
         <div className="br-header">
           <h2>{section?.heading || 'Our Brands'}</h2>
-          {section?.view_all_url && (
-            <Link href={section.view_all_url} className="br-view-all">
-              {section.view_all_text || 'View All'}
-              <svg width="14" height="14" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          )}
         </div>
 
         {/* Slider */}
