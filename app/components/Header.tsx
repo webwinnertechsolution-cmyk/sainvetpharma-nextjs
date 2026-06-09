@@ -84,6 +84,10 @@ export default function EnhancedHeader({ logo, menus }) {
     <>
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
+         body {
+    background: #ffffff !important;
+}
+
 
         .header-wrap {
           background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
