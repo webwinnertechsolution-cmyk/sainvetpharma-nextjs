@@ -132,7 +132,10 @@ const BlogSection = ({ blogs = [] }) => {
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
 
-        .bs-wrap  { padding: 8px 0 30px; background: transparent; }
+        .bs-wrap {
+    padding: 8px 0 30px;
+    background: #ffffff;
+}
         .bs-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 
         /* ── Header ── */
