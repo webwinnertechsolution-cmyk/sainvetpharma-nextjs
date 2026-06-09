@@ -265,12 +265,12 @@ const ProductSection = ({ section = null, products = [] }) => {
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
 
-        .ps-wrap {
-          padding: 4px 0 3px;
-          background: transparent;
-          position: relative;
-          z-index: 1;
-        }
+       .ps-wrap {
+    padding: 4px 0 3px;
+    background: #ffffff;
+    position: relative;
+    z-index: 1;
+}
 
         .ps-inner {
           max-width: 1400px;
