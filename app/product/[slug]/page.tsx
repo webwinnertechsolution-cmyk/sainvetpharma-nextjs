@@ -360,8 +360,8 @@ function ReviewsSection({ productId, productTitle }) {
 // ═══════════════════════════════════════════
 export default function ProductDetailPage() {
   const { slug } = useParams();
-  const { addToCart, items } = useCart();
-  
+  const { addToCart } = useCart();
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [curSlide, setCurSlide] = useState(0);
@@ -373,23 +373,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState<any[]>([]);
   const [discount, setDiscount] = useState<any>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
-  // ✅ Cart drawer se quantity change hone pe product page sync ho jaye
-useEffect(() => {
-  if (!product) return;
-
-  const variantName = selectedVariant?.name || undefined;
-  const cartItem = items.find(
-    i =>
-      i.id === product.id &&
-      i.variant === variantName &&
-      !i.variant?.includes('__FREE__')
-  );
-
-  setQuantity(cartItem ? cartItem.quantity : 1);
-}, [items, product?.id, selectedVariant?.id]);
-  
-  
-  
+  const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
   const [reviewsData, setReviewsData] = useState<any>(null);
   const [images, setImages] = useState<any[]>([]);
@@ -397,8 +381,6 @@ useEffect(() => {
   
   // ⭐ NEW: Track which variant's image we're showing, but don't auto-switch
   const [pendingVariantImage, setPendingVariantImage] = useState<number | null>(null);
-
-   
 
   /* ── Fetch product ── */
   useEffect(() => {
@@ -628,23 +610,14 @@ useEffect(() => {
     if (!price || !product) return;
     const applicable = isDiscountApplicable();
     const discountLabel = applicable ? getDiscountLabel() : undefined;
-   // ✅ Sirf ek addToCart call — qty pass karo
-// CartContext khud BXGY free items add karega API se
-addToCart(
-  {
-    id: product.id,
-    slug: product.slug,
-    title: product.title,
-    image: product.featured_image
-      ? `${API_URL}/uploads/products/${product.featured_image}`
-      : null,
-    price,
-    variant: selectedVariant?.name || undefined,
-    bxgyBuyQty: isBxgy ? discount?.buy_quantity : undefined,
-    bxgyGetQty: isBxgy ? discount?.get_quantity : undefined,
-  },
-  quantity  // ✅ quantity pass karo
-);
+    if (isBxgy && applicable) {
+      const freeQty = getBxgyFreeQty();
+      for (let i = 0; i < quantity; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice: undefined, discountLabel: undefined, variant: selectedVariant?.name || undefined });
+      for (let i = 0; i < freeQty; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice: 0, discountLabel: '🎁 FREE', variant: `${selectedVariant?.name || ''}__FREE__` });
+    } else {
+      const discountedPrice = applicable ? getDiscountedPrice(price) : undefined;
+      for (let i = 0; i < quantity; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice, discountLabel, variant: selectedVariant?.name || undefined });
+    }
     setAddedAnim(true);
     setTimeout(() => setAddedAnim(false), 1800);
   };
