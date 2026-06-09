@@ -515,11 +515,12 @@ export default function ProductDetailPage() {
     return null; 
   };
   
-  const getCompare = () => { 
-    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); 
-    if (product?.sale_price && product?.price) return parseFloat(product.price); 
-    return null; 
-  };
+const getCompare = () => {
+  if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price);
+  if (product?.sale_price && product?.price && parseFloat(product.price) > parseFloat(product.sale_price))
+    return parseFloat(product.price);
+  return null;
+};
   
   const getVariantDisc = () => { 
     const p = getPrice(), c = getCompare(); 
@@ -1262,7 +1263,7 @@ useEffect(() => {
                     <>
                       <span className="price-main">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                       {compare && <span className="price-orig">₹{compare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
-                      {variantDisc && <span className="disc-tag">{variantDisc}% OFF</span>}
+{`{variantDisc && {variantDisc}% OFF}`}
                     </>
                   )}
                 </div>
