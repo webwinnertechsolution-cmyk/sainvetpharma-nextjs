@@ -1,10 +1,10 @@
-'use client';
+code = ''''use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 const BrandsSection = ({ section = null, brands = [] }) => {
-  const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost/sainivetpharma/public').replace(/\/$/, '');
+  const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost/sainivetpharma/public').replace(/\\/$/, '');
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile]         = useState(false);
@@ -21,7 +21,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   }, []);
 
   const GAP          = 20;
-  const maxVisible   = isMobile ? 3 : 7;
+  const maxVisible   = isMobile ? 2 : 7;  // Mobile mein 2 slides
   const itemsVisible = Math.min(maxVisible, brands.length);
   const totalSlides  = brands.length > itemsVisible ? brands.length - itemsVisible + 1 : 1;
   const showArrows   = brands.length > itemsVisible;
@@ -75,7 +75,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
 
         .br-wrap {
           padding: 40px 0;
-          background: transparent; /* NO BACKGROUND */
+          background: transparent;
         }
         .br-inner {
           max-width: 1400px; margin: 0 auto; padding: 0 24px;
@@ -167,14 +167,14 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           .br-header h2 { font-size: 18px; }
           
           .br-card {
-            flex: 0 0 calc((100% - ${2 * GAP}px) / 3) !important;
-            height: 60px;
-            max-width: 100px;
+            flex: 0 0 calc((100% - ${1 * GAP}px) / 2) !important;  /* 2 cards with 1 gap */
+            height: 70px;
+            max-width: none;
           }
           .br-card img { 
-            max-height: 60px; 
-            width: 100px; 
-            height: 60px; 
+            max-height: 70px; 
+            width: 100%; 
+            height: 70px; 
           }
           
           .br-arrow { 
@@ -267,4 +267,9 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   );
 };
 
-export default BrandsSection;
+export default BrandsSection;'''
+
+with open('/mnt/agents/output/BrandsSection.jsx', 'w') as f:
+    f.write(code)
+
+print("File saved successfully!")
