@@ -1,10 +1,10 @@
-code = ''''use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 const BrandsSection = ({ section = null, brands = [] }) => {
-  const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost/sainivetpharma/public').replace(/\\/$/, '');
+  const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost/sainivetpharma/public').replace(/\/$/, '');
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile]         = useState(false);
@@ -104,7 +104,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           will-change: transform;
           transform: translateX(${finalTransform});
         }
-       
+
         /* ── Arrows ── */
         .br-arrow {
           position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
@@ -165,7 +165,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           .br-inner { padding: 0 14px; }
           .br-header { margin-bottom: 16px; }
           .br-header h2 { font-size: 18px; }
-          
+
           .br-card {
             flex: 0 0 calc((100% - ${1 * GAP}px) / 2) !important;  /* 2 cards with 1 gap */
             height: 70px;
@@ -176,7 +176,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
             width: 100%; 
             height: 70px; 
           }
-          
+
           .br-arrow { 
             opacity: 1 !important; 
             width: 28px; 
@@ -267,9 +267,4 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   );
 };
 
-export default BrandsSection;'''
-
-with open('/mnt/agents/output/BrandsSection.jsx', 'w') as f:
-    f.write(code)
-
-print("File saved successfully!")
+export default BrandsSection;
