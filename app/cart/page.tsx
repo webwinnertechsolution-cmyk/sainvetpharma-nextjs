@@ -1,4 +1,4 @@
-cat > /mnt/user-data/outputs/CartPage.tsx << 'ENDOFFILE'
+
 'use client';
 
 import { useCart } from '@/app/components/CartContext';
