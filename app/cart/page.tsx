@@ -29,6 +29,7 @@ export default function CartPage() {
   const [shippingLoading, setShippingLoading]   = useState(false);
   const [freeShippingMin, setFreeShippingMin]   = useState<number>(999);
   const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
+  const [hasShippingData, setHasShippingData]   = useState(false); // NEW: Track if backend has provided data
 
   useEffect(() => {
     if (items.length === 0) return;
@@ -36,6 +37,7 @@ export default function CartPage() {
     setShippingMethods([]);
     setSelectedShipping(null);
     setFallbackCharge(null);
+    setHasShippingData(false); // Reset when items change
 
     fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
       .then(r => r.json())
@@ -43,19 +45,24 @@ export default function CartPage() {
         if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
         if (data.is_free_shipping) {
           setFallbackCharge(0);
+          setHasShippingData(true); // Mark as having data
         } else if (data.success && data.methods?.length > 0) {
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
+          setHasShippingData(true); // Mark as having data
         } else if (data.success && data.methods?.length === 0) {
           const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : 999;
           setFreeShippingMin(freeMin);
           setFallbackCharge(totalPrice >= freeMin ? 0 : 99);
+          setHasShippingData(true); // Mark as having data
         }
+        // If request fails, hasShippingData stays false (shipping hidden)
         setShippingLoading(false);
       })
       .catch(() => {
-        setFallbackCharge(99);
+        // Don't set fallback on error - keep shipping hidden
         setShippingLoading(false);
+        setHasShippingData(false);
       });
   }, [totalPrice]);
 
@@ -256,21 +263,23 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* ── Full-width Free Shipping Bar (drawer style) ── */}
-      <div className={`page-fs-bar ${freeUnlocked ? 'unlocked' : ''}`}>
-        <div className="page-fs-inner">
-          <div className="page-fs-txt">
-            {freeUnlocked ? (
-              <><span>🎉</span> You've unlocked FREE shipping on this order!</>
-            ) : (
-              <><span>🚚</span> Add <strong style={{ margin: '0 4px' }}>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for FREE shipping!</>
-            )}
-          </div>
-          <div className="page-fs-track">
-            <div className="page-fs-fill" style={{ width: `${freeProgress}%` }} />
+      {/* ── Full-width Free Shipping Bar (drawer style) - HIDDEN UNTIL SHIPPING DATA ── */}
+      {hasShippingData && (
+        <div className={`page-fs-bar ${freeUnlocked ? 'unlocked' : ''}`}>
+          <div className="page-fs-inner">
+            <div className="page-fs-txt">
+              {freeUnlocked ? (
+                <><span>🎉</span> You've unlocked FREE shipping on this order!</>
+              ) : (
+                <><span>🚚</span> Add <strong style={{ margin: '0 4px' }}>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for FREE shipping!</>
+              )}
+            </div>
+            <div className="page-fs-track">
+              <div className="page-fs-fill" style={{ width: `${freeProgress}%` }} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="cart-wrap">
 
@@ -381,26 +390,30 @@ export default function CartPage() {
                   <span className="pt-val green">−₹{totalSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                 </div>
               )}
-              <div className="pt-row">
-                <span className="pt-label">
-                  <span className="pt-label-icon">🚚</span>
-                  Shipping
-                  {selectedShipping && !freeUnlocked && (
-                    <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 4 }}>({selectedShipping.name})</span>
+              
+              {/* SHIPPING ROW - HIDDEN UNTIL DATA ── */}
+              {hasShippingData && (
+                <div className="pt-row">
+                  <span className="pt-label">
+                    <span className="pt-label-icon">🚚</span>
+                    Shipping
+                    {selectedShipping && !freeUnlocked && (
+                      <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 4 }}>({selectedShipping.name})</span>
+                    )}
+                  </span>
+                  {shippingLoading ? (
+                    <span className="pt-val loading"><span className="spin-ring" /> Calculating…</span>
+                  ) : freeUnlocked || shippingCharge === 0 ? (
+                    <span className="pt-val free-ship">FREE</span>
+                  ) : (
+                    <span className="pt-val">₹{shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                   )}
-                </span>
-                {shippingLoading ? (
-                  <span className="pt-val loading"><span className="spin-ring" /> Calculating…</span>
-                ) : freeUnlocked || shippingCharge === 0 ? (
-                  <span className="pt-val free-ship">FREE</span>
-                ) : (
-                  <span className="pt-val">₹{shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Multiple shipping methods */}
-            {!freeUnlocked && shippingMethods.length > 1 && (
+            {/* Multiple shipping methods - HIDDEN UNTIL DATA ── */}
+            {hasShippingData && !freeUnlocked && shippingMethods.length > 1 && (
               <div className="ship-methods">
                 {shippingMethods.map(m => (
                   <div key={m.rate_id} className={`ship-opt ${selectedShipping?.rate_id === m.rate_id ? 'sel' : ''}`} onClick={() => setSelectedShipping(m)}>
