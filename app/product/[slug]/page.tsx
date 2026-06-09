@@ -776,7 +776,7 @@ useEffect(() => {
         .discount-applied-tag{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
         .bxgy-tag{background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
         .price-na{font-size:18px;color:#9ca3af;font-style:italic;}
-        .savings-strip{margin-top:12px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:1px solid #6ee7b7;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;animation:bxgyPop .4s ease both;}
+        
         .savings-left{display:flex;align-items:center;gap:8px;font-size:13px;color:#065f46;font-weight:700;}
         .savings-right{font-size:16px;font-weight:800;color:#059669;font-family:'Sora',sans-serif;}
         .savings-sub{font-size:11px;color:#047857;font-weight:600;margin-top:2px;}
@@ -1160,6 +1160,71 @@ useEffect(() => {
     text-align: center;
 }
         }
+		
+		
+		
+		.savings-strip{
+  margin-top:12px;
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  border:1.5px solid #bbf7d0;
+  animation:bxgyPop .4s ease both;
+}
+.savings-left{
+  background:#f0fdf4;
+  flex:1;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.savings-left-icon{
+  width:34px;
+  height:34px;
+  background:#dcfce7;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.savings-left-text-main{
+  font-size:13px;
+  font-weight:700;
+  color:#14532d;
+  letter-spacing:.01em;
+}
+.savings-left-text-sub{
+  font-size:11px;
+  font-weight:500;
+  color:#16a34a;
+  margin-top:2px;
+}
+.savings-right{
+  background:#7c3aed;
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  min-width:72px;
+}
+.savings-right-label{
+  font-size:9px;
+  font-weight:700;
+  color:rgba(255,255,255,.7);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.savings-right-value{
+  font-size:17px;
+  font-weight:800;
+  color:#fff;
+  line-height:1;
+}
       `}</style>
 
       {/* Breadcrumb */}
@@ -1266,23 +1331,40 @@ useEffect(() => {
                     </>
                   )}
                 </div>
-                {applicable && savings > 0 && (
-                  <div className="savings-strip">
-                    <div className="savings-left">
-                      <span>{isBxgy ? '🎁' : '🎉'}</span>
-                      <div>
-                        <div>You save ₹{savings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
-                        {isBxgy && bxgyFreeQty > 0 && <div className="savings-sub">{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} free</div>}
-                        {discount.title && <div className="savings-sub">"{discount.title}" applied</div>}
-                      </div>
-                    </div>
-                   <div className="savings-right">
-  {isBxgy 
-    ? (discount.get_value_type === 'free' ? 'FREE' : `${discount.get_value}% off`)
-    : (discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`) + ' off'
-  }
-</div>
-                  </div>
+         
+                  {applicable && savings > 0 && (
+  <div className="savings-strip">
+    <div className="savings-left">
+      <div className="savings-left-icon">
+        {isBxgy ? '🎁' : '🏷️'}
+      </div>
+      <div>
+        <div className="savings-left-text-main">
+          You save ₹{savings.toLocaleString('en-IN', { maximumFractionDigits: 0 })} on this order
+        </div>
+        <div className="savings-left-text-sub">
+          {isBxgy && bxgyFreeQty > 0
+            ? `${bxgyFreeQty} item${bxgyFreeQty > 1 ? 's' : ''} free · `
+            : ''}
+          {discount.title}
+        </div>
+      </div>
+    </div>
+    <div className="savings-right">
+      <div className="savings-right-label">discount</div>
+      <div className="savings-right-value">
+        {isBxgy
+          ? discount.get_value_type === 'free'
+            ? `${Math.round((savings / (price! * quantity)) * 100)}% off`
+            : `${discount.get_value}% off`
+          : discount.value_type === 'percentage'
+            ? `${discount.value}% off`
+            : `${Math.round((savings / price!) * 100)}% off`
+        }
+      </div>
+    </div>
+  </div>
+)}
                 )}
                 {needMoreForBxgy && discount && (
                   <div className="bxgy-progress">
