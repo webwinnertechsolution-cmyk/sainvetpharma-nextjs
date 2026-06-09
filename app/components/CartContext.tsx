@@ -1,5 +1,7 @@
 'use client';
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface CartItem {
   id: number;
@@ -11,8 +13,7 @@ export interface CartItem {
   discountLabel?: string;
   variant?: string;
   quantity: number;
-  // BXGY metadata — product page se aata hai
-  bxgyBuyQty?: number;
+  bxgyBuyQty?: number; // optional — product page se pass karo ya API se fetch hoga
   bxgyGetQty?: number;
 }
 
@@ -32,46 +33,76 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 // ─────────────────────────────────────────────────────────────
-// BXGY recalculate helper
-// Yeh function BXGY metadata CartItem ke andar stored data se
-// use karta hai — koi API call nahi, pure sync calculation.
+// Discount cache — har product ke liye ek baar API call
 // ─────────────────────────────────────────────────────────────
-function recalculateBxgy(items: CartItem[]): CartItem[] {
-  const productIds = [...new Set(items.map(i => i.id))];
-  const result: CartItem[] = [];
+const discountCache: Record<number, { buyQty: number; getQty: number } | null> = {};
+
+async function fetchBxgyDiscount(productId: number): Promise<{ buyQty: number; getQty: number } | null> {
+  // Cache mein hai toh wahi return karo
+  if (productId in discountCache) return discountCache[productId];
+
+  try {
+    const res = await fetch(`${API_URL}/api/product-discount/${productId}`);
+    const data = await res.json();
+
+    if (
+      data.has_discount &&
+      data.type === 'buy_x_get_y' &&
+      data.get_value_type === 'free'
+    ) {
+      const result = {
+        buyQty: Number(data.buy_quantity ?? 2),
+        getQty: Number(data.get_quantity ?? 1),
+      };
+      discountCache[productId] = result;
+      return result;
+    }
+
+    discountCache[productId] = null;
+    return null;
+  } catch {
+    discountCache[productId] = null;
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Async BXGY sync — API se discount fetch karke free items
+// recalculate karta hai. Pure paid items lo, free items drop
+// karo, phir discount ke hisaab se naye free items add karo.
+// ─────────────────────────────────────────────────────────────
+async function syncBxgyItems(items: CartItem[]): Promise<CartItem[]> {
+  // Sirf paid items rakho pehle (free items fresh recalculate hongi)
+  const paidItems = items.filter(i => !i.variant?.includes('__FREE__'));
+  const result: CartItem[] = [...paidItems];
+
+  // Unique product IDs
+  const productIds = [...new Set(paidItems.map(i => i.id))];
 
   for (const productId of productIds) {
-    const allItemsForProduct = items.filter(i => i.id === productId);
+    const productPaidItems = paidItems.filter(i => i.id === productId);
+    const baseItem = productPaidItems[0];
 
-    // Paid aur free items alag karo
-    const paidItems = allItemsForProduct.filter(i => !i.variant?.includes('__FREE__'));
-    // Free items ko hum khud recalculate karenge — purani entries drop karo
+    // BXGY data — pehle CartItem se lo, nahi toh API se fetch karo
+    let buyQty = baseItem.bxgyBuyQty;
+    let getQty = baseItem.bxgyGetQty;
 
-    // Agar koi paid item nahi toh skip
-    if (paidItems.length === 0) continue;
-
-    // Paid items result mein add karo
-    result.push(...paidItems);
-
-    // BXGY metadata check karo (pehle paid item se lo)
-    const baseItem = paidItems[0];
-    const buyQty = baseItem.bxgyBuyQty;
-    const getQty = baseItem.bxgyGetQty;
-
-    // BXGY metadata nahi hai — koi free item nahi jodna
-    if (!buyQty || !getQty) continue;
+    if (!buyQty || !getQty) {
+      const discount = await fetchBxgyDiscount(productId);
+      if (!discount) continue; // Koi discount nahi
+      buyQty = discount.buyQty;
+      getQty = discount.getQty;
+    }
 
     // Total paid quantity
-    const totalPaidQty = paidItems.reduce((sum, i) => sum + i.quantity, 0);
-
-    // Kitne free milenge
-    const sets = Math.floor(totalPaidQty / buyQty);
-    const freeQty = sets * getQty;
+    const totalPaidQty = productPaidItems.reduce((sum, i) => sum + i.quantity, 0);
+    const freeQty = Math.floor(totalPaidQty / buyQty) * getQty;
 
     if (freeQty > 0) {
-      // Free item as separate cart entry
       result.push({
         ...baseItem,
+        bxgyBuyQty: buyQty,
+        bxgyGetQty: getQty,
         quantity: freeQty,
         variant: `__FREE__${buyQty}__${baseItem.variant || ''}`.trim(),
         discountedPrice: 0,
@@ -91,21 +122,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted]       = useState(false);
 
-  // LocalStorage se restore
+  // LocalStorage restore
   useEffect(() => {
     setMounted(true);
     try {
       const saved = localStorage.getItem('cart');
-      if (saved) setItems(JSON.parse(saved));
+      if (saved) {
+        const parsed: CartItem[] = JSON.parse(saved);
+        // Restore karte waqt bhi BXGY sync karo
+        syncBxgyItems(parsed).then(synced => setItems(synced));
+      }
     } catch {}
   }, []);
 
-  // LocalStorage mein save
+  // LocalStorage save
   useEffect(() => {
     if (mounted) localStorage.setItem('cart', JSON.stringify(items));
   }, [items, mounted]);
 
-  // Body scroll lock when drawer open
+  // Body scroll lock
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -114,20 +149,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // ── addToCart ──────────────────────────────────────────────
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
-      const existing = prev.find(
-        i => i.id === item.id && i.variant === item.variant
-      );
+      const paidPrev = prev.filter(i => !i.variant?.includes('__FREE__'));
+      const existing = paidPrev.find(i => i.id === item.id && i.variant === item.variant);
       let updated: CartItem[];
       if (existing) {
-        updated = prev.map(i =>
+        updated = paidPrev.map(i =>
           i.id === item.id && i.variant === item.variant
             ? { ...i, quantity: i.quantity + 1 }
             : i
         );
       } else {
-        updated = [...prev, { ...item, quantity: 1 }];
+        updated = [...paidPrev, { ...item, quantity: 1 }];
       }
-      return recalculateBxgy(updated);
+
+      // Async sync — result aane pe state update
+      syncBxgyItems(updated).then(synced => setItems(synced));
+
+      // Abhi ke liye free items ke bina state set karo (flash avoid)
+      return updated;
     });
     setDrawerOpen(true);
   };
@@ -135,28 +174,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // ── removeFromCart ─────────────────────────────────────────
   const removeFromCart = (id: number, variant?: string) => {
     setItems(prev => {
-      // Agar paid item remove ho rahi hai toh FREE item bhi hato
       const isFree = variant?.includes('__FREE__');
       let filtered: CartItem[];
 
       if (isFree) {
-        // Sirf free item hato
         filtered = prev.filter(i => !(i.id === id && i.variant === variant));
       } else {
-        // Paid item + uski free item dono hato
+        // Paid item + us product ki saari free items hato
         filtered = prev.filter(
           i => !(i.id === id && (i.variant === variant || i.variant?.includes('__FREE__')))
         );
       }
 
-      return recalculateBxgy(filtered);
+      syncBxgyItems(filtered).then(synced => setItems(synced));
+      return filtered;
     });
   };
 
   // ── updateQty ─────────────────────────────────────────────
   const updateQty = (id: number, variant: string | undefined, qty: number) => {
-    // Free item ki quantity manually nahi badlegi
-    if (variant?.includes('__FREE__')) return;
+    if (variant?.includes('__FREE__')) return; // Free item manual change nahi
 
     if (qty < 1) {
       removeFromCart(id, variant);
@@ -164,11 +201,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setItems(prev => {
-      const updated = prev.map(i =>
+      const paidPrev = prev.filter(i => !i.variant?.includes('__FREE__'));
+      const updated = paidPrev.map(i =>
         i.id === id && i.variant === variant ? { ...i, quantity: qty } : i
       );
-      // BXGY recalculate — free items automatically adjust hongi
-      return recalculateBxgy(updated);
+
+      // Async BXGY recalculate
+      syncBxgyItems(updated).then(synced => setItems(synced));
+
+      return updated; // Temporary state without free items
     });
   };
 
@@ -178,18 +219,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // ── Totals ────────────────────────────────────────────────
   const totalItems = items.reduce((a, i) => a + i.quantity, 0);
 
-  // Free items price mein count nahi hongi
   const totalPrice = items.reduce((a, i) => {
     if (i.variant?.includes('__FREE__')) return a;
-    const effectivePrice = i.discountedPrice ?? i.price;
-    return a + effectivePrice * i.quantity;
+    return a + (i.discountedPrice ?? i.price) * i.quantity;
   }, 0);
 
-  // Savings: free items ka poora price + paid items ka discount
   const totalSavings = items.reduce((a, i) => {
-    if (i.variant?.includes('__FREE__')) {
-      return a + i.price * i.quantity; // FREE item = poori value saved
-    }
+    if (i.variant?.includes('__FREE__')) return a + i.price * i.quantity;
     if (i.discountedPrice !== undefined && i.discountedPrice < i.price) {
       return a + (i.price - i.discountedPrice) * i.quantity;
     }
