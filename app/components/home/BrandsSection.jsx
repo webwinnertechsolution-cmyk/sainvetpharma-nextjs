@@ -77,19 +77,9 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           padding: 28px 0 36px;
           background: #88A73B;
         }
-        .br-wrap {
-    padding: 52px 0 74px; 
-    padding-top: 0px !important;
-    background: #D0EDFB;
-    margin-top: 0px !important;
-    /* margin-top: 58px; */
-    /* margin-bottom: 22px; */
-}
         .br-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 30px 24px;
-}
+          max-width: 1400px; margin: 0 auto; padding: 0 24px;
+        }
 
         /* ── Header ── */
         .br-header {
