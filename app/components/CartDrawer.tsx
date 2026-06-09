@@ -192,7 +192,7 @@ export default function CartDrawer() {
         .cd-fs-fill.on{background:linear-gradient(90deg,#059669,#10b981);}
 
         /* ── Savings Banner ── */
-        .cd-sav{flex-shrink:0;background:linear-gradient(135deg,#d1fae5,#a7f3d0);padding:8px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #6ee7b7;}
+        .cd-sav{flex-shrink:0;background:linear-gradient(135deg,#d1fae5,#a7f3d0);padding:8px 18px;display:none;align-items:center;justify-content:space-between;border-bottom:1px solid #6ee7b7;}
         .cd-sav-l{font-size:12px;color:#065f46;font-weight:700;}
         .cd-sav-r{font-size:13px;color:#059669;font-weight:800;font-family:'Sora',sans-serif;}
 
@@ -271,7 +271,7 @@ export default function CartDrawer() {
         /* Grand total */
         .cd-grand{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(135deg,#0a214f,#1872B5);border-radius:12px;margin-bottom:4px;}
         .cd-grand-l{font-size:14px;font-weight:800;color:#fff;font-family:'Sora',sans-serif;}
-        .cd-grand-r{font-size:20px;font-weight:800;color:#fff;font-family:'Sora',sans-serif;}
+        .cd-grand-r{font-size:16px;font-weight:800;color:#fff;font-family:'Sora',sans-serif;}
         .cd-grand-note{font-size:9px;color:#93c5fd;font-weight:600;padding:0 14px;margin-bottom:12px;}
 
         .cd-btn{width:100%;padding:14px;background:linear-gradient(135deg,#1872B5,#2596e1);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .22s;box-shadow:0 4px 14px rgba(24,114,181,.3);text-decoration:none;}
