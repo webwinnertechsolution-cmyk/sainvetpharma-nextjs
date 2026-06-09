@@ -48,14 +48,12 @@ const ExclusiveOffers = () => {
         * { box-sizing: border-box; }
 
         .exclusive-offers-wrapper {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
- margin:  0px !important ;
- padding: 50px 25px;
-    background: #fff;
-    /* padding: 37px 0; */
-}
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+          margin: 60px 0;
+          padding: 0 20px;
+        }
 
         .offers-container {
           max-width: 1400px;
@@ -338,6 +336,7 @@ const ExclusiveOffers = () => {
     position: relative;
     width: 100%;
     overflow: hidden;
+    margin: 37px 0;
     padding: 0 20px;
 }
 .bs-wrap {
