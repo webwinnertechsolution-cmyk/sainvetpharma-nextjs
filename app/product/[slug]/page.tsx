@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/app/components/CartContext';
+import { getStoredUser } from '@/lib/googleAuth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -606,7 +607,17 @@ export default function ProductDetailPage() {
   const increaseQty = () => setQuantity(q => Math.min(maxStock, q + 1));
 
   const handleAddToCart = () => {
-    const price = getPrice();
+  // ── AUTH CHECK ──────────────────────────────
+  const currentUser = getStoredUser();
+  if (!currentUser?.firebase_uid) {
+    const returnPath = window.location.pathname;
+    window.location.href = `/login?returnTo=${encodeURIComponent(returnPath)}`;
+    return;
+  }
+  // ────────────────────────────────────────────
+
+  const price = getPrice();
+  if (!price || !product) return;
     if (!price || !product) return;
     const applicable = isDiscountApplicable();
     const discountLabel = applicable ? getDiscountLabel() : undefined;
