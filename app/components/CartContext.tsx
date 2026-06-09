@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -13,13 +13,13 @@ export interface CartItem {
   discountLabel?: string;
   variant?: string;
   quantity: number;
-  bxgyBuyQty?: number; // optional — product page se pass karo ya API se fetch hoga
+  bxgyBuyQty?: number;
   bxgyGetQty?: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+  addToCart: (item: Omit<CartItem, 'quantity'>, qty?: number) => void; // ✅ qty param add
   removeFromCart: (id: number, variant?: string) => void;
   updateQty: (id: number, variant: string | undefined, qty: number) => void;
   clearCart: () => void;
@@ -33,31 +33,20 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 // ─────────────────────────────────────────────────────────────
-// Discount cache — har product ke liye ek baar API call
+// Discount cache — ek product ke liye sirf ek baar API call
 // ─────────────────────────────────────────────────────────────
 const discountCache: Record<number, { buyQty: number; getQty: number } | null> = {};
 
 async function fetchBxgyDiscount(productId: number): Promise<{ buyQty: number; getQty: number } | null> {
-  // Cache mein hai toh wahi return karo
   if (productId in discountCache) return discountCache[productId];
-
   try {
     const res = await fetch(`${API_URL}/api/product-discount/${productId}`);
     const data = await res.json();
-
-    if (
-      data.has_discount &&
-      data.type === 'buy_x_get_y' &&
-      data.get_value_type === 'free'
-    ) {
-      const result = {
-        buyQty: Number(data.buy_quantity ?? 2),
-        getQty: Number(data.get_quantity ?? 1),
-      };
+    if (data.has_discount && data.type === 'buy_x_get_y' && data.get_value_type === 'free') {
+      const result = { buyQty: Number(data.buy_quantity ?? 2), getQty: Number(data.get_quantity ?? 1) };
       discountCache[productId] = result;
       return result;
     }
-
     discountCache[productId] = null;
     return null;
   } catch {
@@ -67,34 +56,27 @@ async function fetchBxgyDiscount(productId: number): Promise<{ buyQty: number; g
 }
 
 // ─────────────────────────────────────────────────────────────
-// Async BXGY sync — API se discount fetch karke free items
-// recalculate karta hai. Pure paid items lo, free items drop
-// karo, phir discount ke hisaab se naye free items add karo.
+// Async BXGY sync
 // ─────────────────────────────────────────────────────────────
 async function syncBxgyItems(items: CartItem[]): Promise<CartItem[]> {
-  // Sirf paid items rakho pehle (free items fresh recalculate hongi)
   const paidItems = items.filter(i => !i.variant?.includes('__FREE__'));
   const result: CartItem[] = [...paidItems];
-
-  // Unique product IDs
   const productIds = [...new Set(paidItems.map(i => i.id))];
 
   for (const productId of productIds) {
     const productPaidItems = paidItems.filter(i => i.id === productId);
     const baseItem = productPaidItems[0];
 
-    // BXGY data — pehle CartItem se lo, nahi toh API se fetch karo
     let buyQty = baseItem.bxgyBuyQty;
     let getQty = baseItem.bxgyGetQty;
 
     if (!buyQty || !getQty) {
       const discount = await fetchBxgyDiscount(productId);
-      if (!discount) continue; // Koi discount nahi
+      if (!discount) continue;
       buyQty = discount.buyQty;
       getQty = discount.getQty;
     }
 
-    // Total paid quantity
     const totalPaidQty = productPaidItems.reduce((sum, i) => sum + i.quantity, 0);
     const freeQty = Math.floor(totalPaidQty / buyQty) * getQty;
 
@@ -110,7 +92,6 @@ async function syncBxgyItems(items: CartItem[]): Promise<CartItem[]> {
       });
     }
   }
-
   return result;
 }
 
@@ -122,50 +103,47 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted]       = useState(false);
 
-  // LocalStorage restore
   useEffect(() => {
     setMounted(true);
     try {
       const saved = localStorage.getItem('cart');
       if (saved) {
         const parsed: CartItem[] = JSON.parse(saved);
-        // Restore karte waqt bhi BXGY sync karo
         syncBxgyItems(parsed).then(synced => setItems(synced));
       }
     } catch {}
   }, []);
 
-  // LocalStorage save
   useEffect(() => {
     if (mounted) localStorage.setItem('cart', JSON.stringify(items));
   }, [items, mounted]);
 
-  // Body scroll lock
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
   // ── addToCart ──────────────────────────────────────────────
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
+  // qty param: agar pass karo toh direct set karo (product page se)
+  // nahi karo toh +1 karo (default behaviour)
+  const addToCart = (item: Omit<CartItem, 'quantity'>, qty: number = 1) => {
     setItems(prev => {
       const paidPrev = prev.filter(i => !i.variant?.includes('__FREE__'));
       const existing = paidPrev.find(i => i.id === item.id && i.variant === item.variant);
       let updated: CartItem[];
+
       if (existing) {
+        // ✅ qty pass kiya hai → direct set karo, nahi toh +1
         updated = paidPrev.map(i =>
           i.id === item.id && i.variant === item.variant
-            ? { ...i, quantity: i.quantity + 1 }
+            ? { ...i, quantity: qty > 1 ? qty : i.quantity + 1 }
             : i
         );
       } else {
-        updated = [...paidPrev, { ...item, quantity: 1 }];
+        updated = [...paidPrev, { ...item, quantity: qty }];
       }
 
-      // Async sync — result aane pe state update
       syncBxgyItems(updated).then(synced => setItems(synced));
-
-      // Abhi ke liye free items ke bina state set karo (flash avoid)
       return updated;
     });
     setDrawerOpen(true);
@@ -176,16 +154,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(prev => {
       const isFree = variant?.includes('__FREE__');
       let filtered: CartItem[];
-
       if (isFree) {
         filtered = prev.filter(i => !(i.id === id && i.variant === variant));
       } else {
-        // Paid item + us product ki saari free items hato
         filtered = prev.filter(
           i => !(i.id === id && (i.variant === variant || i.variant?.includes('__FREE__')))
         );
       }
-
       syncBxgyItems(filtered).then(synced => setItems(synced));
       return filtered;
     });
@@ -193,23 +168,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // ── updateQty ─────────────────────────────────────────────
   const updateQty = (id: number, variant: string | undefined, qty: number) => {
-    if (variant?.includes('__FREE__')) return; // Free item manual change nahi
-
-    if (qty < 1) {
-      removeFromCart(id, variant);
-      return;
-    }
+    if (variant?.includes('__FREE__')) return;
+    if (qty < 1) { removeFromCart(id, variant); return; }
 
     setItems(prev => {
       const paidPrev = prev.filter(i => !i.variant?.includes('__FREE__'));
       const updated = paidPrev.map(i =>
         i.id === id && i.variant === variant ? { ...i, quantity: qty } : i
       );
-
-      // Async BXGY recalculate
       syncBxgyItems(updated).then(synced => setItems(synced));
-
-      return updated; // Temporary state without free items
+      return updated;
     });
   };
 
@@ -234,16 +202,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider value={{
-      items,
-      addToCart,
-      removeFromCart,
-      updateQty,
-      clearCart,
-      totalItems,
-      totalPrice,
-      totalSavings,
-      drawerOpen,
-      setDrawerOpen,
+      items, addToCart, removeFromCart, updateQty, clearCart,
+      totalItems, totalPrice, totalSavings, drawerOpen, setDrawerOpen,
     }}>
       {children}
     </CartContext.Provider>
