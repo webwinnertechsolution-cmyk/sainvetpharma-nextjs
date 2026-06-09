@@ -1332,40 +1332,40 @@ useEffect(() => {
                   )}
                 </div>
          
-                  {applicable && savings > 0 && (
-  <div className="savings-strip">
-    <div className="savings-left">
-      <div className="savings-left-icon">
-        {isBxgy ? '🎁' : '🏷️'}
-      </div>
-      <div>
-        <div className="savings-left-text-main">
-          You save ₹{savings.toLocaleString('en-IN', { maximumFractionDigits: 0 })} on this order
-        </div>
-        <div className="savings-left-text-sub">
-          {isBxgy && bxgyFreeQty > 0
-            ? `${bxgyFreeQty} item${bxgyFreeQty > 1 ? 's' : ''} free · `
-            : ''}
-          {discount.title}
-        </div>
-      </div>
-    </div>
-    <div className="savings-right">
-      <div className="savings-right-label">discount</div>
-      <div className="savings-right-value">
-        {isBxgy
-          ? discount.get_value_type === 'free'
-            ? `${Math.round((savings / (price! * quantity)) * 100)}% off`
-            : `${discount.get_value}% off`
-          : discount.value_type === 'percentage'
-            ? `${discount.value}% off`
-            : `${Math.round((savings / price!) * 100)}% off`
-        }
-      </div>
-    </div>
-  </div>
-)}
+{applicable && savings > 0 && (
+                  <div className="savings-strip">
+                    <div className="savings-left">
+                      <div className="savings-left-icon">
+                        {isBxgy ? '🎁' : '🏷️'}
+                      </div>
+                      <div>
+                        <div className="savings-left-text-main">
+                          You save ₹{savings.toLocaleString('en-IN', { maximumFractionDigits: 0 })} on this order
+                        </div>
+                        <div className="savings-left-text-sub">
+                          {isBxgy && bxgyFreeQty > 0
+                            ? `${bxgyFreeQty} item${bxgyFreeQty > 1 ? 's' : ''} free · `
+                            : ''}
+                          {discount.title}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="savings-right">
+                      <div className="savings-right-label">discount</div>
+                      <div className="savings-right-value">
+                        {isBxgy
+                          ? discount.get_value_type === 'free'
+                            ? `${Math.round((savings / (price! * quantity)) * 100)}% off`
+                            : `${discount.get_value}% off`
+                          : discount.value_type === 'percentage'
+                            ? `${discount.value}% off`
+                            : `${Math.round((savings / price!) * 100)}% off`
+                        }
+                      </div>
+                    </div>
+                  </div>
                 )}
+
                 {needMoreForBxgy && discount && (
                   <div className="bxgy-progress">
                     <div className="bxgy-progress-text">🎁 Add {(discount.buy_quantity ?? 1) - quantity} more to get {discount.get_quantity} free!</div>
