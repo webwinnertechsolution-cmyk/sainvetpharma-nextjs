@@ -747,8 +747,50 @@ useEffect(() => {
         .pd-gallery{position:sticky;top:24px;}
         .slider-wrap{position:relative;background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.1);cursor:zoom-in;}
         .slider-track{display:flex;width:100%;height:100%;transition:transform .42s cubic-bezier(.4,0,.2,1);}
-        .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:20px;flex-shrink:0;}
-        .slide img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease;}
+        /* ✅ NEW FIXED STYLES */
+.slide {
+    min-width: 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.slide img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain !important;
+    transition: transform .4s ease;
+    display: block;
+}
+
+/* Mobile fix */
+@media (max-width: 767px) {
+    .slide {
+        padding: 12px;
+    }
+    .slide img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain !important;
+    }
+}
+
+/* iPhone specific */
+@supports (-webkit-touch-callout: none) {
+    .slide img {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
         .slider-wrap:hover .slide img{transform:scale(1.04);}
         .arrow-btn{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:#374151;box-shadow:0 2px 12px rgba(0,0,0,.12);transition:all .22s;font-size:18px;padding:0;}
         .arrow-btn:hover{background:#1872B5;color:#fff;border-color:#1872B5;transform:translateY(-50%) scale(1.1);}
