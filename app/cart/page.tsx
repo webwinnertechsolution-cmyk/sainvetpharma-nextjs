@@ -107,6 +107,19 @@ export default function CartPage() {
         .ch-title { display: flex; align-items: center; gap: 10px; font-family: 'Sora',sans-serif; font-size: 17px; font-weight: 800; color: #0B1E3D; }
         .ch-pill { background: #EEF4FF; color: #2B7FE0; font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; font-family: 'Nunito',sans-serif; }
 
+        /* ─── Full-width Shipping Bar (drawer style) ─── */
+        .page-fs-bar { padding: 10px 0 12px; transition: background .4s, border-color .4s; }
+        .page-fs-bar.unlocked { background: linear-gradient(135deg,#d1fae5,#a7f3d0); border-bottom-color: #6ee7b7; }
+        .page-fs-bar:not(.unlocked) { background: #EFF6FF; border-bottom: 1px solid #BFDBFE; }
+        .page-fs-inner { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+        .page-fs-txt { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+        .page-fs-bar:not(.unlocked) .page-fs-txt { color: #1D4ED8; }
+        .page-fs-bar.unlocked .page-fs-txt { color: #065F46; }
+        .page-fs-track { height: 7px; background: rgba(0,0,0,.1); border-radius: 10px; overflow: hidden; }
+        .page-fs-fill { height: 100%; border-radius: 10px; transition: width .6s ease; }
+        .page-fs-bar:not(.unlocked) .page-fs-fill { background: linear-gradient(90deg,#3B82F6,#2B7FE0); }
+        .page-fs-bar.unlocked .page-fs-fill { background: linear-gradient(90deg,#059669,#10b981); }
+
         /* ─── Layout ─── */
         .cart-wrap { max-width: 1160px; margin: 28px auto 72px; padding: 0 24px; display: grid; grid-template-columns: 1fr 368px; gap: 20px; align-items: start; }
 
@@ -164,13 +177,7 @@ export default function CartPage() {
         .sum-head h2 { font-family: 'Sora',sans-serif; font-size: 15px; font-weight: 800; color: #0B1E3D; }
         .sum-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
 
-        /* Free shipping bar */
-        .fs-unlocked { background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #065F46; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .fs-bar-section { display: flex; flex-direction: column; gap: 7px; }
-        .fs-bar-txt { font-size: 12.5px; color: #6B7280; font-weight: 600; }
-        .fs-bar-txt strong { color: #0B1E3D; font-weight: 800; }
-        .fs-bar-track { width: 100%; height: 6px; background: #E5EAF2; border-radius: 10px; overflow: hidden; }
-        .fs-bar-fill { height: 100%; background: linear-gradient(90deg,#3B82F6,#2B7FE0); border-radius: 10px; transition: width .5s ease; }
+        /* (free shipping bar moved to full-width page level) */
 
         /* Savings banner */
         .savings-banner { display: flex; justify-content: space-between; align-items: center; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; }
@@ -245,6 +252,22 @@ export default function CartPage() {
             <span>🛒</span>
             Shopping Cart
             <span className="ch-pill">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Full-width Free Shipping Bar (drawer style) ── */}
+      <div className={`page-fs-bar ${freeUnlocked ? 'unlocked' : ''}`}>
+        <div className="page-fs-inner">
+          <div className="page-fs-txt">
+            {freeUnlocked ? (
+              <><span>🎉</span> You've unlocked FREE shipping on this order!</>
+            ) : (
+              <><span>🚚</span> Add <strong style={{ margin: '0 4px' }}>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for FREE shipping!</>
+            )}
+          </div>
+          <div className="page-fs-track">
+            <div className="page-fs-fill" style={{ width: `${freeProgress}%` }} />
           </div>
         </div>
       </div>
@@ -337,18 +360,6 @@ export default function CartPage() {
         <div className="sum-card">
           <div className="sum-head"><h2>Order Summary</h2></div>
           <div className="sum-body">
-
-            {/* Shipping bar */}
-            {freeUnlocked ? (
-              <div className="fs-unlocked">
-                <span>✅</span> You've unlocked FREE shipping!
-              </div>
-            ) : (
-              <div className="fs-bar-section">
-                <div className="fs-bar-txt">Add <strong>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for free shipping</div>
-                <div className="fs-bar-track"><div className="fs-bar-fill" style={{ width: `${freeProgress}%` }} /></div>
-              </div>
-            )}
 
             {/* Savings */}
             {totalSavings > 0 && (
