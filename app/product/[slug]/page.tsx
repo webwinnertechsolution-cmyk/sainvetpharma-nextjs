@@ -1254,14 +1254,14 @@ useEffect(() => {
                 <div className="price-row">
                   {applicable ? (
                     <>
-                      <span className="price-main with-discount">₹{finalPrice!.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                      <span className="price-orig">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                      <span className="price-main with-discount">₹{(finalPrice! * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+<span className="price-orig">₹{(price * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                       {isBxgy ? <span className="bxgy-tag">🎁 {getBxgyLabel()}</span> : <span className="discount-applied-tag">🏷️ {discountLabel}</span>}
                     </>
                   ) : (
                     <>
-                      <span className="price-main">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                      {compare && <span className="price-orig">₹{compare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
+                      <span className="price-main">₹{(price * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+{compare && <span className="price-orig">₹{(compare * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                       {variantDisc && <span className="disc-tag">{variantDisc}% OFF</span>}
                     </>
                   )}
@@ -1271,12 +1271,17 @@ useEffect(() => {
                     <div className="savings-left">
                       <span>{isBxgy ? '🎁' : '🎉'}</span>
                       <div>
-                        <div>You save ₹{savings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+                        <div>You save ₹{(savings * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
                         {isBxgy && bxgyFreeQty > 0 && <div className="savings-sub">{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} free</div>}
                         {discount.title && <div className="savings-sub">"{discount.title}" applied</div>}
                       </div>
                     </div>
-                    <div className="savings-right">{discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`} off</div>
+                   <div className="savings-right">
+  {isBxgy
+    ? (discount.get_value_type === 'percentage' ? `${discount.get_value}%` : 'FREE')
+    : (discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`)
+  } off
+</div>
                   </div>
                 )}
                 {needMoreForBxgy && discount && (
