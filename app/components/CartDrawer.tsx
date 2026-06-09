@@ -102,26 +102,16 @@ export default function CartDrawer() {
         if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
 
         if (data.is_free_shipping) {
-          // Backend ne free shipping confirm kiya
           setFallbackCharge(0);
         } else if (data.success && data.methods?.length > 0) {
-          // Normal methods available
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
-        } else if (data.success && data.methods?.length === 0) {
-          // methods[] empty — free_shipping_min se decide karo
-          const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : null;
-          if (freeMin !== null && totalPrice >= freeMin) {
-            setFallbackCharge(0);
-          }
-          // else: shippingCharge = null → "At checkout" dikhega
-        } else {
-          setShippingError(true);
         }
+        // methods[] empty ho ya koi error ho — kuch set nahi karo
+        // shipping row hide rahegi jab tak real methods na aayein
         setShippingLoading(false);
       })
       .catch(() => {
-        setShippingError(true);
         setShippingLoading(false);
       });
   }, [drawerOpen, totalPrice]);
@@ -140,14 +130,19 @@ export default function CartDrawer() {
   const progress     = freeMin > 0 ? Math.min(100, (totalPrice / freeMin) * 100) : 0;
   const freeUnlocked = freeMin > 0 && totalPrice >= freeMin;
 
+  // shippingKnown = true sirf tab jab actual rate hai ya free confirm hai
+  const shippingKnown: boolean = (
+    freeUnlocked ||
+    fallbackCharge === 0 ||
+    shippingMethods.length > 0
+  );
+
   const shippingCharge: number | null = (() => {
     if (items.length === 0)        return 0;
     if (freeUnlocked)              return 0;
-    if (shippingLoading)           return null;
-    if (shippingError)             return null;
-    if (fallbackCharge !== null)   return fallbackCharge;
-    if (!selectedShipping)         return null;
-    return Number(selectedShipping.charge);
+    if (fallbackCharge === 0)      return 0;
+    if (selectedShipping)          return Number(selectedShipping.charge);
+    return null; // unknown — row hide hogi
   })();
 
   const grandTotal = shippingCharge !== null
@@ -228,7 +223,7 @@ export default function CartDrawer() {
         .cd-rm{background:none;border:none;cursor:pointer;color:#9ca3af;font-size:14px;padding:3px;transition:color .2s;margin-left:5px;line-height:1;}
         .cd-rm:hover{color:#ef4444;}
 
-        /* ── Shipping Section ── */
+        /* ── Shipping Section (drawer ke andar) ── */
         .cd-ship{flex-shrink:0;border-top:1px solid #f3f4f6;padding:10px 16px 0;display:none;}
         .cd-ship-lbl{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
         .cd-ship-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
@@ -247,12 +242,10 @@ export default function CartDrawer() {
         @keyframes spin{to{transform:rotate(360deg)}}
         .cd-spinner{width:13px;height:13px;border-radius:50%;border:2px solid #e5e7eb;border-top-color:#1872B5;animation:spin .7s linear infinite;flex-shrink:0;}
         .cd-sloading{font-size:12px;color:#9ca3af;font-weight:600;display:flex;align-items:center;gap:6px;padding:6px 0 10px;}
-        .cd-serror{font-size:11px;color:#dc2626;font-weight:600;background:#fee2e2;padding:7px 10px;border-radius:8px;margin-bottom:8px;}
 
         /* ── Footer / Price Summary ── */
         .cd-foot{padding:10px 18px 18px;border-top:2px solid #f3f4f6;flex-shrink:0;background:#fff;}
 
-        /* Summary table */
         .cd-summary{background:#f8faff;border:1.5px solid #e0eaff;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
         .cd-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
         .cd-row+.cd-row{border-top:1px dashed #e5e7eb;}
@@ -262,11 +255,9 @@ export default function CartDrawer() {
         .cd-rv.r{color:#ef4444;}
         .cd-rv.m{color:#9ca3af;font-size:11px;font-weight:600;}
 
-        /* Grand total */
-        .cd-grand{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(135deg,#0a214f,#1872B5);border-radius:12px;margin-bottom:4px;}
+        .cd-grand{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(135deg,#0a214f,#1872B5);border-radius:12px;margin-bottom:12px;}
         .cd-grand-l{font-size:12px;font-weight:800;color:#fff;font-family:'Sora',sans-serif;}
         .cd-grand-r{font-size:12px;font-weight:800;color:#fff;font-family:'Sora',sans-serif;}
-        .cd-grand-note{font-size:9px;color:#93c5fd;font-weight:600;padding:0 14px;margin-bottom:12px;}
 
         .cd-btn{width:100%;padding:14px;background:linear-gradient(135deg,#1872B5,#2596e1);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .22s;box-shadow:0 4px 14px rgba(24,114,181,.3);text-decoration:none;}
         .cd-btn:hover{background:linear-gradient(135deg,#1560a0,#1872B5);transform:translateY(-1px);}
@@ -373,55 +364,36 @@ export default function CartDrawer() {
               })}
             </div>
 
-            {/* Shipping Section */}
-            <div className="cd-ship">
-              <div className="cd-ship-lbl">🚚 Shipping</div>
-              {shippingLoading ? (
-                <div className="cd-sloading"><div className="cd-spinner" /> Calculating shipping...</div>
-              ) : freeUnlocked || fallbackCharge === 0 ? (
-                <div className="cd-sfree">🎉 Free shipping applied automatically!</div>
-              ) : shippingError ? (
-                <div className="cd-serror">⚠️ Shipping unavailable — calculated at checkout</div>
-              ) : fallbackCharge !== null ? (
-                <div className="cd-ship-list">
-                  <div className="cd-ship-opt on">
-                    <div className="cd-sradio"><div className="cd-sdot" /></div>
-                    <div className="cd-sinfo">
-                      <div className="cd-sname">Standard Delivery</div>
-                      {freeShippingMin && (
-                        <div className="cd-stime">
-                          Free above ₹{Number(freeShippingMin).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            {/* Shipping Section — sirf tab dikhao jab real methods hon */}
+            {shippingKnown && (
+              <div className="cd-ship" style={{ display: 'block' }}>
+                <div className="cd-ship-lbl">🚚 Shipping</div>
+                {shippingLoading ? (
+                  <div className="cd-sloading"><div className="cd-spinner" /> Calculating shipping...</div>
+                ) : freeUnlocked || fallbackCharge === 0 ? (
+                  <div className="cd-sfree">🎉 Free shipping applied automatically!</div>
+                ) : shippingMethods.length > 0 ? (
+                  <div className="cd-ship-list">
+                    {shippingMethods.map((m: ShippingMethod) => (
+                      <div
+                        key={m.rate_id}
+                        className={`cd-ship-opt ${selectedShipping?.rate_id === m.rate_id ? 'on' : ''}`}
+                        onClick={() => setSelectedShipping(m)}
+                      >
+                        <div className="cd-sradio"><div className="cd-sdot" /></div>
+                        <div className="cd-sinfo">
+                          <div className="cd-sname">{m.name}</div>
+                          {m.delivery_time && <div className="cd-stime">⏱ {m.delivery_time}</div>}
                         </div>
-                      )}
-                    </div>
-                    <div className={`cd-sprice ${fallbackCharge === 0 ? 'free' : ''}`}>
-                      {fallbackCharge === 0 ? 'FREE' : `₹${fallbackCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                    </div>
+                        <div className={`cd-sprice ${m.charge === 0 ? 'free' : ''}`}>
+                          {m.charge === 0 ? 'FREE' : `₹${Number(m.charge).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ) : shippingMethods.length > 0 ? (
-                <div className="cd-ship-list">
-                  {shippingMethods.map((m: ShippingMethod) => (
-                    <div
-                      key={m.rate_id}
-                      className={`cd-ship-opt ${selectedShipping?.rate_id === m.rate_id ? 'on' : ''}`}
-                      onClick={() => setSelectedShipping(m)}
-                    >
-                      <div className="cd-sradio"><div className="cd-sdot" /></div>
-                      <div className="cd-sinfo">
-                        <div className="cd-sname">{m.name}</div>
-                        {m.delivery_time && <div className="cd-stime">⏱ {m.delivery_time}</div>}
-                      </div>
-                      <div className={`cd-sprice ${m.charge === 0 ? 'free' : ''}`}>
-                        {m.charge === 0 ? 'FREE' : `₹${Number(m.charge).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="cd-sloading" style={{ paddingBottom: 10 }}>No shipping methods available</div>
-              )}
-            </div>
+                ) : null}
+              </div>
+            )}
 
             {/* ── Price Summary Footer ── */}
             <div className="cd-foot">
@@ -440,42 +412,37 @@ export default function CartDrawer() {
                   </div>
                 )}
 
-                {/* Shipping */}
-                <div className="cd-row">
-                  <span className="cd-rl">
-                    🚚 Shipping
-                    {selectedShipping && !freeUnlocked && !shippingLoading && (
-                      <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 4, fontWeight: 600 }}>
-                        ({selectedShipping.name})
-                      </span>
-                    )}
-                  </span>
-                  {shippingLoading ? (
-                    <span className="cd-rv m">Calculating...</span>
-                  ) : freeUnlocked ? (
-                    <span className="cd-rv g">FREE 🎉</span>
-                  ) : shippingCharge !== null ? (
-                    <span className={`cd-rv ${shippingCharge === 0 ? 'g' : ''}`}>
-                      {shippingCharge === 0 ? 'FREE' : `₹${shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
+                {/* Shipping row — sirf tab dikhao jab rate known ho */}
+                {shippingKnown && (
+                  <div className="cd-row">
+                    <span className="cd-rl">
+                      🚚 Shipping
+                      {selectedShipping && !freeUnlocked && (
+                        <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 4, fontWeight: 600 }}>
+                          ({selectedShipping.name})
+                        </span>
+                      )}
                     </span>
-                  ) : (
-                    <span className="cd-rv m">At checkout</span>
-                  )}
-                </div>
+                    {shippingLoading ? (
+                      <span className="cd-rv m">Calculating...</span>
+                    ) : freeUnlocked || shippingCharge === 0 ? (
+                      <span className="cd-rv g">FREE 🎉</span>
+                    ) : shippingCharge !== null ? (
+                      <span className="cd-rv">
+                        ₹{shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               {/* Grand Total */}
               <div className="cd-grand">
-                <span className="cd-grand-l">Total{shippingCharge === null ? '*' : ''}</span>
+                <span className="cd-grand-l">Total</span>
                 <span className="cd-grand-r">
                   ₹{grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </span>
               </div>
-              <p className="cd-grand-note">
-                {shippingCharge === null
-                  ? '* Shipping will be calculated at checkout · Taxes included'
-                  : 'Taxes included · Final price'}
-              </p>
 
               <Link href="/cart" className="cd-btn" onClick={() => setDrawerOpen(false)}>
                 🛒 View Cart &amp; Checkout
