@@ -32,14 +32,12 @@ export default function CartDrawer() {
   const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
   const [shippingLoading, setShippingLoading]   = useState(false);
   const [shippingError, setShippingError]       = useState(false);
-  // Fallback charge jab methods[] empty ho (backend se configured nahi)
   const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
   const [itemsWithDiscount, setItemsWithDiscount] = useState<any[]>([]);
 
   // ── Free shipping threshold — sirf ek baar fetch ──
-  // (calculate-shipping API se hi milta hai free_shipping_min)
   useEffect(() => {
-    if (freeShippingMin !== null) return; // already fetched
+    if (freeShippingMin !== null) return;
     fetch(`${API_URL}/api/calculate-shipping?cart_total=0&country=india`)
       .then(r => r.json())
       .then(d => {
@@ -101,7 +99,6 @@ export default function CartDrawer() {
     fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
       .then(r => r.json())
       .then(data => {
-        // free_shipping_min hamesha save karo
         if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
 
         if (data.is_free_shipping) {
@@ -112,12 +109,12 @@ export default function CartDrawer() {
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
         } else if (data.success && data.methods?.length === 0) {
-          // methods[] empty — backend mein configure nahi
-          // free_shipping_min se decide karo
+          // methods[] empty — free_shipping_min se decide karo
           const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : null;
           if (freeMin !== null && totalPrice >= freeMin) {
-            setFallbackCharge(0); // free shipping threshold cross ho gayi
-          } 
+            setFallbackCharge(0);
+          }
+          // else: shippingCharge = null → "At checkout" dikhega
         } else {
           setShippingError(true);
         }
@@ -148,7 +145,7 @@ export default function CartDrawer() {
     if (freeUnlocked)              return 0;
     if (shippingLoading)           return null;
     if (shippingError)             return null;
-    if (fallbackCharge !== null)   return fallbackCharge;   // ✅ fallback use karo
+    if (fallbackCharge !== null)   return fallbackCharge;
     if (!selectedShipping)         return null;
     return Number(selectedShipping.charge);
   })();
@@ -211,13 +208,13 @@ export default function CartDrawer() {
         .cd-img img{width:100%;height:100%;object-fit:contain;padding:4px;}
         .cd-img-ph{font-size:26px;color:#d1d5db;}
         .cd-fbadge{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:9px;font-weight:800;padding:2px 4px;border-radius:0 0 8px 8px;text-align:center;}
-.cd-dbadge{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:8px;font-weight:800;padding:2px 4px;border-radius:0 0 8px 8px;text-align:center;line-height:1.3;}
+        .cd-dbadge{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:8px;font-weight:800;padding:2px 4px;border-radius:0 0 8px 8px;text-align:center;line-height:1.3;}
         .cd-info{flex:1;min-width:0;}
         .cd-title{font-size:12px;font-weight:700;color:#0a214f;line-height:1.4;margin-bottom:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
         .cd-vtag{font-size:10px;color:#6b7280;font-weight:600;background:#f3f4f6;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:1px;}
         .cd-ftag{font-size:10px;color:#065f46;font-weight:700;background:#d1fae5;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:7px;}
         .cd-bot{display:flex;align-items:center;justify-content:space-between;}
-        .cd-pcol {display: flex;flex-direction: row;gap: 8px;align-items: center;}
+        .cd-pcol{display:flex;flex-direction:row;gap:8px;align-items:center;}
         .cd-price{font-size:12px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;}
         .cd-price.d{color:#059669;}
         .cd-price.f{color:#059669;}
@@ -232,7 +229,7 @@ export default function CartDrawer() {
         .cd-rm:hover{color:#ef4444;}
 
         /* ── Shipping Section ── */
-        .cd-ship{flex-shrink:0;border-top:1px solid #f3f4f6;padding:10px 16px 0; display:none;}
+        .cd-ship{flex-shrink:0;border-top:1px solid #f3f4f6;padding:10px 16px 0;display:none;}
         .cd-ship-lbl{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
         .cd-ship-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
         .cd-ship-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .18s;background:#fff;}
@@ -386,7 +383,6 @@ export default function CartDrawer() {
               ) : shippingError ? (
                 <div className="cd-serror">⚠️ Shipping unavailable — calculated at checkout</div>
               ) : fallbackCharge !== null ? (
-                // methods[] empty tha — fallback charge show karo
                 <div className="cd-ship-list">
                   <div className="cd-ship-opt on">
                     <div className="cd-sradio"><div className="cd-sdot" /></div>
