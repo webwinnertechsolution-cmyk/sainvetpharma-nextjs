@@ -155,7 +155,7 @@ export default function CartPage() {
         .ci-save-chip { background: #ECFDF5; color: #059669; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 5px; }
         .ci-free-note { font-size: 12px; color: #059669; font-weight: 700; }
 
-        .ci-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 10px; }
+        .ci-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0px; flex-wrap: wrap; gap: 10px; }
         .ci-total-col { display: flex; flex-direction: column; gap: 2px; }
         .ci-total-val { font-family: 'Sora',sans-serif; font-size: 14px; font-weight: 800; color: #0B1E3D; line-height: 1; }
         .ci-total-val.free-val { color: #059669; font-size: 12px; }
