@@ -70,11 +70,17 @@ export default function PromotionalBanner() {
   return (
     <section className="promotional-banner-wrapper">
       <style>{`
+
+	  .promotional-banner-wrapper,
+.promotional-banner-wrapper * {
+  color-scheme: light;
+}
         .promotional-banner-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
   margin: 40px 0;  /* ← change to: margin: 0; */
+  background:#fffff !important;
 }
 
 .promotional-banner {
