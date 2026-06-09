@@ -131,70 +131,62 @@ export default function CartPage() {
         .clear-btn:hover { background: #FEF2F2; border-color: #DC2626; }
 
         /* ─── Cart Item ─── */
-        .ci { display: flex; gap: 16px; padding: 20px 22px; border-bottom: 1px solid #F0F2F7; animation: fadeUp .28s ease; transition: background .15s; }
-        .ci:last-child { border-bottom: none; }
-        .ci:hover { background: #FAFBFF; }
-
-        .ci-img-wrap { position: relative; flex-shrink: 0; }
-        .ci-img { width: 88px; height: 88px; border-radius: 12px; border: 1px solid #E5EAF2; background: #F8F9FC; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .ci-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-        .ci-badge { position: absolute; top: -6px; left: -6px; font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 7px; letter-spacing: .02em; text-transform: uppercase; }
-        .ci-badge.free { background: #059669; color: #fff; }
-        .ci-badge.disc { background: #EF4444; color: #fff; top: -6px; left: auto; right: -6px; }
-
-        .ci-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-        .ci-name { font-size: 14.5px; font-weight: 700; color: #0B1E3D; line-height: 1.4; text-decoration: none; display: block; transition: color .15s; }
-        .ci-name:hover { color: #2B7FE0; }
-        .ci-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; width: fit-content; }
-        .ci-tag.variant { background: #F3F4F6; color: #6B7280; }
-        .ci-tag.free-item { background: #D1FAE5; color: #065F46; }
-
-        .ci-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .ci-orig  { font-size: 12px; color: #9CA3AF; text-decoration: line-through; }
-        .ci-final { font-size: 13px; font-weight: 700; color: #059669; }
-        .ci-save-chip { background: #ECFDF5; color: #059669; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 5px; }
-        .ci-free-note { font-size: 12px; color: #059669; font-weight: 700; }
-
-        .ci-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 10px; }
-        .ci-total-col { display: flex; flex-direction: column; gap: 2px; }
-        .ci-total-val { font-family: 'Sora',sans-serif; font-size: 20px; font-weight: 800; color: #0B1E3D; line-height: 1; }
-        .ci-total-val.free-val { color: #059669; font-size: 16px; }
-        .ci-total-slashed { font-size: 11.5px; color: #9CA3AF; text-decoration: line-through; }
-        .ci-total-saved { font-size: 11px; font-weight: 700; color: #059669; }
-
-        .ci-actions { display: flex; align-items: center; gap: 10px; }
-        .qty-wrap { display: flex; align-items: center; border: 1.5px solid #E5EAF2; border-radius: 10px; overflow: hidden; background: #F8F9FC; }
-        .qty-btn { width: 34px; height: 34px; border: none; background: transparent; cursor: pointer; font-size: 17px; font-weight: 600; color: #374151; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-        .qty-btn:hover:not(:disabled) { background: #EEF4FF; color: #2B7FE0; }
-        .qty-btn:disabled { opacity: .3; cursor: not-allowed; }
-        .qty-num { width: 38px; height: 34px; text-align: center; font-size: 14px; font-weight: 800; color: #0B1E3D; background: #fff; border-left: 1.5px solid #E5EAF2; border-right: 1.5px solid #E5EAF2; display: flex; align-items: center; justify-content: center; font-family: 'Sora',sans-serif; }
-        .del-btn { width: 34px; height: 34px; border: 1.5px solid #E5EAF2; border-radius: 8px; background: #fff; cursor: pointer; color: #9CA3AF; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all .18s; }
-        .del-btn:hover { border-color: #FCA5A5; background: #FEF2F2; color: #DC2626; }
+        .ci{display:flex;gap:12px;padding:14px 22px;border-bottom:1px solid #f5f6fa;align-items:flex-start;transition:background .15s;}
+.ci:last-child{border-bottom:none;}
+.ci:hover{background:#fafbff;}
+.ci-img{width:76px;height:76px;border-radius:12px;border:1.5px solid #e8edf5;background:#f8fafc;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.ci-img img{width:100%;height:100%;object-fit:contain;padding:6px;}
+.ci-badge{position:absolute;bottom:0;left:0;right:0;font-size:8px;font-weight:800;text-align:center;padding:2px 0;border-radius:0 0 10px 10px;text-transform:uppercase;letter-spacing:.04em;}
+.ci-badge.free{background:#059669;color:#fff;}
+.ci-badge.disc{background:#7c3aed;color:#fff;}
+.ci-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+.ci-name{font-size:13.5px;font-weight:700;color:#0a214f;line-height:1.35;text-decoration:none;display:block;transition:color .15s;}
+.ci-name:hover{color:#1872B5;}
+.ci-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;width:fit-content;margin-bottom:4px;}
+.ci-tag.variant{background:#f3f4f6;color:#6b7280;}
+.ci-tag.free-item{background:#d1fae5;color:#065f46;}
+.ci-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:2px;}
+.ci-prices{display:flex;flex-direction:column;gap:1px;}
+.ci-price-each{font-size:11px;color:#9ca3af;font-weight:600;}
+.ci-total-val{font-size:18px;font-weight:800;color:#0a214f;font-family:'Sora',sans-serif;line-height:1;}
+.ci-total-val.free-val{color:#059669;font-size:15px;}
+.ci-total-slashed{font-size:11px;color:#9ca3af;text-decoration:line-through;}
+.ci-total-saved{font-size:10px;font-weight:700;color:#059669;}
+.ci-actions{display:flex;align-items:center;gap:8px;}
+.qty-wrap{display:flex;align-items:center;border:1.5px solid #e5eaf2;border-radius:9px;overflow:hidden;background:#f8fafc;}
+.qty-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;font-size:16px;font-weight:600;color:#374151;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.qty-btn:hover:not(:disabled){background:#eff6ff;color:#1872B5;}
+.qty-btn:disabled{opacity:.3;cursor:not-allowed;}
+.qty-num{width:34px;height:32px;text-align:center;font-size:13px;font-weight:800;color:#0a214f;background:#fff;border-left:1.5px solid #e5eaf2;border-right:1.5px solid #e5eaf2;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;}
+.del-btn{width:32px;height:32px;border:1.5px solid #e5eaf2;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.del-btn:hover{border-color:#fca5a5;background:#fef2f2;color:#dc2626;}
 
         /* ─── Summary Card ─── */
-        .sum-card { background: #fff; border-radius: 16px; border: 1px solid #E5EAF2; box-shadow: 0 1px 8px rgba(0,0,0,.05); overflow: hidden; position: sticky; top: 24px; }
-        .sum-head { padding: 16px 22px; border-bottom: 1px solid #F0F2F7; }
-        .sum-head h2 { font-family: 'Sora',sans-serif; font-size: 15px; font-weight: 800; color: #0B1E3D; }
-        .sum-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
-
-        /* (free shipping bar moved to full-width page level) */
-
-        /* Savings banner */
-        .savings-banner { display: flex; justify-content: space-between; align-items: center; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; }
-        .savings-l { font-size: 13px; color: #065F46; font-weight: 700; }
-        .savings-r { font-size: 14px; font-weight: 800; color: #059669; font-family: 'Sora',sans-serif; }
-
-        /* Price table */
-        .price-table { border: 1px solid #E5EAF2; border-radius: 12px; overflow: hidden; }
-        .pt-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; border-bottom: 1px solid #F0F2F7; }
-        .pt-row:last-child { border-bottom: none; }
-        .pt-label { font-size: 13px; color: #6B7280; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .pt-label-icon { font-size: 13px; }
-        .pt-val { font-size: 13.5px; font-weight: 800; color: #0B1E3D; font-family: 'Sora',sans-serif; }
-        .pt-val.green { color: #059669; }
-        .pt-val.free-ship { color: #059669; }
-        .pt-val.loading { color: #9CA3AF; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .spin-ring { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #E5EAF2; border-top-color: #2B7FE0; animation: spin .65s linear infinite; flex-shrink: 0; }
+        .sum-card{background:#fff;border-radius:16px;border:1px solid #e5eaf2;overflow:hidden;position:sticky;top:24px;}
+.sum-head{padding:14px 20px;border-bottom:1px solid #f0f2f7;}
+.sum-head h2{font-family:'Sora',sans-serif;font-size:15px;font-weight:800;color:#0a214f;}
+.sum-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;}
+.savings-banner{display:flex;justify-content:space-between;align-items:center;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;}
+.savings-l{font-size:12px;color:#14532d;font-weight:700;}
+.savings-r{font-size:14px;font-weight:800;color:#16a34a;font-family:'Sora',sans-serif;}
+.price-table{border:1px solid #e8edf5;border-radius:11px;overflow:hidden;}
+.pt-row{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid #f0f2f7;}
+.pt-row:last-child{border-bottom:none;}
+.pt-label{font-size:12px;color:#6b7280;font-weight:600;display:flex;align-items:center;gap:5px;}
+.pt-val{font-size:13px;font-weight:800;color:#0a214f;font-family:'Sora',sans-serif;}
+.pt-val.green{color:#059669;}
+.pt-val.free-ship{color:#059669;}
+.pt-val.loading{color:#9ca3af;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.grand-total-block{background:#0a214f;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+.gt-label{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.07em;}
+.gt-amount{font-family:'Sora',sans-serif;font-size:24px;font-weight:800;color:#fff;line-height:1;}
+.gt-note{font-size:10px;color:#9ca3af;padding:0 2px;}
+.checkout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:#1872B5;color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:800;font-family:'Sora',sans-serif;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.01em;}
+.checkout-btn:hover{background:#1560a0;transform:translateY(-1px);}
+.continue-btn{display:block;width:100%;padding:11px;background:#f0f4fa;color:#374151;border:1.5px solid #e5eaf2;border-radius:11px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;text-decoration:none;text-align:center;transition:all .18s;}
+.continue-btn:hover{background:#eff6ff;border-color:#1872B5;color:#1872B5;}
+.trust-strip{display:flex;align-items:center;justify-content:center;gap:16px;padding-top:12px;border-top:1px solid #f0f2f7;}
+.trust-item{font-size:11px;color:#9ca3af;font-weight:600;display:flex;align-items:center;gap:4px;}
 
         /* Shipping methods */
         .ship-methods { display: flex; flex-direction: column; gap: 6px; }
@@ -296,13 +288,11 @@ export default function CartPage() {
 
             return (
               <div className="ci" key={`${item.id}-${item.variant || ''}-${idx}`}>
-                <div className="ci-img-wrap">
-                  <div className="ci-img">
-                    {item.image ? <img src={item.image} alt={item.title} /> : <span style={{ fontSize: 32, color: '#D1D5DB' }}>📦</span>}
-                  </div>
-                  {isFree && <span className="ci-badge free">Free</span>}
-                  {!isFree && item.discountLabel && <span className="ci-badge disc">{item.discountLabel}</span>}
-                </div>
+                <div className="ci-img">
+  {item.image ? <img src={item.image} alt={item.title} /> : <span style={{fontSize:28,color:'#d1d5db'}}>📦</span>}
+  {isFree && <span className="ci-badge free">FREE</span>}
+  {!isFree && item.discountLabel && <span className="ci-badge disc">{item.discountLabel}</span>}
+</div>
 
                 <div className="ci-body">
                   <Link href={`/product/${item.slug}`} className="ci-name">{item.title}</Link>
@@ -326,32 +316,28 @@ export default function CartPage() {
                     )}
                   </div>
 
-                  <div className="ci-footer">
-                    <div className="ci-total-col">
-                      <span className={`ci-total-val ${isFree ? 'free-val' : ''}`}>
-                        {isFree ? 'FREE 🎁' : `₹${itemTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                      </span>
-                      {(isFree || item.discountedPrice) && (
-                        <>
-                          <span className="ci-total-slashed">₹{origTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          <span className="ci-total-saved">You save ₹{itemSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="ci-actions">
-                      <div className="qty-wrap">
-                        <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity - 1)}>−</button>
-                        <span className="qty-num">{item.quantity}</span>
-                        <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity + 1)}>+</button>
-                      </div>
-                      <button className="del-btn" onClick={() => removeFromCart(item.id, item.variant)} title="Remove item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  <div className="ci-meta">
+  <div className="ci-prices">
+    <span className="ci-price-each">
+      {isFree ? '' : `₹${item.price.toLocaleString('en-IN')} × ${item.quantity}`}
+    </span>
+    <span className={`ci-total-val ${isFree ? 'free-val' : ''}`}>
+      {isFree ? 'FREE 🎁' : `₹${itemTotal.toLocaleString('en-IN',{maximumFractionDigits:0})}`}
+    </span>
+    {itemSavings > 0 && <span className="ci-total-saved">You save ₹{itemSavings.toLocaleString('en-IN',{maximumFractionDigits:0})}</span>}
+    {isFree && <span className="ci-total-slashed">₹{origTotal.toLocaleString('en-IN',{maximumFractionDigits:0})}</span>}
+  </div>
+  <div className="ci-actions">
+    <div className="qty-wrap">
+      <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity - 1)}>−</button>
+      <span className="qty-num">{item.quantity}</span>
+      <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity + 1)}>+</button>
+    </div>
+    <button className="del-btn" onClick={() => removeFromCart(item.id, item.variant)}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>
+  </div>
+</div>
             );
           })}
         </div>
