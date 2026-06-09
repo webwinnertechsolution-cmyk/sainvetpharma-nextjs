@@ -20,8 +20,8 @@ const BrandsSection = ({ section = null, brands = [] }) => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const GAP          = 20;
-  const maxVisible   = isMobile ? 2 : 7;  // Mobile mein 2 slides
+  const GAP          = 12;  // Mobile mein gap kam kiya
+  const maxVisible   = isMobile ? 3 : 7;  // Mobile mein 3 slides
   const itemsVisible = Math.min(maxVisible, brands.length);
   const totalSlides  = brands.length > itemsVisible ? brands.length - itemsVisible + 1 : 1;
   const showArrows   = brands.length > itemsVisible;
@@ -161,20 +161,20 @@ const BrandsSection = ({ section = null, brands = [] }) => {
 
         /* ── Mobile ── */
         @media (max-width: 767px) {
-          .br-wrap { padding: 24px 0; }
-          .br-inner { padding: 0 14px; }
-          .br-header { margin-bottom: 16px; }
+          .br-wrap { padding: 20px 0; }
+          .br-inner { padding: 0 10px; }
+          .br-header { margin-bottom: 12px; }
           .br-header h2 { font-size: 18px; }
 
           .br-card {
-            flex: 0 0 calc((100% - ${1 * GAP}px) / 2) !important;  /* 2 cards with 1 gap */
-            height: 70px;
-            max-width: none;
+            flex: 0 0 calc((100% - 24px) / 3) !important;  /* 3 cards, 2 gaps of 12px = 24px */
+            height: 60px;
+            max-width: none !important;
           }
           .br-card img { 
-            max-height: 70px; 
+            max-height: 60px; 
             width: 100%; 
-            height: 70px; 
+            height: 60px; 
           }
 
           .br-arrow { 
