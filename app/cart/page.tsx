@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCart } from '@/app/components/CartContext';
@@ -31,7 +30,6 @@ export default function CartPage() {
   const [freeShippingMin, setFreeShippingMin]   = useState<number>(999);
   const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
 
-  // ── Shipping fetch ──
   useEffect(() => {
     if (items.length === 0) return;
     setShippingLoading(true);
@@ -43,7 +41,6 @@ export default function CartPage() {
       .then(r => r.json())
       .then(data => {
         if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
-
         if (data.is_free_shipping) {
           setFallbackCharge(0);
         } else if (data.success && data.methods?.length > 0) {
@@ -62,251 +59,272 @@ export default function CartPage() {
       });
   }, [totalPrice]);
 
-  // ── Calculations ──
   const freeUnlocked = totalPrice >= freeShippingMin;
   const freeProgress = Math.min((totalPrice / freeShippingMin) * 100, 100);
   const remaining    = Math.max(0, freeShippingMin - totalPrice);
 
   const shippingCharge: number = (() => {
-    if (freeUnlocked)             return 0;
-    if (fallbackCharge !== null)  return fallbackCharge;
-    if (selectedShipping)         return Number(selectedShipping.charge);
+    if (freeUnlocked)            return 0;
+    if (fallbackCharge !== null) return fallbackCharge;
+    if (selectedShipping)        return Number(selectedShipping.charge);
     return 0;
   })();
 
   const grandTotal = totalPrice + shippingCharge;
 
-  /* ── Empty State ── */
   if (items.length === 0) return (
-    <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito,sans-serif', background: '#f5f7fa' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap');`}</style>
-      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <div style={{ fontSize: 84, marginBottom: 20 }}>🛒</div>
-        <h2 style={{ fontFamily: 'Sora,sans-serif', fontSize: 26, color: '#0a214f', marginBottom: 10 }}>Your cart is empty</h2>
-        <p style={{ color: '#6b7280', fontSize: 15, marginBottom: 30 }}>Looks like you haven't added anything yet.</p>
-        <Link href="/collections" style={{ background: 'linear-gradient(135deg,#1872B5,#2596e1)', color: '#fff', padding: '14px 34px', borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 15, fontFamily: 'Sora,sans-serif', boxShadow: '0 4px 18px rgba(24,114,181,.32)', display: 'inline-block' }}>
-          Browse Products →
+    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8F9FC', fontFamily: "'Nunito',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
+      <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+        <div style={{ width: 96, height: 96, borderRadius: '50%', background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 44 }}>🛒</div>
+        <h2 style={{ fontFamily: 'Sora,sans-serif', fontSize: 24, color: '#0B1E3D', marginBottom: 10, fontWeight: 800 }}>Your cart is empty</h2>
+        <p style={{ color: '#6B7280', fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>Looks like you haven't added anything yet.</p>
+        <Link href="/collections" style={{ background: 'linear-gradient(135deg,#1A6FCC,#2B7FE0)', color: '#fff', padding: '14px 36px', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 15, fontFamily: 'Sora,sans-serif', display: 'inline-block', letterSpacing: '0.01em' }}>
+          Browse Products
         </Link>
       </div>
     </div>
   );
 
   return (
-    <div style={{ background: '#f5f7fa', minHeight: '100vh', fontFamily: "'Nunito',sans-serif" }}>
+    <div style={{ background: '#F0F4FA', minHeight: '100vh', fontFamily: "'Nunito',sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
-        *{ box-sizing:border-box; margin:0; padding:0; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes spin { to{transform:rotate(360deg)} }
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .cart-header { background: linear-gradient(135deg,#1872B5,#1560a0); padding: 18px 0; }
-        .cart-header-inner { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; }
-        .cart-bc { font-size:13px; color:rgba(255,255,255,.75); display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
-        .cart-bc a { color:rgba(255,255,255,.75); text-decoration:none; }
-        .cart-bc a:hover { color:#fff; }
-        .cart-page-title { font-family:'Sora',sans-serif; font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px; }
-        .cart-count-pill { background:rgba(255,255,255,.2); padding:3px 13px; border-radius:20px; font-size:13px; }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin     { to{transform:rotate(360deg)} }
+        @keyframes shimmer  { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
 
-        .cart-layout { max-width:1200px; margin:28px auto; padding:0 24px 60px; display:grid; grid-template-columns:1fr 380px; gap:22px; align-items:start; }
+        /* ─── Page Header ─── */
+        .ch { background: #fff; border-bottom: 1px solid #E5EAF2; padding: 14px 0; }
+        .ch-inner { max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .ch-bc { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #9CA3AF; }
+        .ch-bc a { color: #9CA3AF; text-decoration: none; transition: color .15s; }
+        .ch-bc a:hover { color: #2B7FE0; }
+        .ch-bc-sep { color: #D1D5DB; font-size: 11px; }
+        .ch-bc-cur { color: #0B1E3D; font-weight: 700; }
+        .ch-title { display: flex; align-items: center; gap: 10px; font-family: 'Sora',sans-serif; font-size: 17px; font-weight: 800; color: #0B1E3D; }
+        .ch-pill { background: #EEF4FF; color: #2B7FE0; font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; font-family: 'Nunito',sans-serif; }
 
-        /* ── Items Card ── */
-        .cart-items-card { background:#fff; border-radius:18px; border:1.5px solid #e5e7eb; box-shadow:0 2px 14px rgba(0,0,0,.07); overflow:hidden; }
-        .cart-items-head { padding:16px 22px; border-bottom:1.5px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between; }
-        .cart-items-head h2 { font-family:'Sora',sans-serif; font-size:16px; font-weight:800; color:#0a214f; }
-        .clear-btn { background:none; border:1.5px solid #fee2e2; color:#dc2626; padding:7px 14px; border-radius:9px; font-size:12px; font-weight:700; cursor:pointer; transition:all .2s; }
-        .clear-btn:hover { background:#fee2e2; }
+        /* ─── Layout ─── */
+        .cart-wrap { max-width: 1160px; margin: 28px auto 72px; padding: 0 24px; display: grid; grid-template-columns: 1fr 368px; gap: 20px; align-items: start; }
 
-        .cart-item { display:flex; gap:16px; padding:18px 22px; border-bottom:1px solid #f3f4f6; animation:fadeIn .3s ease; }
-        .cart-item:last-child { border-bottom:none; }
-        .ci-img { width:90px; height:90px; border-radius:14px; border:1.5px solid #e5e7eb; background:#f9fafb; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative; }
-        .ci-img img { width:100%; height:100%; object-fit:contain; padding:6px; }
-        .ci-no-img { font-size:36px; color:#d1d5db; }
-        .ci-free-badge { position:absolute; top:-5px; left:-5px; background:linear-gradient(135deg,#059669,#10b981); color:#fff; font-size:9px; font-weight:800; padding:3px 7px; border-radius:8px; }
-        .ci-disc-badge { position:absolute; top:-5px; right:-5px; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:9px; font-weight:800; padding:3px 7px; border-radius:8px; white-space:nowrap; }
+        /* ─── Items Card ─── */
+        .items-card { background: #fff; border-radius: 16px; border: 1px solid #E5EAF2; box-shadow: 0 1px 8px rgba(0,0,0,.05); overflow: hidden; }
+        .items-head { padding: 16px 22px; border-bottom: 1px solid #F0F2F7; display: flex; align-items: center; justify-content: space-between; }
+        .items-head-title { font-family: 'Sora',sans-serif; font-size: 15px; font-weight: 800; color: #0B1E3D; }
+        .clear-btn { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid #FECACA; color: #DC2626; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .18s; font-family: 'Nunito',sans-serif; }
+        .clear-btn:hover { background: #FEF2F2; border-color: #DC2626; }
 
-        .ci-info { flex:1; min-width:0; }
-        .ci-title { font-size:15px; font-weight:700; color:#0a214f; line-height:1.4; margin-bottom:5px; transition:color .2s; text-decoration:none; display:block; }
-        .ci-title:hover { color:#1872B5; }
-        .ci-variant { font-size:11px; color:#6b7280; background:#f3f4f6; padding:3px 10px; border-radius:5px; display:inline-block; margin-bottom:8px; font-weight:600; }
-        .ci-free-tag { font-size:11px; color:#065f46; background:#d1fae5; padding:3px 10px; border-radius:5px; display:inline-block; margin-bottom:8px; font-weight:700; }
-        .ci-unit-price { font-size:12px; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .ci-unit-orig  { color:#9ca3af; text-decoration:line-through; }
-        .ci-unit-disc  { color:#059669; font-weight:700; }
-        .ci-unit-label { background:#d1fae5; color:#059669; font-size:10px; font-weight:800; padding:2px 7px; border-radius:4px; }
-        .ci-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-        .ci-total-col  { display:flex; flex-direction:column; gap:3px; }
-        .ci-total      { font-size:19px; font-weight:800; color:#1872B5; font-family:'Sora',sans-serif; }
-        .ci-total.free { color:#059669; }
-        .ci-total.saved { color:#059669; }
-        .ci-total-orig { font-size:12px; color:#9ca3af; text-decoration:line-through; }
-        .ci-savings-chip { font-size:11px; color:#059669; font-weight:800; background:#d1fae5; padding:2px 9px; border-radius:5px; }
+        /* ─── Cart Item ─── */
+        .ci { display: flex; gap: 16px; padding: 20px 22px; border-bottom: 1px solid #F0F2F7; animation: fadeUp .28s ease; transition: background .15s; }
+        .ci:last-child { border-bottom: none; }
+        .ci:hover { background: #FAFBFF; }
 
-        .qty-ctrl { display:flex; align-items:center; border:1.5px solid #e5e7eb; border-radius:11px; overflow:hidden; }
-        .qty-btn  { width:36px; height:36px; border:none; background:#f9fafb; cursor:pointer; font-size:18px; font-weight:700; color:#374151; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-        .qty-btn:hover:not(:disabled) { background:#1872B5; color:#fff; }
-        .qty-btn:disabled { opacity:.35; cursor:not-allowed; }
-        .qty-num  { width:40px; text-align:center; font-size:15px; font-weight:800; color:#0a214f; background:#fff; border-left:1.5px solid #e5e7eb; border-right:1.5px solid #e5e7eb; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Sora',sans-serif; }
-        .ci-remove { background:none; border:none; cursor:pointer; color:#9ca3af; font-size:18px; padding:6px; transition:color .2s; margin-left:8px; }
-        .ci-remove:hover { color:#ef4444; }
+        .ci-img-wrap { position: relative; flex-shrink: 0; }
+        .ci-img { width: 88px; height: 88px; border-radius: 12px; border: 1px solid #E5EAF2; background: #F8F9FC; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .ci-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+        .ci-badge { position: absolute; top: -6px; left: -6px; font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 7px; letter-spacing: .02em; text-transform: uppercase; }
+        .ci-badge.free { background: #059669; color: #fff; }
+        .ci-badge.disc { background: #EF4444; color: #fff; top: -6px; left: auto; right: -6px; }
 
-        /* ── Summary Card ── */
-        .summary-card { background:#fff; border-radius:18px; border:1.5px solid #e5e7eb; box-shadow:0 2px 14px rgba(0,0,0,.07); overflow:hidden; position:sticky; top:24px; }
-        .summary-head { padding:16px 22px; border-bottom:1.5px solid #f3f4f6; }
-        .summary-head h2 { font-family:'Sora',sans-serif; font-size:16px; font-weight:800; color:#0a214f; }
-        .summary-body { padding:20px 22px; }
+        .ci-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+        .ci-name { font-size: 14.5px; font-weight: 700; color: #0B1E3D; line-height: 1.4; text-decoration: none; display: block; transition: color .15s; }
+        .ci-name:hover { color: #2B7FE0; }
+        .ci-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; width: fit-content; }
+        .ci-tag.variant { background: #F3F4F6; color: #6B7280; }
+        .ci-tag.free-item { background: #D1FAE5; color: #065F46; }
 
-        /* Free shipping progress */
-        .fs-unlocked { background:#d1fae5; border:1px solid #a7f3d0; border-radius:12px; padding:10px 14px; font-size:13px; color:#065f46; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:16px; }
-        .fs-progress-wrap { margin-bottom:16px; }
-        .fs-progress-txt { font-size:12px; color:#6b7280; font-weight:600; margin-bottom:7px; }
-        .fs-progress-txt strong { color:#1872B5; }
-        .fs-bar { width:100%; height:7px; background:#e5e7eb; border-radius:10px; overflow:hidden; }
-        .fs-bar-fill { height:100%; background:linear-gradient(90deg,#0ea5e9,#1872B5); border-radius:10px; transition:width .5s ease; }
+        .ci-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .ci-orig  { font-size: 12px; color: #9CA3AF; text-decoration: line-through; }
+        .ci-final { font-size: 13px; font-weight: 700; color: #059669; }
+        .ci-save-chip { background: #ECFDF5; color: #059669; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 5px; }
+        .ci-free-note { font-size: 12px; color: #059669; font-weight: 700; }
 
-        /* Summary rows */
-        .sum-table { background:#f8faff; border:1.5px solid #e0eaff; border-radius:12px; padding:12px 14px; margin-bottom:12px; }
-        .sum-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; }
-        .sum-row + .sum-row { border-top:1px dashed #e5e7eb; }
-        .sum-label { font-size:13px; color:#6b7280; font-weight:600; display:flex; align-items:center; gap:5px; }
-        .sum-val   { font-size:13px; color:#374151; font-weight:700; font-family:'Sora',sans-serif; }
-        .sum-val.green { color:#059669; }
-        .sum-val.free  { color:#059669; font-weight:800; }
-        .sum-val.loading { color:#9ca3af; font-size:11px; }
+        .ci-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 10px; }
+        .ci-total-col { display: flex; flex-direction: column; gap: 2px; }
+        .ci-total-val { font-family: 'Sora',sans-serif; font-size: 20px; font-weight: 800; color: #0B1E3D; line-height: 1; }
+        .ci-total-val.free-val { color: #059669; font-size: 16px; }
+        .ci-total-slashed { font-size: 11.5px; color: #9CA3AF; text-decoration: line-through; }
+        .ci-total-saved { font-size: 11px; font-weight: 700; color: #059669; }
 
-        /* Savings highlight */
-        .sum-savings { display:flex; justify-content:space-between; align-items:center; background:#d1fae5; padding:10px 14px; border-radius:10px; margin-bottom:10px; border:1px solid #a7f3d0; }
-        .sum-savings-l { color:#065f46; font-weight:700; font-size:13px; }
-        .sum-savings-r { color:#059669; font-weight:800; font-size:14px; font-family:'Sora',sans-serif; }
+        .ci-actions { display: flex; align-items: center; gap: 10px; }
+        .qty-wrap { display: flex; align-items: center; border: 1.5px solid #E5EAF2; border-radius: 10px; overflow: hidden; background: #F8F9FC; }
+        .qty-btn { width: 34px; height: 34px; border: none; background: transparent; cursor: pointer; font-size: 17px; font-weight: 600; color: #374151; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+        .qty-btn:hover:not(:disabled) { background: #EEF4FF; color: #2B7FE0; }
+        .qty-btn:disabled { opacity: .3; cursor: not-allowed; }
+        .qty-num { width: 38px; height: 34px; text-align: center; font-size: 14px; font-weight: 800; color: #0B1E3D; background: #fff; border-left: 1.5px solid #E5EAF2; border-right: 1.5px solid #E5EAF2; display: flex; align-items: center; justify-content: center; font-family: 'Sora',sans-serif; }
+        .del-btn { width: 34px; height: 34px; border: 1.5px solid #E5EAF2; border-radius: 8px; background: #fff; cursor: pointer; color: #9CA3AF; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all .18s; }
+        .del-btn:hover { border-color: #FCA5A5; background: #FEF2F2; color: #DC2626; }
+
+        /* ─── Summary Card ─── */
+        .sum-card { background: #fff; border-radius: 16px; border: 1px solid #E5EAF2; box-shadow: 0 1px 8px rgba(0,0,0,.05); overflow: hidden; position: sticky; top: 24px; }
+        .sum-head { padding: 16px 22px; border-bottom: 1px solid #F0F2F7; }
+        .sum-head h2 { font-family: 'Sora',sans-serif; font-size: 15px; font-weight: 800; color: #0B1E3D; }
+        .sum-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+
+        /* Free shipping bar */
+        .fs-unlocked { background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #065F46; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .fs-bar-section { display: flex; flex-direction: column; gap: 7px; }
+        .fs-bar-txt { font-size: 12.5px; color: #6B7280; font-weight: 600; }
+        .fs-bar-txt strong { color: #0B1E3D; font-weight: 800; }
+        .fs-bar-track { width: 100%; height: 6px; background: #E5EAF2; border-radius: 10px; overflow: hidden; }
+        .fs-bar-fill { height: 100%; background: linear-gradient(90deg,#3B82F6,#2B7FE0); border-radius: 10px; transition: width .5s ease; }
+
+        /* Savings banner */
+        .savings-banner { display: flex; justify-content: space-between; align-items: center; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; }
+        .savings-l { font-size: 13px; color: #065F46; font-weight: 700; }
+        .savings-r { font-size: 14px; font-weight: 800; color: #059669; font-family: 'Sora',sans-serif; }
+
+        /* Price table */
+        .price-table { border: 1px solid #E5EAF2; border-radius: 12px; overflow: hidden; }
+        .pt-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; border-bottom: 1px solid #F0F2F7; }
+        .pt-row:last-child { border-bottom: none; }
+        .pt-label { font-size: 13px; color: #6B7280; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .pt-label-icon { font-size: 13px; }
+        .pt-val { font-size: 13.5px; font-weight: 800; color: #0B1E3D; font-family: 'Sora',sans-serif; }
+        .pt-val.green { color: #059669; }
+        .pt-val.free-ship { color: #059669; }
+        .pt-val.loading { color: #9CA3AF; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .spin-ring { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #E5EAF2; border-top-color: #2B7FE0; animation: spin .65s linear infinite; flex-shrink: 0; }
 
         /* Shipping methods */
-        .ship-methods { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
-        .ship-opt { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px; border:1.5px solid #e5e7eb; cursor:pointer; transition:all .18s; background:#fff; }
-        .ship-opt:hover, .ship-opt.on { border-color:#1872B5; background:#eff6ff; }
-        .ship-radio { width:16px; height:16px; border-radius:50%; border:2px solid #d1d5db; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-        .ship-opt.on .ship-radio { border-color:#1872B5; }
-        .ship-dot { width:8px; height:8px; border-radius:50%; background:#1872B5; opacity:0; }
-        .ship-opt.on .ship-dot { opacity:1; }
-        .ship-info { flex:1; }
-        .ship-name { font-size:12px; font-weight:700; color:#0a214f; }
-        .ship-time { font-size:10px; color:#9ca3af; font-weight:600; }
-        .ship-price { font-size:13px; font-weight:800; color:#1872B5; font-family:'Sora',sans-serif; }
-        .ship-price.free { color:#059669; }
-        .ship-spinner { width:13px; height:13px; border-radius:50%; border:2px solid #e5e7eb; border-top-color:#1872B5; animation:spin .7s linear infinite; display:inline-block; vertical-align:middle; margin-right:6px; }
+        .ship-methods { display: flex; flex-direction: column; gap: 6px; }
+        .ship-opt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #E5EAF2; cursor: pointer; transition: all .18s; background: #FAFBFF; }
+        .ship-opt:hover, .ship-opt.sel { border-color: #2B7FE0; background: #EEF4FF; }
+        .ship-radio-wrap { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #D1D5DB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+        .ship-opt.sel .ship-radio-wrap { border-color: #2B7FE0; }
+        .ship-dot { width: 8px; height: 8px; border-radius: 50%; background: #2B7FE0; opacity: 0; transition: opacity .15s; }
+        .ship-opt.sel .ship-dot { opacity: 1; }
+        .ship-info { flex: 1; }
+        .ship-name { font-size: 12.5px; font-weight: 700; color: #0B1E3D; }
+        .ship-time { font-size: 11px; color: #9CA3AF; font-weight: 600; margin-top: 1px; }
+        .ship-charge { font-size: 13px; font-weight: 800; color: #2B7FE0; font-family: 'Sora',sans-serif; }
+        .ship-charge.free { color: #059669; }
 
-        /* Grand Total */
-        .grand-total { display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#0a214f,#1872B5); border-radius:12px; padding:12px 16px; margin-bottom:4px; }
-        .gt-label { font-family:'Sora',sans-serif; font-size:14px; font-weight:800; color:#fff; }
-        .gt-val   { font-family:'Sora',sans-serif; font-size:22px; font-weight:800; color:#fff; }
-        .gt-note  { font-size:10px; color:#6b7280; margin-bottom:14px; padding:0 2px; }
+        /* Grand total */
+        .grand-total-block { background: linear-gradient(135deg,#0B1E3D 0%,#1A4A8A 100%); border-radius: 13px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; }
+        .gt-label { font-family: 'Sora',sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8); letter-spacing: .02em; text-transform: uppercase; }
+        .gt-amount { font-family: 'Sora',sans-serif; font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
+        .gt-note { font-size: 11px; color: #9CA3AF; padding: 0 2px; }
 
-        .checkout-btn { width:100%; padding:15px; background:linear-gradient(135deg,#1872B5,#2596e1); color:#fff; border:none; border-radius:13px; font-size:16px; font-weight:800; font-family:'Sora',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; transition:all .22s; box-shadow:0 4px 18px rgba(24,114,181,.32); margin-bottom:10px; text-decoration:none; }
-        .checkout-btn:hover { background:linear-gradient(135deg,#1560a0,#1872B5); transform:translateY(-1px); }
-        .continue-btn { width:100%; padding:12px; background:#f9fafb; color:#374151; border:1.5px solid #e5e7eb; border-radius:12px; font-size:14px; font-weight:700; font-family:'Sora',sans-serif; cursor:pointer; transition:all .2s; text-decoration:none; display:block; text-align:center; }
-        .continue-btn:hover { background:#f3f4f6; border-color:#1872B5; color:#1872B5; }
-        .secure-badges { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; padding-top:14px; border-top:1px solid #f3f4f6; }
-        .sec-badge { font-size:11px; color:#9ca3af; display:flex; align-items:center; gap:4px; font-weight:600; }
+        /* CTAs */
+        .checkout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; background: linear-gradient(135deg,#1A6FCC,#2B7FE0); color: #fff; border: none; border-radius: 11px; font-size: 15px; font-weight: 800; font-family: 'Sora',sans-serif; cursor: pointer; text-decoration: none; transition: all .2s; box-shadow: 0 4px 16px rgba(43,127,224,.3); letter-spacing: .01em; }
+        .checkout-btn:hover { background: linear-gradient(135deg,#155EA8,#1A6FCC); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(43,127,224,.38); }
+        .continue-btn { display: block; width: 100%; padding: 12px; background: #F8F9FC; color: #374151; border: 1.5px solid #E5EAF2; border-radius: 11px; font-size: 13.5px; font-weight: 700; font-family: 'Nunito',sans-serif; cursor: pointer; text-decoration: none; text-align: center; transition: all .18s; }
+        .continue-btn:hover { background: #EEF4FF; border-color: #2B7FE0; color: #2B7FE0; }
+
+        /* Trust strip */
+        .trust-strip { display: flex; align-items: center; justify-content: center; gap: 18px; padding-top: 14px; border-top: 1px solid #F0F2F7; }
+        .trust-item { font-size: 11.5px; color: #9CA3AF; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 
         @media(max-width:900px) {
-          .cart-layout { grid-template-columns:1fr; }
-          .summary-card { position:static; }
+          .cart-wrap { grid-template-columns: 1fr; }
+          .sum-card { position: static; }
         }
-        @media(max-width:480px) {
-          .cart-layout { padding:0 14px 48px; margin:20px auto; }
-          .ci-img { width:72px; height:72px; }
-          .cart-item { padding:14px 14px; gap:12px; }
+        @media(max-width:520px) {
+          .cart-wrap { padding: 0 14px 56px; margin: 18px auto; }
+          .ci { padding: 16px 14px; gap: 12px; }
+          .ci-img { width: 76px; height: 76px; }
+          .gt-amount { font-size: 22px; }
         }
       `}</style>
 
-      {/* Header */}
-      <div className="cart-header">
-        <div className="cart-header-inner">
-          <nav className="cart-bc">
-            <Link href="/">Home</Link><span>›</span>
-            <Link href="/collections">Shop</Link><span>›</span>
-            <span style={{ color: '#fff', fontWeight: 700 }}>Cart</span>
+      {/* ── Header ── */}
+      <div className="ch">
+        <div className="ch-inner">
+          <nav className="ch-bc">
+            <Link href="/" className="">Home</Link>
+            <span className="ch-bc-sep">›</span>
+            <Link href="/collections" className="">Shop</Link>
+            <span className="ch-bc-sep">›</span>
+            <span className="ch-bc-cur">Cart</span>
           </nav>
-          <div className="cart-page-title">
-            🛒 Shopping Cart
-            <span className="cart-count-pill">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
+          <div className="ch-title">
+            <span>🛒</span>
+            Shopping Cart
+            <span className="ch-pill">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
 
-      <div className="cart-layout">
+      <div className="cart-wrap">
 
         {/* ── LEFT: Items ── */}
-        <div className="cart-items-card">
-          <div className="cart-items-head">
-            <h2>Cart Items ({totalItems})</h2>
-            <button className="clear-btn" onClick={clearCart}>🗑 Clear All</button>
+        <div className="items-card">
+          <div className="items-head">
+            <span className="items-head-title">Cart Items ({totalItems})</span>
+            <button className="clear-btn" onClick={clearCart}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              Clear All
+            </button>
           </div>
 
           {items.map((item, idx) => {
             const isFree = item.variant?.includes('__FREE__');
-            // Clean variant name — __FREE__2__1 Kg → 1 Kg
             const cleanVariant = item.variant?.replace(/__FREE__\d*__/g, '').trim() || undefined;
-
             const effectivePrice = isFree ? 0 : (item.discountedPrice ?? item.price);
-            const itemTotal      = effectivePrice * item.quantity;
-            const origTotal      = item.price * item.quantity;
-            const itemSavings    = isFree
+            const itemTotal   = effectivePrice * item.quantity;
+            const origTotal   = item.price * item.quantity;
+            const itemSavings = isFree
               ? item.price * item.quantity
-              : item.discountedPrice
-                ? (item.price - item.discountedPrice) * item.quantity
-                : 0;
+              : item.discountedPrice ? (item.price - item.discountedPrice) * item.quantity : 0;
 
             return (
-              <div className="cart-item" key={`${item.id}-${item.variant || ''}-${idx}`}>
-                <div className="ci-img">
-                  {item.image ? <img src={item.image} alt={item.title} /> : <span className="ci-no-img">📦</span>}
-                  {isFree && <span className="ci-free-badge">FREE</span>}
-                  {!isFree && item.discountLabel && <span className="ci-disc-badge">{item.discountLabel}</span>}
+              <div className="ci" key={`${item.id}-${item.variant || ''}-${idx}`}>
+                <div className="ci-img-wrap">
+                  <div className="ci-img">
+                    {item.image ? <img src={item.image} alt={item.title} /> : <span style={{ fontSize: 32, color: '#D1D5DB' }}>📦</span>}
+                  </div>
+                  {isFree && <span className="ci-badge free">Free</span>}
+                  {!isFree && item.discountLabel && <span className="ci-badge disc">{item.discountLabel}</span>}
                 </div>
 
-                <div className="ci-info">
-                  <Link href={`/product/${item.slug}`} className="ci-title">{item.title}</Link>
+                <div className="ci-body">
+                  <Link href={`/product/${item.slug}`} className="ci-name">{item.title}</Link>
 
-                  {/* Variant / Free tag */}
                   {isFree
-                    ? <span className="ci-free-tag">🎁 FREE Item{cleanVariant ? ` — ${cleanVariant}` : ''}</span>
-                    : cleanVariant && <span className="ci-variant">{cleanVariant}</span>
+                    ? <span className="ci-tag free-item">🎁 Free Item{cleanVariant ? ` · ${cleanVariant}` : ''}</span>
+                    : cleanVariant && <span className="ci-tag variant">{cleanVariant}</span>
                   }
 
-                  {/* Unit price */}
-                  <div className="ci-unit-price">
+                  <div className="ci-price-row">
                     {isFree ? (
-                      <span style={{ color: '#059669', fontWeight: 700 }}>Free (worth ₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })})</span>
+                      <span className="ci-free-note">Free — worth ₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                     ) : item.discountedPrice ? (
                       <>
-                        <span className="ci-unit-orig">₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })} each</span>
-                        <span className="ci-unit-disc">₹{item.discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })} each</span>
-                        {item.discountLabel && <span className="ci-unit-label">{item.discountLabel}</span>}
+                        <span className="ci-orig">₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                        <span className="ci-final">₹{item.discountedPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })} each</span>
+                        {item.discountLabel && <span className="ci-save-chip">{item.discountLabel}</span>}
                       </>
                     ) : (
-                      <span style={{ color: '#9ca3af' }}>₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })} each</span>
+                      <span style={{ fontSize: 13, color: '#9CA3AF', fontWeight: 600 }}>₹{item.price.toLocaleString('en-IN', { maximumFractionDigits: 0 })} each</span>
                     )}
                   </div>
 
-                  <div className="ci-bottom">
+                  <div className="ci-footer">
                     <div className="ci-total-col">
-                      <span className={`ci-total ${isFree ? 'free' : item.discountedPrice ? 'saved' : ''}`}>
+                      <span className={`ci-total-val ${isFree ? 'free-val' : ''}`}>
                         {isFree ? 'FREE 🎁' : `₹${itemTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                       </span>
                       {(isFree || item.discountedPrice) && (
                         <>
-                          <span className="ci-total-orig">₹{origTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          <span className="ci-savings-chip">Save ₹{itemSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          <span className="ci-total-slashed">₹{origTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          <span className="ci-total-saved">You save ₹{itemSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                         </>
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className="qty-ctrl">
+                    <div className="ci-actions">
+                      <div className="qty-wrap">
                         <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity - 1)}>−</button>
                         <span className="qty-num">{item.quantity}</span>
                         <button className="qty-btn" disabled={isFree} onClick={() => updateQty(item.id, item.variant, item.quantity + 1)}>+</button>
                       </div>
-                      <button className="ci-remove" onClick={() => removeFromCart(item.id, item.variant)}>🗑</button>
+                      <button className="del-btn" onClick={() => removeFromCart(item.id, item.variant)} title="Remove item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -315,77 +333,72 @@ export default function CartPage() {
           })}
         </div>
 
-        {/* ── RIGHT: Order Summary ── */}
-        <div className="summary-card">
-          <div className="summary-head"><h2>Order Summary</h2></div>
-          <div className="summary-body">
+        {/* ── RIGHT: Summary ── */}
+        <div className="sum-card">
+          <div className="sum-head"><h2>Order Summary</h2></div>
+          <div className="sum-body">
 
-            {/* Free Shipping Progress */}
+            {/* Shipping bar */}
             {freeUnlocked ? (
-              <div className="fs-unlocked">🎉 You've unlocked FREE shipping!</div>
+              <div className="fs-unlocked">
+                <span>✅</span> You've unlocked FREE shipping!
+              </div>
             ) : (
-              <div className="fs-progress-wrap">
-                <div className="fs-progress-txt">
-                  Add <strong>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for free shipping!
-                </div>
-                <div className="fs-bar">
-                  <div className="fs-bar-fill" style={{ width: `${freeProgress}%` }} />
-                </div>
+              <div className="fs-bar-section">
+                <div className="fs-bar-txt">Add <strong>₹{remaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> more for free shipping</div>
+                <div className="fs-bar-track"><div className="fs-bar-fill" style={{ width: `${freeProgress}%` }} /></div>
               </div>
             )}
 
-            {/* Savings Banner */}
+            {/* Savings */}
             {totalSavings > 0 && (
-              <div className="sum-savings">
-                <span className="sum-savings-l">🎉 Total Savings</span>
-                <span className="sum-savings-r">-₹{totalSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+              <div className="savings-banner">
+                <span className="savings-l">Total Savings</span>
+                <span className="savings-r">−₹{totalSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
             )}
 
-            {/* Price Breakdown */}
-            <div className="sum-table">
-              <div className="sum-row">
-                <span className="sum-label">🛍️ Subtotal ({totalItems} items)</span>
-                <span className="sum-val">₹{totalPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            {/* Price breakdown */}
+            <div className="price-table">
+              <div className="pt-row">
+                <span className="pt-label"><span className="pt-label-icon">🛍️</span> Subtotal ({totalItems} items)</span>
+                <span className="pt-val">₹{totalPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
               {totalSavings > 0 && (
-                <div className="sum-row">
-                  <span className="sum-label">🎁 Product Discount</span>
-                  <span className="sum-val green">-₹{totalSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                <div className="pt-row">
+                  <span className="pt-label"><span className="pt-label-icon">🏷️</span> Discount</span>
+                  <span className="pt-val green">−₹{totalSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                 </div>
               )}
-              <div className="sum-row">
-                <span className="sum-label">
-                  🚚 Shipping
+              <div className="pt-row">
+                <span className="pt-label">
+                  <span className="pt-label-icon">🚚</span>
+                  Shipping
                   {selectedShipping && !freeUnlocked && (
-                    <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 4 }}>({selectedShipping.name})</span>
+                    <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 4 }}>({selectedShipping.name})</span>
                   )}
                 </span>
                 {shippingLoading ? (
-                  <span className="sum-val loading"><span className="ship-spinner" />Calculating...</span>
+                  <span className="pt-val loading"><span className="spin-ring" /> Calculating…</span>
                 ) : freeUnlocked || shippingCharge === 0 ? (
-                  <span className="sum-val free">FREE 🎉</span>
+                  <span className="pt-val free-ship">FREE</span>
                 ) : (
-                  <span className="sum-val">₹{shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                  <span className="pt-val">₹{shippingCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                 )}
               </div>
             </div>
 
-            {/* Shipping Method Selection (agar multiple methods hain) */}
+            {/* Multiple shipping methods */}
             {!freeUnlocked && shippingMethods.length > 1 && (
               <div className="ship-methods">
                 {shippingMethods.map(m => (
-                  <div
-                    key={m.rate_id}
-                    className={`ship-opt ${selectedShipping?.rate_id === m.rate_id ? 'on' : ''}`}
-                    onClick={() => setSelectedShipping(m)}
-                  >
-                    <div className="ship-radio"><div className="ship-dot" /></div>
+                  <div key={m.rate_id} className={`ship-opt ${selectedShipping?.rate_id === m.rate_id ? 'sel' : ''}`} onClick={() => setSelectedShipping(m)}>
+                    <div className="ship-radio-wrap"><div className="ship-dot" /></div>
                     <div className="ship-info">
                       <div className="ship-name">{m.name}</div>
                       {m.delivery_time && <div className="ship-time">⏱ {m.delivery_time}</div>}
                     </div>
-                    <div className={`ship-price ${m.charge === 0 ? 'free' : ''}`}>
+                    <div className={`ship-charge ${m.charge === 0 ? 'free' : ''}`}>
                       {m.charge === 0 ? 'FREE' : `₹${Number(m.charge).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                     </div>
                   </div>
@@ -394,21 +407,33 @@ export default function CartPage() {
             )}
 
             {/* Grand Total */}
-            <div className="grand-total">
-              <span className="gt-label">Total</span>
-              <span className="gt-val">₹{grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            <div className="grand-total-block">
+              <div>
+                <div className="gt-label">Total Payable</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)', marginTop: 2 }}>Incl. all taxes</div>
+              </div>
+              <div className="gt-amount">₹{grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
             </div>
-            <p className="gt-note">Inclusive of all taxes · Final price</p>
 
             <Link href="/checkout" className="checkout-btn">
-              <span>✓</span> Proceed to Checkout
+              Proceed to Checkout
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </Link>
             <Link href="/collections" className="continue-btn">← Continue Shopping</Link>
 
-            <div className="secure-badges">
-              <span className="sec-badge">🔒 Secure</span>
-              <span className="sec-badge">✓ Easy Returns</span>
-              <span className="sec-badge">🚚 Fast Delivery</span>
+            <div className="trust-strip">
+              <span className="trust-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Secure Checkout
+              </span>
+              <span className="trust-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-7.58"/></svg>
+                Easy Returns
+              </span>
+              <span className="trust-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                Fast Delivery
+              </span>
             </div>
           </div>
         </div>
