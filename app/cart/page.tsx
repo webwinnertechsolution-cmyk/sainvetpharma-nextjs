@@ -28,39 +28,35 @@ export default function CartPage() {
   const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
   const [shippingLoading, setShippingLoading]   = useState(false);
   const [freeShippingMin, setFreeShippingMin]   = useState<number>(999);
-  const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
-  const [hasShippingData, setHasShippingData]   = useState(false); // NEW: Track if backend has provided data
+  const [hasShippingData, setHasShippingData]   = useState(false); // ONLY show shipping if backend provides data
 
   useEffect(() => {
     if (items.length === 0) return;
     setShippingLoading(true);
     setShippingMethods([]);
     setSelectedShipping(null);
-    setFallbackCharge(null);
     setHasShippingData(false); // Reset when items change
 
     fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
       .then(r => r.json())
       .then(data => {
         if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
-        if (data.is_free_shipping) {
-          setFallbackCharge(0);
-          setHasShippingData(true); // Mark as having data
-        } else if (data.success && data.methods?.length > 0) {
+        
+        // ONLY show shipping if we have valid backend data
+        if (data.success && data.methods?.length > 0) {
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
-          setHasShippingData(true); // Mark as having data
-        } else if (data.success && data.methods?.length === 0) {
-          const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : 999;
-          setFreeShippingMin(freeMin);
-          setFallbackCharge(totalPrice >= freeMin ? 0 : 99);
-          setHasShippingData(true); // Mark as having data
+          setHasShippingData(true); // ✅ Show shipping
+        } else if (data.is_free_shipping) {
+          setHasShippingData(true); // ✅ Show shipping (free)
+        } else {
+          // No data from backend - keep shipping hidden
+          setHasShippingData(false);
         }
-        // If request fails, hasShippingData stays false (shipping hidden)
         setShippingLoading(false);
       })
       .catch(() => {
-        // Don't set fallback on error - keep shipping hidden
+        // Error - shipping hidden completely
         setShippingLoading(false);
         setHasShippingData(false);
       });
@@ -71,9 +67,9 @@ export default function CartPage() {
   const remaining    = Math.max(0, freeShippingMin - totalPrice);
 
   const shippingCharge: number = (() => {
-    if (freeUnlocked)            return 0;
-    if (fallbackCharge !== null) return fallbackCharge;
-    if (selectedShipping)        return Number(selectedShipping.charge);
+    if (!hasShippingData) return 0; // No shipping data = no charge
+    if (freeUnlocked) return 0;
+    if (selectedShipping) return Number(selectedShipping.charge);
     return 0;
   })();
 
