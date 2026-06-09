@@ -182,7 +182,7 @@ export default function CartPage() {
         /* Savings banner */
         .savings-banner { display: flex; justify-content: space-between; align-items: center; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; }
         .savings-l { font-size: 13px; color: #065F46; font-weight: 700; }
-        .savings-r { font-size: 14px; font-weight: 800; color: #059669; font-family: 'Sora',sans-serif; }
+        .savings-r { font-size: 12px; font-weight: 800; color: #059669; font-family: 'Sora',sans-serif; }
 
         /* Price table */
         .price-table { border: 1px solid #E5EAF2; border-radius: 12px; overflow: hidden; }
@@ -190,7 +190,7 @@ export default function CartPage() {
         .pt-row:last-child { border-bottom: none; }
         .pt-label { font-size: 13px; color: #6B7280; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .pt-label-icon { font-size: 13px; }
-        .pt-val { font-size: 13.5px; font-weight: 800; color: #0B1E3D; font-family: 'Sora',sans-serif; }
+        .pt-val { font-size: 12.5px; font-weight: 800; color: #0B1E3D; font-family: 'Sora',sans-serif; }
         .pt-val.green { color: #059669; }
         .pt-val.free-ship { color: #059669; }
         .pt-val.loading { color: #9CA3AF; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
