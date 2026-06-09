@@ -220,7 +220,7 @@ export default function CartDrawer() {
         .cd-vtag{font-size:10px;color:#6b7280;font-weight:600;background:#f3f4f6;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:1px;}
         .cd-ftag{font-size:10px;color:#065f46;font-weight:700;background:#d1fae5;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:7px;}
         .cd-bot{display:flex;align-items:center;justify-content:space-between;}
-        .cd-pcol{display:flex;flex-direction:column;gap:2px;}
+        .cd-pcol {display: flex;flex-direction: row;gap: 8px;align-items: center;}
         .cd-price{font-size:12px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;}
         .cd-price.d{color:#059669;}
         .cd-price.f{color:#059669;}
