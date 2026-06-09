@@ -8,6 +8,24 @@ import WishlistHeart from '@/app/components/WishlistHeart';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const PRODUCTS_PER_PAGE = 12;
 
+/* ── Star Rating Component ── */
+function StarRating({ rating, count }: { rating: number; count: number }) {
+  if (!rating || rating === 0) return null;
+  return (
+    <div className="col-stars-row">
+      <span className="col-stars">
+        {[1, 2, 3, 4, 5].map(i => (
+          <span
+            key={i}
+            style={{ color: i <= Math.round(rating) ? '#f59e0b' : '#d1d5db', fontSize: 13 }}
+          >★</span>
+        ))}
+      </span>
+      <span className="col-stars-count">({count})</span>
+    </div>
+  );
+}
+
 /* ── Pagination Component ── */
 function Pagination({ currentPage, totalPages, onPageChange }: {
   currentPage: number;
@@ -81,6 +99,9 @@ function CollectionsPageInner() {
   const [drawerOpen, setDrawerOpen]     = useState(false);
   const [secOpen, setSecOpen]           = useState({ categories: true, tags: false, price: false });
 
+  // ── Ratings map: { [productId]: { average, total } } ──
+  const [ratingsMap, setRatingsMap] = useState<Record<number, { average: number; total: number }>>({});
+
   const [minInput, setMinInput]     = useState('');
   const [maxInput, setMaxInput]     = useState('');
   const [appliedMin, setAppliedMin] = useState('');
@@ -91,10 +112,9 @@ function CollectionsPageInner() {
   const sort     = searchParams.get('sort') || 'latest';
   const page     = parseInt(searchParams.get('page') || '1', 10);
 
-  // ── totalPages ab backend ke total_count se aayega ──
   const totalPages = Math.max(1, Math.ceil(totalCount / PRODUCTS_PER_PAGE));
 
-  /* ── Fetch products WITH page param ── */
+  /* ── Fetch products ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -104,10 +124,8 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
-        qs.append('page', String(page));              // ✅ page backend ko bhejo
+        qs.append('page', String(page));
         qs.append('per_page', String(PRODUCTS_PER_PAGE));
-
-        // Price filter bhi backend ko bhejo agar support ho, otherwise frontend filter
         if (appliedMin) qs.append('min_price', appliedMin);
         if (appliedMax) qs.append('max_price', appliedMax);
 
@@ -115,8 +133,8 @@ function CollectionsPageInner() {
         if (!res.ok) throw new Error(`API returned ${res.status}: ${res.statusText}`);
 
         const data = await res.json();
-        setProducts(data.products    || []);
-        // ✅ Backend se total count lo — 'total', 'total_count', 'count' — jo bhi aaye
+        const fetchedProducts = data.products || [];
+        setProducts(fetchedProducts);
         setTotalCount(
           data.total       ??
           data.total_count ??
@@ -125,6 +143,11 @@ function CollectionsPageInner() {
         );
         setCategories(data.categories || []);
         setTags(data.tags             || []);
+
+        // ── Fetch ratings for all products in parallel ──
+        if (fetchedProducts.length > 0) {
+          fetchRatings(fetchedProducts);
+        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         setApiError(msg);
@@ -137,7 +160,32 @@ function CollectionsPageInner() {
       }
     };
     fetchData();
-  }, [category, tag, sort, page, appliedMin, appliedMax]); // ✅ page & price bhi dependency mein
+  }, [category, tag, sort, page, appliedMin, appliedMax]);
+
+  /* ── Fetch ratings for current page products ── */
+  const fetchRatings = async (productsList: any[]) => {
+    try {
+      const results = await Promise.allSettled(
+        productsList.map((p: any) =>
+          fetch(`${API_URL}/api/products/${p.id}/reviews`)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => ({ id: p.id, average: d?.average ?? 0, total: d?.total ?? 0 }))
+        )
+      );
+      const map: Record<number, { average: number; total: number }> = {};
+      results.forEach(result => {
+        if (result.status === 'fulfilled' && result.value) {
+          map[result.value.id] = {
+            average: result.value.average,
+            total: result.value.total,
+          };
+        }
+      });
+      setRatingsMap(map);
+    } catch {
+      // Ratings fetch fail hone pe silently ignore karo
+    }
+  };
 
   /* ── Helpers ── */
   function getEffectivePrice(p: any) {
@@ -168,14 +216,8 @@ function CollectionsPageInner() {
     return pct >= 1 ? { pct, compare, selling } : null;
   }
 
-  // ✅ Product ka short description / overview nikalo
   function getOverview(p: any): string {
-    const raw =
-      p.short_description ||
-      p.description       ||
-      p.excerpt           ||
-      '';
-    // HTML tags hataao aur 90 characters mein trim karo
+    const raw = p.short_description || p.description || p.excerpt || '';
     const plain = raw.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
     if (!plain) return '';
     return plain.length > 90 ? plain.slice(0, 90).trimEnd() + '…' : plain;
@@ -318,7 +360,7 @@ function CollectionsPageInner() {
         .col-bc a { color:rgba(255,255,255,.65); text-decoration:none; }
         .col-bc a:hover { color:#fff; }
         .col-layout { max-width:1400px; margin:28px auto; padding:0 24px 60px; display:grid; grid-template-columns:250px 1fr; gap:24px; align-items:start; }
-        .col-sidebar-desktop { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow:hidden; position:sticky; top:100px; }
+        .col-sidebar-desktop { background:#fff; border-radius:14px; border:1.5px solid #e5e7eb; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow:hidden; position:sticky; top:20px; }
         .mob-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:998; opacity:0; transition:opacity .3s; }
         .mob-overlay.open { display:block; opacity:1; }
         .mob-drawer { display:none; position:fixed; top:0; left:-300px; width:285px; height:100%; background:#fff; z-index:999; overflow-y:auto; transition:left .32s cubic-bezier(.4,0,.2,1); }
@@ -381,11 +423,14 @@ function CollectionsPageInner() {
         .col-badge { position:absolute; top:10px; left:10px; z-index:10; display:inline-flex; align-items:center; gap:4px; background:#1872B5; color:#fff; font-size:11px; font-weight:800; padding:5px; border-radius:5px; font-family:'Nunito',sans-serif; pointer-events:none; }
         .col-badge::before { content:''; display:inline-block; width:6px; height:6px; background:rgba(255,255,255,.6); border-radius:50%; }
         .col-card-body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
-        .col-card-title { font-size:14px; font-weight:700; color:#0a214f; line-height:1.4; margin-bottom:0px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition:color .15s; font-family:'Nunito',sans-serif; }
+        .col-card-title { font-size:14px; font-weight:700; color:#0a214f; line-height:1.4; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition:color .15s; font-family:'Nunito',sans-serif; }
         .col-card:hover .col-card-title { color:#1872B5; }
+        .col-card-overview { font-size:12px; color:#6b7280; line-height:1.4; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
 
-        /* ✅ Product Overview */
-        .col-card-overview { font-size:12px; color:#6b7280; line-height:1.2; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
+        /* ── Star Rating Row ── */
+        .col-stars-row { display:flex; align-items:center; gap:4px; margin-bottom:6px; }
+        .col-stars { display:inline-flex; gap:1px; line-height:1; }
+        .col-stars-count { font-size:11px; color:#9ca3af; font-family:'Nunito',sans-serif; font-weight:600; }
 
         .col-price-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
         .col-price { font-size:16px; font-weight:800; color:#1872B5; font-family:'Nunito',sans-serif; }
@@ -400,6 +445,7 @@ function CollectionsPageInner() {
         .error-banner { background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-family:'Nunito',sans-serif; font-size:13px; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .wh-btn.active { background: #fff; }
+
         /* ── Pagination ── */
         .pagination-wrap { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:32px; padding:20px 0 4px; flex-wrap:wrap; }
         .pg-numbers { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; }
@@ -410,6 +456,7 @@ function CollectionsPageInner() {
         .pg-btn { display:flex; align-items:center; gap:5px; padding:0 16px; height:38px; border-radius:9px; border:1.5px solid #e5e7eb; background:#fff; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; color:#374151; cursor:pointer; transition:all .18s ease; white-space:nowrap; }
         .pg-btn:hover:not(:disabled) { border-color:#1872B5; color:#1872B5; background:#eff6ff; }
         .pg-btn:disabled { opacity:.4; cursor:not-allowed; }
+
         @media(max-width:1100px) { .col-grid { grid-template-columns:repeat(3,1fr); } }
         @media(max-width:900px) {
           .col-layout { grid-template-columns:1fr; }
@@ -523,7 +570,10 @@ function CollectionsPageInner() {
               const primaryImg   = imgUrl(product.featured_image);
               const galleryImgs  = product.images || [];
               const secondaryImg = galleryImgs.length > 0 ? galleryUrl(galleryImgs[0].image) : null;
-              const overview     = getOverview(product); // ✅ overview text
+              const overview     = getOverview(product);
+
+              // ── Rating for this product ──
+              const rating = ratingsMap[product.id];
 
               return (
                 <Link
@@ -548,7 +598,12 @@ function CollectionsPageInner() {
                   <div className="col-card-body">
                     <div className="col-card-title">{product.title}</div>
 
-                    {/* ✅ Product Overview — title ke neeche */}
+                    {/* ── Star Rating ── */}
+                    {rating && rating.total > 0 && (
+                      <StarRating rating={rating.average} count={rating.total} />
+                    )}
+
+                    {/* ── Overview ── */}
                     {overview && (
                       <div className="col-card-overview">{overview}</div>
                     )}
