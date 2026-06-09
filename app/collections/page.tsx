@@ -71,9 +71,8 @@ function CollectionsPageInner() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  const [allProducts, setAllProducts]   = useState<any[]>([]);
-  const [filtered, setFiltered]         = useState<any[]>([]);
-  const [paginated, setPaginated]       = useState<any[]>([]);
+  const [products, setProducts]         = useState<any[]>([]);
+  const [totalCount, setTotalCount]     = useState(0);
   const [categories, setCategories]     = useState<any[]>([]);
   const [tags, setTags]                 = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
@@ -92,9 +91,10 @@ function CollectionsPageInner() {
   const sort     = searchParams.get('sort') || 'latest';
   const page     = parseInt(searchParams.get('page') || '1', 10);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
+  // ── totalPages ab backend ke total_count se aayega ──
+  const totalPages = Math.max(1, Math.ceil(totalCount / PRODUCTS_PER_PAGE));
 
-  /* ── Fetch ALL products (no page param to backend) ── */
+  /* ── Fetch products WITH page param ── */
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -104,23 +104,32 @@ function CollectionsPageInner() {
         if (category) qs.append('category', category);
         if (tag)      qs.append('tag', tag);
         qs.append('sort', sort);
-		qs.append('per_page', '1000');  
-        qs.append('all', 'true'); 		
-		
-		 
-        // No page param sent — backend returns all products
+        qs.append('page', String(page));              // ✅ page backend ko bhejo
+        qs.append('per_page', String(PRODUCTS_PER_PAGE));
+
+        // Price filter bhi backend ko bhejo agar support ho, otherwise frontend filter
+        if (appliedMin) qs.append('min_price', appliedMin);
+        if (appliedMax) qs.append('max_price', appliedMax);
 
         const res = await fetch(`${API_URL}/api/shop?${qs}`);
         if (!res.ok) throw new Error(`API returned ${res.status}: ${res.statusText}`);
 
         const data = await res.json();
-        setAllProducts(data.products  || []);
+        setProducts(data.products    || []);
+        // ✅ Backend se total count lo — 'total', 'total_count', 'count' — jo bhi aaye
+        setTotalCount(
+          data.total       ??
+          data.total_count ??
+          data.count       ??
+          (data.products?.length || 0)
+        );
         setCategories(data.categories || []);
         setTags(data.tags             || []);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         setApiError(msg);
-        setAllProducts([]);
+        setProducts([]);
+        setTotalCount(0);
         setCategories([]);
         setTags([]);
       } finally {
@@ -128,25 +137,7 @@ function CollectionsPageInner() {
       }
     };
     fetchData();
-  }, [category, tag, sort]);
-
-  /* ── Apply price filter → filtered list ── */
-  useEffect(() => {
-    if (!appliedMin && !appliedMax) { setFiltered(allProducts); return; }
-    const min = appliedMin !== '' ? parseFloat(appliedMin) : -Infinity;
-    const max = appliedMax !== '' ? parseFloat(appliedMax) :  Infinity;
-    setFiltered(allProducts.filter(p => {
-      const price = getEffectivePrice(p);
-      return price !== null && price >= min && price <= max;
-    }));
-  }, [allProducts, appliedMin, appliedMax]);
-
-  /* ── Slice for current page ── */
-  useEffect(() => {
-    const safePage = Math.min(page, Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE)));
-    const start    = (safePage - 1) * PRODUCTS_PER_PAGE;
-    setPaginated(filtered.slice(start, start + PRODUCTS_PER_PAGE));
-  }, [filtered, page]);
+  }, [category, tag, sort, page, appliedMin, appliedMax]); // ✅ page & price bhi dependency mein
 
   /* ── Helpers ── */
   function getEffectivePrice(p: any) {
@@ -175,6 +166,19 @@ function CollectionsPageInner() {
     if (!compare || !selling || compare <= selling) return null;
     const pct = Math.round(((compare - selling) / compare) * 100);
     return pct >= 1 ? { pct, compare, selling } : null;
+  }
+
+  // ✅ Product ka short description / overview nikalo
+  function getOverview(p: any): string {
+    const raw =
+      p.short_description ||
+      p.description       ||
+      p.excerpt           ||
+      '';
+    // HTML tags hataao aur 90 characters mein trim karo
+    const plain = raw.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    if (!plain) return '';
+    return plain.length > 90 ? plain.slice(0, 90).trimEnd() + '…' : plain;
   }
 
   const imgUrl     = (n: any) => n ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/products/${n}`         : null;
@@ -377,8 +381,12 @@ function CollectionsPageInner() {
         .col-badge { position:absolute; top:10px; left:10px; z-index:10; display:inline-flex; align-items:center; gap:4px; background:#1872B5; color:#fff; font-size:11px; font-weight:800; padding:5px; border-radius:5px; font-family:'Nunito',sans-serif; pointer-events:none; }
         .col-badge::before { content:''; display:inline-block; width:6px; height:6px; background:rgba(255,255,255,.6); border-radius:50%; }
         .col-card-body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
-        .col-card-title { font-size:14px; font-weight:600; color:#0a214f; line-height:1.4; margin-bottom:1px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition:color .15s; font-family:'Nunito',sans-serif; }
+        .col-card-title { font-size:14px; font-weight:700; color:#0a214f; line-height:1.4; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition:color .15s; font-family:'Nunito',sans-serif; }
         .col-card:hover .col-card-title { color:#1872B5; }
+
+        /* ✅ Product Overview */
+        .col-card-overview { font-size:12px; color:#6b7280; line-height:1.5; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
+
         .col-price-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
         .col-price { font-size:16px; font-weight:800; color:#1872B5; font-family:'Nunito',sans-serif; }
         .col-mrp   { font-size:12px; color:#9ca3af; text-decoration:line-through; font-family:'Nunito',sans-serif; }
@@ -450,8 +458,8 @@ function CollectionsPageInner() {
         <div>
           <div className="col-topbar">
             <span className="col-result">
-              {filtered.length > 0
-                ? <>Showing <strong>{(page - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(page * PRODUCTS_PER_PAGE, filtered.length)}</strong> of <strong>{filtered.length}</strong> products</>
+              {totalCount > 0
+                ? <>Showing <strong>{(page - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(page * PRODUCTS_PER_PAGE, totalCount)}</strong> of <strong>{totalCount}</strong> products</>
                 : <>Showing <strong>0</strong> products</>
               }
               {category && <> in <strong>{categories.find((c: any) => c.slug === category)?.name}</strong></>}
@@ -499,7 +507,7 @@ function CollectionsPageInner() {
           <div className="col-grid">
             {loading && <div className="col-loader"><div className="col-spinner" /></div>}
 
-            {!loading && paginated.length === 0 && (
+            {!loading && products.length === 0 && (
               <div className="col-empty">
                 <div className="col-empty-icon">📦</div>
                 <h3>No products found</h3>
@@ -507,7 +515,7 @@ function CollectionsPageInner() {
               </div>
             )}
 
-            {!loading && paginated.map((product: any) => {
+            {!loading && products.map((product: any) => {
               const disc    = getDiscount(product);
               const inStock = product.stock_quantity > 0;
               const price   = disc?.selling ?? getEffectivePrice(product);
@@ -515,6 +523,7 @@ function CollectionsPageInner() {
               const primaryImg   = imgUrl(product.featured_image);
               const galleryImgs  = product.images || [];
               const secondaryImg = galleryImgs.length > 0 ? galleryUrl(galleryImgs[0].image) : null;
+              const overview     = getOverview(product); // ✅ overview text
 
               return (
                 <Link
@@ -538,6 +547,12 @@ function CollectionsPageInner() {
                   </div>
                   <div className="col-card-body">
                     <div className="col-card-title">{product.title}</div>
+
+                    {/* ✅ Product Overview — title ke neeche */}
+                    {overview && (
+                      <div className="col-card-overview">{overview}</div>
+                    )}
+
                     {!inStock && (
                       <div className="col-stock-out">
                         <span style={{ width:5, height:5, borderRadius:'50%', background:'#dc2626', display:'inline-block' }} />
