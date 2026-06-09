@@ -308,7 +308,7 @@ const ProductSection = ({ section = null, products = [] }) => {
         .ps-body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
         .ps-title { font-size:14px; font-weight:600; color:#0a214f; line-height:1.4; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito'; }
         .ps-card:hover .ps-title { color:#1872B5; }
-
+ 
         /* ── Overview ── */
         .ps-overview { font-size:11.5px; color:#6b7280; line-height:1.4; margin-bottom:0px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
 
