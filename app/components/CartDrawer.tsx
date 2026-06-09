@@ -114,7 +114,7 @@ export default function CartDrawer() {
     setShippingMethods([]);
     setSelectedShipping(null);
 
-    const url = `http://127.0.0.1:8000/api/calculate-shipping?cart_total=${totalPrice}&country=india`;
+    const url = `${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`;
     
     fetch(url)
       .then(r => r.json())
