@@ -425,7 +425,7 @@ function CollectionsPageInner() {
         .col-card-body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
         .col-card-title { font-size:14px; font-weight:700; color:#0a214f; line-height:1.4; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition:color .15s; font-family:'Nunito',sans-serif; }
         .col-card:hover .col-card-title { color:#1872B5; }
-        .col-card-overview { font-size:12px; color:#6b7280; line-height:1.4; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
+        .col-card-overview { font-size:11px; color:#6b7280; line-height:14px; margin-bottom:0px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
 
         /* ── Star Rating Row ── */
         .col-stars-row { display:flex; align-items:center; gap:4px; margin-bottom:6px; }
