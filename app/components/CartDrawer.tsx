@@ -213,8 +213,8 @@ export default function CartDrawer() {
         .cd-img{width:70px;height:70px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;overflow:hidden;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;}
         .cd-img img{width:100%;height:100%;object-fit:contain;padding:4px;}
         .cd-img-ph{font-size:26px;color:#d1d5db;}
-        .cd-fbadge{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;}
-        .cd-dbadge{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;}
+        .cd-fbadge{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:9px;font-weight:800;padding:2px 4px;border-radius:0 0 8px 8px;text-align:center;}
+.cd-dbadge{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:8px;font-weight:800;padding:2px 4px;border-radius:0 0 8px 8px;text-align:center;line-height:1.3;}
         .cd-info{flex:1;min-width:0;}
         .cd-title{font-size:12px;font-weight:700;color:#0a214f;line-height:1.4;margin-bottom:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
         .cd-vtag{font-size:10px;color:#6b7280;font-weight:600;background:#f3f4f6;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:1px;}
