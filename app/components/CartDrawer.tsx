@@ -112,12 +112,12 @@ export default function CartDrawer() {
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
         } else if (data.success && data.methods?.length === 0) {
-  const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : null;
-  if (freeMin !== null && totalPrice >= freeMin) {
-    setFallbackCharge(0); // sirf free shipping set hogi
-  }
-  // else: kuch set nahi hoga ← PROBLEM YAH HAI
-} 
+          // methods[] empty — backend mein configure nahi
+          // free_shipping_min se decide karo
+          const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : null;
+          if (freeMin !== null && totalPrice >= freeMin) {
+            setFallbackCharge(0); // free shipping threshold cross ho gayi
+          } 
         } else {
           setShippingError(true);
         }
