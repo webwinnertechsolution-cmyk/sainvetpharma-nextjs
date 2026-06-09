@@ -1167,7 +1167,7 @@ useEffect(() => {
   margin-top:12px;
   border-radius:12px;
   overflow:hidden;
-  display:flex;
+  display:none;
   border:1.5px solid #bbf7d0;
   animation:bxgyPop .4s ease both;
 }
