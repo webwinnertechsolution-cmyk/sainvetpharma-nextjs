@@ -7,9 +7,6 @@ import { useCart } from '@/app/components/CartContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// ═══════════════════════════════════════════
-// STARS COMPONENT
-// ═══════════════════════════════════════════
 function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating = 0 }) {
   return (
     <span style={{ display: 'inline-flex', gap: 2 }}>
@@ -34,9 +31,6 @@ function Stars({ rating, size = 16, interactive = false, onSelect, hoverRating =
   );
 }
 
-// ═══════════════════════════════════════════
-// REVIEWS SECTION COMPONENT
-// ═══════════════════════════════════════════
 function ReviewsSection({ productId, productTitle }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -174,10 +168,6 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-success h4{font-family:'Sora',sans-serif;font-size:19px;color:#065f46;margin:0 0 6px;}
         .rv-success p{font-size:13px;color:#6b7280;}
         .rv-err-msg{background:#fee2e2;color:#991b1b;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;}
-    
-
-
-
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
           .rv-cta-box{flex-direction:row;flex-wrap:wrap;}
@@ -355,9 +345,6 @@ function ReviewsSection({ productId, productTitle }) {
   );
 }
 
-// ═══════════════════════════════════════════
-// MAIN PRODUCT DETAIL PAGE
-// ═══════════════════════════════════════════
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const { addToCart } = useCart();
@@ -378,11 +365,8 @@ export default function ProductDetailPage() {
   const [reviewsData, setReviewsData] = useState<any>(null);
   const [images, setImages] = useState<any[]>([]);
   const thumbsRef = useRef<HTMLDivElement>(null);
-  
-  // ⭐ NEW: Track which variant's image we're showing, but don't auto-switch
   const [pendingVariantImage, setPendingVariantImage] = useState<number | null>(null);
 
-  /* ── Fetch product ── */
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
@@ -391,54 +375,37 @@ export default function ProductDetailPage() {
       .then(data => {
         setProduct(data);
         if (data.variants?.length) setSelectedVariant(data.variants[0]);
-        
         const imgs: any[] = [];
         if (data.featured_image)
           imgs.push({ src: `${API_URL}/uploads/products/${data.featured_image}`, alt: data.featured_image_alt || data.title, type: 'image', variantId: null });
-        
         (data.images || []).forEach((gi: any) =>
           imgs.push({ src: `${API_URL}/uploads/products/gallery/${gi.image}`, alt: gi.alt_tag || data.title, type: gi.type || 'image', variantId: null })
         );
-        
         (data.variants || []).forEach((variant: any) => {
           if (variant.image) {
-            imgs.push({ 
-              src: `${API_URL}/uploads/products/variants/${variant.image}`, 
-              alt: variant.name, 
-              type: 'image', 
-              variantId: variant.id,
-              variantName: variant.name 
-            });
+            imgs.push({ src: `${API_URL}/uploads/products/variants/${variant.image}`, alt: variant.name, type: 'image', variantId: variant.id, variantName: variant.name });
           }
         });
-        
         setImages(imgs);
         setCurSlide(0);
         setLoading(false);
-
         if (data.id) {
           fetch(`${API_URL}/api/product-discount/${data.id}`)
             .then(r => r.json())
             .then(d => { if (d.has_discount) setDiscount(d); })
             .catch(() => {});
         }
-
         fetch(`${API_URL}/api/products`)
           .then(r => r.json())
           .then((all: any[]) => {
             const catIds = data.categories?.map((c: any) => c.id) || [];
-            const rel = all
-              .filter((p: any) => p.id !== data.id && p.categories?.some((c: any) => catIds.includes(c.id)))
-              .slice(0, 5);
+            const rel = all.filter((p: any) => p.id !== data.id && p.categories?.some((c: any) => catIds.includes(c.id))).slice(0, 5);
             setRelated(rel.length ? rel : all.filter((p: any) => p.id !== data.id).slice(0, 5));
           });
       })
       .catch(() => setLoading(false));
   }, [slug]);
 
-  /* ── Fetch reviews ── */
-
-  
   useEffect(() => {
     if (!product?.id) return;
     fetch(`${API_URL}/api/products/${product.id}/reviews`)
@@ -447,21 +414,14 @@ export default function ProductDetailPage() {
       .catch(() => {});
   }, [product?.id]);
 
-  /* ── Handle variant click - ONLY switch to variant image if user hasn't manually navigated ── */
   const handleVariantClick = (variant: any) => {
     setSelectedVariant(variant);
-    
-    // Find the variant image index
     const variantImageIndex = images.findIndex(img => img.variantId === variant.id);
-    
-    // Only switch to variant image if it exists
     if (variantImageIndex !== -1) {
       setCurSlide(variantImageIndex);
-      // Scroll thumbnail into view
       setTimeout(() => {
         if (thumbsRef.current) {
-          const thumbW = 70;
-          const gap = 8;
+          const thumbW = 70; const gap = 8;
           const containerW = thumbsRef.current.offsetWidth;
           const scrollTo = variantImageIndex * (thumbW + gap) - containerW / 2 + thumbW / 2;
           thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
@@ -470,7 +430,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  /* ── Parse extra_tabs ── */
   const getExtraTabs = (): Array<{ title: string; content: string }> => {
     if (!product?.extra_tabs) return [];
     try {
@@ -493,8 +452,7 @@ export default function ProductDetailPage() {
     const next = ((n % total) + total) % total;
     setCurSlide(next);
     if (thumbsRef.current) {
-      const thumbW = 70;
-      const gap = 8;
+      const thumbW = 70; const gap = 8;
       const containerW = thumbsRef.current.offsetWidth;
       const scrollTo = next * (thumbW + gap) - containerW / 2 + thumbW / 2;
       thumbsRef.current.scrollTo({ left: Math.max(0, scrollTo), behavior: 'smooth' });
@@ -508,97 +466,78 @@ export default function ProductDetailPage() {
     if (Math.abs(diff) > 40) diff > 0 ? goSlide(curSlide + 1) : goSlide(curSlide - 1);
   };
 
-  const getPrice = () => { 
-    if (selectedVariant?.price) return parseFloat(selectedVariant.price); 
-    if (product?.sale_price) return parseFloat(product.sale_price); 
-    if (product?.price) return parseFloat(product.price); 
-    return null; 
+  // ══════════════════════════════════════════════════════
+  // PRICE CALCULATION — all pure functions, no stale state
+  // ══════════════════════════════════════════════════════
+
+  const getPrice = () => {
+    if (selectedVariant?.price) return parseFloat(selectedVariant.price);
+    if (product?.sale_price) return parseFloat(product.sale_price);
+    if (product?.price) return parseFloat(product.price);
+    return null;
   };
-  
-  const getCompare = () => { 
-    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); 
-    if (product?.sale_price && product?.price) return parseFloat(product.price); 
-    return null; 
+
+  const getCompare = () => {
+    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price);
+    if (product?.sale_price && product?.price) return parseFloat(product.price);
+    return null;
   };
-  
-  const getVariantDisc = () => { 
-    const p = getPrice(), c = getCompare(); 
-    if (!p || !c || c <= p) return null; 
-    return Math.round(((c - p) / c) * 100); 
+
+  const getVariantDisc = () => {
+    const p = getPrice(), c = getCompare();
+    if (!p || !c || c <= p) return null;
+    return Math.round(((c - p) / c) * 100);
   };
 
   const isBxgy = discount?.type === 'buy_x_get_y';
-  
-  const getBxgyFreeQty = (): number => { 
-    if (!isBxgy || !discount) return 0; 
-    const buyQty = discount.buy_quantity ?? 1; 
-    const getQty = discount.get_quantity ?? 1; 
-    const maxUses = discount.max_uses_per_order ?? 999; 
-    const sets = Math.min(Math.floor(quantity / buyQty), maxUses); 
-    return sets * getQty; 
+
+  // Returns how many items are FREE for current quantity
+  const calcBxgyFreeQty = (qty: number): number => {
+    if (!isBxgy || !discount) return 0;
+    const buyQty = discount.buy_quantity ?? 1;
+    const getQty = discount.get_quantity ?? 1;
+    const maxUses = discount.max_uses_per_order ?? 999;
+    const sets = Math.min(Math.floor(qty / buyQty), maxUses);
+    return sets * getQty;
   };
-  
-  const getBxgyDiscountedPrice = (op: number): number => { 
-    if (!isBxgy || !discount) return op; 
-    const fq = getBxgyFreeQty(); 
-    if (fq === 0) return op; 
-    if (discount.get_value_type === 'free') { 
-      return Math.round((op * (quantity - fq)) / quantity); 
-    } 
-    if (discount.get_value_type === 'percentage') { 
-      const td = (op * discount.get_value / 100) * fq; 
-      return Math.round(((op * quantity) - td) / quantity); 
-    } 
-    return op; 
+
+  const getBxgyLabel = (): string => {
+    if (!isBxgy || !discount) return '';
+    if (discount.get_value_type === 'free') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} Free`;
+    if (discount.get_value_type === 'percentage') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} @ ${discount.get_value}% OFF`;
+    return `Buy ${discount.buy_quantity} Get ${discount.get_quantity}`;
   };
-  
-  const getBxgyLabel = (): string => { 
-    if (!isBxgy || !discount) return ''; 
-    if (discount.get_value_type === 'free') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} Free`; 
-    if (discount.get_value_type === 'percentage') return `Buy ${discount.buy_quantity} Get ${discount.get_quantity} @ ${discount.get_value}% OFF`; 
-    return `Buy ${discount.buy_quantity} Get ${discount.get_quantity}`; 
+
+  const isBxgyApplicable = (): boolean => {
+    if (!isBxgy || !discount) return false;
+    return quantity >= (discount.buy_quantity ?? 1);
   };
-  
-  const isBxgyApplicable = (): boolean => { 
-    if (!isBxgy || !discount) return false; 
-    return quantity >= (discount.buy_quantity ?? 1); 
+
+  const isDiscountApplicable = (): boolean => {
+    if (!discount) return false;
+    if (isBxgy) return isBxgyApplicable();
+    const minQty = discount.min_quantity ?? 0;
+    const minAmt = discount.min_amount ?? 0;
+    if (minQty > 0 && quantity < minQty) return false;
+    if (minAmt > 0) {
+      const p = getPrice();
+      if (!p || p * quantity < minAmt) return false;
+    }
+    return true;
   };
-  
-  const isDiscountApplicable = (): boolean => { 
-    if (!discount) return false; 
-    if (isBxgy) return isBxgyApplicable(); 
-    const minQty = discount.min_quantity ?? 0; 
-    const minAmt = discount.min_amount ?? 0; 
-    if (minQty > 0 && quantity < minQty) return false; 
-    if (minAmt > 0) { 
-      const p = getPrice(); 
-      if (!p || p * quantity < minAmt) return false; 
-    } 
-    return true; 
+
+  // Per-unit discounted price (used for regular % / flat discounts only)
+  const getDiscountedPricePerUnit = (op: number): number => {
+    if (!discount || !isDiscountApplicable()) return op;
+    if (isBxgy) return op; // BxGy handled separately via calcBxgyFreeQty
+    if (discount.value_type === 'percentage') return Math.round(op - (op * discount.value / 100));
+    return Math.max(0, op - discount.value);
   };
-  
-  const getDiscountedPrice = (op: number): number => { 
-    if (!discount || !isDiscountApplicable()) return op; 
-    if (isBxgy) return getBxgyDiscountedPrice(op); 
-    if (discount.value_type === 'percentage') return Math.round(op - (op * discount.value / 100)); 
-    return Math.max(0, op - discount.value); 
-  };
-  
-  const getDiscountLabel = (): string => { 
-    if (!discount) return ''; 
-    if (isBxgy) return getBxgyLabel(); 
-    return discount.value_type === 'percentage' ? `${discount.value}% OFF` : `₹${discount.value} OFF`; 
-  };
-  
-  const getSavingsAmount = (op: number): number => { 
-    if (!isDiscountApplicable()) return 0; 
-    if (isBxgy) { 
-      const fq = getBxgyFreeQty(); 
-      if (discount.get_value_type === 'free') return op * fq; 
-      if (discount.get_value_type === 'percentage') return Math.round((op * discount.get_value / 100) * fq); 
-      return 0; 
-    } 
-    return op - getDiscountedPrice(op); 
+
+  const getDiscountLabel = (): string => {
+    if (!discount) return '';
+    if (isBxgy) return getBxgyLabel();
+    return discount.value_type === 'percentage' ? `${discount.value}% OFF` : `₹${discount.value} OFF`;
   };
 
   const maxStock = selectedVariant?.stock_quantity ?? product?.stock_quantity ?? 99;
@@ -611,11 +550,11 @@ export default function ProductDetailPage() {
     const applicable = isDiscountApplicable();
     const discountLabel = applicable ? getDiscountLabel() : undefined;
     if (isBxgy && applicable) {
-      const freeQty = getBxgyFreeQty();
+      const freeQty = calcBxgyFreeQty(quantity);
       for (let i = 0; i < quantity; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice: undefined, discountLabel: undefined, variant: selectedVariant?.name || undefined });
       for (let i = 0; i < freeQty; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice: 0, discountLabel: '🎁 FREE', variant: `${selectedVariant?.name || ''}__FREE__` });
     } else {
-      const discountedPrice = applicable ? getDiscountedPrice(price) : undefined;
+      const discountedPrice = applicable ? getDiscountedPricePerUnit(price) : undefined;
       for (let i = 0; i < quantity; i++) addToCart({ id: product.id, slug: product.slug, title: product.title, image: product.featured_image ? `${API_URL}/uploads/products/${product.featured_image}` : null, price, discountedPrice, discountLabel, variant: selectedVariant?.name || undefined });
     }
     setAddedAnim(true);
@@ -650,36 +589,21 @@ export default function ProductDetailPage() {
     return () => { document.body.style.overflow = ''; };
   }, [enquiryOpen, zoomOpen]);
 
+  useEffect(() => {
+    if (!product) return;
+    document.title = product.meta_title || product.title;
+    const setMeta = (name, content, prop = false) => {
+      let el = document.querySelector(`${prop ? `[property="${name}"]` : `[name="${name}"]`}`);
+      if (!el) { el = document.createElement('meta'); prop ? el.setAttribute('property', name) : el.setAttribute('name', name); document.head.appendChild(el); }
+      el.setAttribute('content', content || '');
+    };
+    setMeta('description', product.meta_description);
+    setMeta('keywords', product.meta_keywords);
+    setMeta('og:title', product.og_title || product.title, true);
+    setMeta('og:description', product.og_description, true);
+    setMeta('og:image', product.og_image ? `${API_URL}/uploads/products/og/${product.og_image}` : '', true);
+  }, [product]);
 
-  
-{/* Seo Settings */}
-
-useEffect(() => {
-  if (!product) return;
-
-  document.title = product.meta_title || product.title;
-
-  const setMeta = (name, content, prop = false) => {
-    let el = document.querySelector(`${prop ? `[property="${name}"]` : `[name="${name}"]`}`);
-    if (!el) {
-      el = document.createElement('meta');
-      prop ? el.setAttribute('property', name) : el.setAttribute('name', name);
-      document.head.appendChild(el);
-    }
-    el.setAttribute('content', content || '');
-  };
-
-  setMeta('description', product.meta_description);
-  setMeta('keywords', product.meta_keywords);
-  setMeta('og:title', product.og_title || product.title, true);
-  setMeta('og:description', product.og_description, true);
-  setMeta('og:image', product.og_image ? `${API_URL}/uploads/products/og/${product.og_image}` : '', true);
-
-}, [product]);
-
-
-
-  
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', flexDirection: 'column', gap: 16, fontFamily: 'Nunito,sans-serif' }}>
       <div style={{ width: 48, height: 48, borderRadius: '50%', border: '4px solid #dbeafe', borderTopColor: '#1872B5', animation: 'spin .8s linear infinite' }} />
@@ -697,18 +621,44 @@ useEffect(() => {
     </div>
   );
 
+  // ══════════════════════════════════════════════════════
+  // DERIVED DISPLAY VALUES — computed fresh every render
+  // ══════════════════════════════════════════════════════
   const price = getPrice();
   const compare = getCompare();
   const variantDisc = getVariantDisc();
   const inStock = (selectedVariant?.stock_quantity ?? product.stock_quantity) > 0;
   const applicable = isDiscountApplicable();
-  const finalPrice = price && applicable ? getDiscountedPrice(price) : price;
-  const savings = price && applicable ? getSavingsAmount(price) : 0;
   const discountLabel = getDiscountLabel();
   const minQty = discount?.min_quantity ?? 0;
   const needMoreForDisc = discount && !applicable && minQty > 0 && quantity < minQty;
-  const bxgyFreeQty = getBxgyFreeQty();
   const needMoreForBxgy = isBxgy && !isBxgyApplicable() && discount;
+
+  // BxGy: compute fresh from current quantity
+  const bxgyFreeQty = calcBxgyFreeQty(quantity);
+  const paidQty = quantity - bxgyFreeQty; // items customer actually pays for
+
+  // TOTAL prices shown to user (not per-unit)
+  const totalOrigPrice = price ? price * quantity : 0;  // always MRP × qty
+
+  // What customer actually pays total:
+  let totalPayPrice = totalOrigPrice;
+  if (price && applicable) {
+    if (isBxgy) {
+      // Pay for paidQty items, get bxgyFreeQty free (or at % off)
+      if (discount.get_value_type === 'free') {
+        totalPayPrice = price * paidQty;
+      } else if (discount.get_value_type === 'percentage') {
+        const discOnFreeItems = (price * discount.get_value / 100) * bxgyFreeQty;
+        totalPayPrice = totalOrigPrice - discOnFreeItems;
+      }
+    } else {
+      // Regular discount: apply per-unit discount × quantity
+      totalPayPrice = getDiscountedPricePerUnit(price) * quantity;
+    }
+  }
+
+  const totalSavings = applicable ? totalOrigPrice - totalPayPrice : 0;
 
   return (
     <div style={{ background: '#f5f7fa', minHeight: '100vh', fontFamily: "'Nunito',sans-serif" }}>
@@ -736,8 +686,8 @@ useEffect(() => {
         .pd-gallery{position:sticky;top:24px;}
         .slider-wrap{position:relative;background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.1);cursor:zoom-in;}
         .slider-track{display:flex;width:100%;height:100%;transition:transform .42s cubic-bezier(.4,0,.2,1);}
-        .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:20px;flex-shrink:0;}
-        .slide img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease;}
+        .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+        .slide img{max-width:100%;max-height:100%;object-fit:cover;transition:transform .4s ease;width:100%;}
         .slider-wrap:hover .slide img{transform:scale(1.04);}
         .arrow-btn{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:#374151;box-shadow:0 2px 12px rgba(0,0,0,.12);transition:all .22s;font-size:18px;padding:0;}
         .arrow-btn:hover{background:#1872B5;color:#fff;border-color:#1872B5;transform:translateY(-50%) scale(1.1);}
@@ -750,24 +700,22 @@ useEffect(() => {
         .badge-bxgy{background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;}
         .zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;backdrop-filter:blur(6px);pointer-events:none;opacity:0;transition:opacity .2s;}
         .slider-wrap:hover .zoom-hint{opacity:1;}
-        .slider-dots{display:flex;justify-content:center;gap:6px;margin-top:12px;}
-        .sdot-item{width:7px;height:7px;border-radius:50%;background:#d1d5eb;cursor:pointer;transition:all .2s;border:none;padding:0;}
-        .sdot-item.on{background:#1872B5;width:22px;border-radius:4px;}
+        .slider-dots{display:none;}
         .thumbs-wrap{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
         .thumbs-wrap::-webkit-scrollbar{display:none;}
-        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;position:relative;}
-        .thumb img{width:100%;height:100%;object-fit:contain;padding:4px;}
+        .thumb{width:70px;height:70px;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;background:#fff;flex-shrink:0;transition:all .22s;position:relative;margin-top:3px;}
+        .thumb img{width:100%;height:100%;object-fit:cover;padding:0;}
         .thumb.on,.thumb:hover{border-color:#1872B5;transform:translateY(-3px);box-shadow:0 6px 16px rgba(24,114,181,.22);}
-        .thumb-variant-badge{position:absolute;top:2px;right:2px;background:#1872B5;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;}
+        .thumb-variant-badge{position:absolute;top:2px;right:2px;background:#1872B5;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;display:none;}
         .pd-info{animation:fadeIn .45s ease both;}
-        .pd-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:#0a214f;line-height:25px;margin-bottom:10px;}
+        .pd-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:#0a214f;line-height:25px;margin-bottom:7px;}
         .pd-sku{font-size:12px;color:#9ca3af;margin-bottom:18px;display:flex;align-items:center;gap:6px;}
         .pd-sku b{color:#374151;background:#f3f4f6;padding:2px 8px;border-radius:5px;}
-        .reviews-summary{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1.5px solid #e5e7eb;animation:slideDown .4s ease both;}
+        .reviews-summary{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:8px;border-bottom:1.5px solid #e5e7eb;animation:slideDown .4s ease both;}
         .reviews-stars{display:flex;gap:2px;}
         .reviews-star{font-size:20px;line-height:1;}
         .reviews-text{font-size:13px;font-weight:700;color:#374151;font-family:'Sora',sans-serif;}
-        .price-box{background:#ffffff00;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:-6px;}
+        .price-box{background:transparent;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:-6px;}
         .price-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
         .price-main{font-size:18px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;line-height:1;}
         .price-main.with-discount{color:#059669;}
@@ -794,14 +742,13 @@ useEffect(() => {
         .sp-dot-in{background:#10b981;animation:pulse 1.6s infinite;}
         .sp-dot-out{background:#ef4444;}
         .overview-label{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:none;}
-        .overview-box{font-size:14px;color:#374151;line-height:20px;margin-bottom:-6px;padding:0;background:#ffffff00;border-radius:12px;border:none;padding-block:1px;}
+        .overview-box{font-size:14px;color:#374151;line-height:20px;margin-bottom:-6px;padding:0;background:transparent;border-radius:12px;border:none;padding-block:1px;}
         .divider{border:none;border-top:0px solid #e5e7eb;margin:10px 0;}
         .vg-label{font-size:11px;font-weight:800;color:#0a214f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
-        .variant-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
-        .vc{position:relative;min-width:58px;background:#fff;border:2px solid #e5e7eb;border-radius:7px;padding:7px 9px;text-align:center;cursor:pointer;transition:all .18s;box-shadow:none!important;}
+        .variant-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:-8px;margin-top:-6px;}
+        .vc{position:relative;min-width:58px;background:#fff;border:2px solid #e5e7eb;border-radius:7px;padding:7px 9px;text-align:center;cursor:pointer;transition:all .18s;}
         .vc:hover{border-color:#1872B5;box-shadow:0 4px 16px rgba(24,114,181,.15);transform:translateY(-2px);}
         .vc.on{border-color:#1872B5;background:#eff6ff;box-shadow:0 4px 20px rgba(24,114,181,.22);}
-        .vc-off{display:none;}
         .vc-name{font-size:12px;font-weight:600;color:#0a214f;font-family:'Sora',sans-serif;}
         .vc-out{font-size:10px;color:#dc2626;font-weight:700;margin-top:3px;}
         .qty-section{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
@@ -832,8 +779,8 @@ useEffect(() => {
         .prod-tab-btn{padding:11px 14px;font-size:13px;font-weight:700;color:#6b7280;background:none;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;font-family:'Nunito',sans-serif;flex-shrink:0;border-bottom:3px solid transparent;margin-bottom:-1.5px;}
         .prod-tab-btn:hover{color:#1872B5;background:#f0f7ff;}
         .prod-tab-btn.active{color:#1872B5;border-bottom-color:#1872B5;background:#fff;}
-        .prod-tab-content{padding:28px 32px;animation:tabFadeIn .3s ease both;min-height:120px;}
-        .reviews-tab-wrap{padding:24px 32px;animation:tabFadeIn .3s ease both;}
+        .prod-tab-content{padding:20px 18px;animation:tabFadeIn .3s ease both;min-height:120px;font-size:13px;line-height:19px;color:#171717;}
+        .reviews-tab-wrap{padding:14px 18px;animation:tabFadeIn .3s ease both;}
         .rv-topbar{display:none!important;}
         .rel-section{max-width:1260px;margin:0 auto;padding:0 24px 64px;}
         .rel-head{font-family:'Sora',sans-serif;font-size:19px;font-weight:800;color:#0a214f;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #e5e7eb;display:flex;align-items:center;gap:10px;}
@@ -877,314 +824,36 @@ useEffect(() => {
           .prod-tabs-section,.rel-section{padding-left:16px;padding-right:16px;}
           .prod-tab-content,.reviews-tab-wrap{padding:20px 18px;}
         }
-
-
-            .slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover!important;
-    transition: transform .4s ease;
-    width: 100%!important;
-}
-.slide {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-    flex-shrink: 0;
-}
-.slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-    display: none;
-}
-.thumb {
-    width: 70px;
-    height: 70px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #fff;
-    flex-shrink: 0;
-    transition: all .22s;
-    position: relative;
-    margin-top: 3px!important;
-}
-.thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover!important;
-    padding: 0px!important;
-}
-.thumb-variant-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #1872B5;
-    color: #fff;
-    font-size: 7px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 3px;
-    display: none;
-}
-.variant-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: -8px;
-    margin-top: -6px;
-}
-.prod-tab-content {
-    padding: 20px 18px;
-    animation: tabFadeIn .3s ease both;
-    min-height: 120px;
-    font-size: 13px;
-    line-height: 19px;
-    color: #171717 !important;
-}
-.rv-card {
-    background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 8px 12px;
-    animation: rvFadeUp .3s ease both;
-    transition: box-shadow .2s,border-color .2s;
-}
-.rv-avatar {
-    width: 29px;
-    height: 29px;
-    border-radius: 50%;
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 800;
-    font-family: 'Sora',sans-serif;
-    flex-shrink: 0;
-}
-.rv-rname {
-    font-size: 11px;
-    font-weight: 800;
-    color: #0a214f;
-    margin-bottom: -7px;
-}
-.rv-card-hd {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 3px;
-}
-.rv-text {
-    font-size: 12px;
-    color: #4b5563;
-    line-height: 1.75;
-}
-.reviews-tab-wrap {
-    padding: 14px 18px;
-    animation: tabFadeIn .3s ease both;
-}
-.rv-avg-big {
-    font-family: 'Sora',sans-serif;
-    font-size: 35px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1;
-    text-align: center;
-}
-.rv-cta-big {
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    font-family: 'Sora',sans-serif;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all .22s;
-    box-shadow: 0 4px 14px rgba(24,114,181,.28);
-}
-.rv-mod-hd {
-    background: linear-gradient(135deg,#1872B5,#2596e1);
-    padding: 9px 18px 12px;
-    border-radius: 20px 20px 0 0;
-    position: relative;
-}
-.pd-title {
-    font-family: 'Sora',sans-serif;
-    font-size: 21px;
-    font-weight: 700;
-    color: #0a214f;
-    line-height: 25px;
-    margin-bottom: 7px;
-}
-.reviews-summary {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 18px;
-    padding-bottom: 8px;
-    border-bottom: 1.5px solid #e5e7eb;
-    animation: slideDown .4s ease both;
-}
-
         @media(max-width:767px){
-          .pd-title{font-size:20px;}
-          .price-main{font-size:28px;}
-          .rel-grid{grid-template-columns:1fr 1fr;gap:10px;}
+          .pd-title{font-size:16px;line-height:19px;margin-bottom:5px;}
+          .price-main{font-size:16px;}
+          .rel-grid{grid-template-columns:1fr 1fr;gap:5px;}
           .reviews-summary{flex-direction:unset;align-items:flex-start;gap:8px;}
-          .rel-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-}
-.arrow-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.95);
-    border: 1.5px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    color: #374151;
-    box-shadow: 0 2px 12px rgba(0,0,0,.12);
-    transition: all .22s;
-    font-size: 18px;
-    padding: 0;
-}
-.pd-title {
-    font-size: 16px;
-}
-.pd-title {
-    font-family: 'Sora',sans-serif;
-    
-    font-weight: 700;
-    color: #0a214f;
-    line-height: 19px;
-    margin-bottom: 5px;
-}
-.price-main {
-    font-size: 16px;
-}
-.overview-box {
-    font-size: 12px;
-    color: #374151;
-    line-height: 15px;
-    margin-bottom: -6px;
-    padding: 0;
-    background: #ffffff00;
-    border-radius: 12px;
-    border: none;
-    padding-block: 1px;
-}
-.qty-section {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-.cta-btn {
-    flex: 1;
-    min-width: 140px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 800;
-    font-family: 'Sora',sans-serif;
-    cursor: pointer;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    text-decoration: none;
-    transition: all .22s;
-    position: relative;
-    overflow: hidden;
-}
-.meta-tbl td {
-    padding: 6px 16px;
-    vertical-align: middle;
-}
-.chip-cat {
-    background: #eff6ff;
-    color: #1872B5;
-    border: 1px solid #bfdbfe;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 8px;
-    font-weight: 700;
-    text-decoration: none;
-    display: inline-block;
-    margin: 2px;
-    transition: background .2s;
-}
-.rel-head {
-    font-family: 'Sora',sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    color: #0a214f;
-    margin-bottom: 17px;
-    padding-bottom: 7px;
-    border-bottom: 2px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.rv-avg-big {
-    font-family: 'Sora',sans-serif;
-    font-size: 29px;
-    font-weight: 800;
-    color: #0a214f;
-    line-height: 1;
-    text-align: center;
-}
+          .arrow-btn{width:30px;height:30px;font-size:18px;}
+          .overview-box{font-size:12px;line-height:15px;}
+          .qty-section{margin-bottom:16px;}
+          .cta-btn{padding:10px 20px;font-size:14px;}
+          .meta-tbl td{padding:6px 16px;}
+          .chip-cat{font-size:8px;}
+          .rel-head{font-size:16px;margin-bottom:17px;padding-bottom:7px;}
+          .rv-avg-big{font-size:29px;}
         }
       `}</style>
 
-      {/* Breadcrumb */}
       <div className="pd-bc-bar">
         <div className="pd-bc-inner">
           <nav className="pd-bc">
             <Link href="/">Home</Link>
             <span className="pd-bc-sep">›</span>
             <Link href="/collections">Shop</Link>
-            {product.categories?.[0] && (
-              <>
-                <span className="pd-bc-sep">›</span>
-                <Link href={`/collections?category=${product.categories[0].slug}`}>{product.categories[0].name}</Link>
-              </>
-            )}
+            {product.categories?.[0] && (<><span className="pd-bc-sep">›</span><Link href={`/collections?category=${product.categories[0].slug}`}>{product.categories[0].name}</Link></>)}
             <span className="pd-bc-sep">›</span>
             <span className="pd-bc-cur">{product.title?.slice(0, 45)}{product.title?.length > 45 ? '…' : ''}</span>
           </nav>
         </div>
       </div>
 
-      {/* Main Grid */}
       <div className="pd-grid">
-
-        {/* LEFT: GALLERY */}
         <div className="pd-gallery">
           {images.length > 0 ? (
             <>
@@ -1208,16 +877,10 @@ useEffect(() => {
                 {images.length > 1 && <button className="arrow-btn arrow-next" onClick={e => { e.stopPropagation(); goSlide(curSlide + 1); }}>›</button>}
                 {images[curSlide]?.type !== 'video' && <span className="zoom-hint">🔍 Click to zoom</span>}
               </div>
-              {images.length > 1 && images.length <= 8 && (
-                <div className="slider-dots">
-                  {images.map((_, i) => <button key={i} className={`sdot-item ${i === curSlide ? 'on' : ''}`} onClick={() => goSlide(i)} />)}
-                </div>
-              )}
               {images.length > 1 && (
                 <div className="thumbs-wrap" ref={thumbsRef}>
                   {images.map((im, i) => (
                     <div key={i} className={`thumb ${i === curSlide ? 'on' : ''}`} onClick={() => goSlide(i)}>
-                      {im.variantId && <span className="thumb-variant-badge">✓ Var</span>}
                       {im.type === 'video'
                         ? <div style={{ width: '100%', height: '100%', background: '#0a214f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, borderRadius: 8 }}>▶</div>
                         : <img src={im.src} alt={im.alt} />}
@@ -1231,7 +894,6 @@ useEffect(() => {
           )}
         </div>
 
-        {/* RIGHT: PRODUCT INFO */}
         <div className="pd-info">
           <h1 className="pd-title">{product.title}</h1>
 
@@ -1248,49 +910,80 @@ useEffect(() => {
 
           {product.sku && <div className="pd-sku">SKU: <b>{product.sku}</b></div>}
 
+          {/* ═══════════════════════════════════════
+              PRICE BOX — clean, correct calculation
+              ═══════════════════════════════════════ */}
           <div className="price-box">
             {price ? (
               <>
                 <div className="price-row">
                   {applicable ? (
                     <>
-                      <span className="price-main with-discount">₹{(finalPrice! * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-<span className="price-orig">₹{(price * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                      {isBxgy ? <span className="bxgy-tag">🎁 {getBxgyLabel()}</span> : <span className="discount-applied-tag">🏷️ {discountLabel}</span>}
+                      {/* Discounted total price */}
+                      <span className="price-main with-discount">
+                        ₹{Math.round(totalPayPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      </span>
+                      {/* Original total (strikethrough) — only show if actually different */}
+                      {totalOrigPrice > totalPayPrice && (
+                        <span className="price-orig">
+                          ₹{Math.round(totalOrigPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </span>
+                      )}
+                      {isBxgy
+                        ? <span className="bxgy-tag">🎁 {getBxgyLabel()}</span>
+                        : <span className="discount-applied-tag">🏷️ {discountLabel}</span>}
                     </>
                   ) : (
                     <>
-                      <span className="price-main">₹{(price * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-{compare && <span className="price-orig">₹{(compare * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
+                      <span className="price-main">
+                        ₹{Math.round(price * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      </span>
+                      {compare && compare > price && (
+                        <span className="price-orig">
+                          ₹{Math.round(compare * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </span>
+                      )}
                       {variantDisc && <span className="disc-tag">{variantDisc}% OFF</span>}
                     </>
                   )}
                 </div>
-                {applicable && savings > 0 && (
+
+                {/* Savings strip */}
+                {applicable && totalSavings > 0 && (
                   <div className="savings-strip">
                     <div className="savings-left">
                       <span>{isBxgy ? '🎁' : '🎉'}</span>
                       <div>
-                        <div>You save ₹{(savings * quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
-                        {isBxgy && bxgyFreeQty > 0 && <div className="savings-sub">{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} free</div>}
+                        <div>You save ₹{Math.round(totalSavings).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+                        {isBxgy && bxgyFreeQty > 0 && (
+                          <div className="savings-sub">{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} free</div>
+                        )}
                         {discount.title && <div className="savings-sub">"{discount.title}" applied</div>}
                       </div>
                     </div>
-                   <div className="savings-right">
-  {isBxgy
-    ? (discount.get_value_type === 'percentage' ? `${discount.get_value}%` : 'FREE')
-    : (discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`)
-  } off
-</div>
+                    <div className="savings-right">
+                      {isBxgy
+                        ? (discount.get_value_type === 'percentage' ? `${discount.get_value}% off` : 'FREE')
+                        : (discount.value_type === 'percentage' ? `${discount.value}% off` : `₹${discount.value} off`)}
+                    </div>
                   </div>
                 )}
+
+                {/* BxGy progress bar (not yet applicable) */}
                 {needMoreForBxgy && discount && (
                   <div className="bxgy-progress">
-                    <div className="bxgy-progress-text">🎁 Add {(discount.buy_quantity ?? 1) - quantity} more to get {discount.get_quantity} free!</div>
-                    <div className="bxgy-bar-wrap"><div className="bxgy-bar-fill" style={{ width: `${Math.min(100, (quantity / (discount.buy_quantity ?? 1)) * 100)}%` }} /></div>
+                    <div className="bxgy-progress-text">
+                      🎁 Add {(discount.buy_quantity ?? 1) - quantity} more to get {discount.get_quantity} free!
+                    </div>
+                    <div className="bxgy-bar-wrap">
+                      <div className="bxgy-bar-fill" style={{ width: `${Math.min(100, (quantity / (discount.buy_quantity ?? 1)) * 100)}%` }} />
+                    </div>
                   </div>
                 )}
-                {needMoreForDisc && <div className="disc-hint-strip">🏷️ Add {minQty - quantity} more to unlock {discountLabel}!</div>}
+
+                {needMoreForDisc && (
+                  <div className="disc-hint-strip">🏷️ Add {minQty - quantity} more to unlock {discountLabel}!</div>
+                )}
               </>
             ) : <span className="price-na">Price on request</span>}
           </div>
@@ -1344,7 +1037,10 @@ useEffect(() => {
           {isBxgy && isBxgyApplicable() && bxgyFreeQty > 0 && (
             <div className="bxgy-counter">
               <div className="bxgy-counter-icon">🎁</div>
-              <div><div>{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} will be FREE!</div><div style={{ fontSize: 11, opacity: .85, marginTop: 2 }}>{discount.title}</div></div>
+              <div>
+                <div>{bxgyFreeQty} item{bxgyFreeQty > 1 ? 's' : ''} will be FREE!</div>
+                <div style={{ fontSize: 11, opacity: .85, marginTop: 2 }}>{discount.title}</div>
+              </div>
             </div>
           )}
 
@@ -1357,8 +1053,7 @@ useEffect(() => {
               <button className={`cta-btn cta-add ${addedAnim ? 'added' : ''}`} onClick={handleAddToCart} disabled={!price || !inStock}>
                 {addedAnim
                   ? <><span style={{ fontSize: 18, animation: 'checkPop .4s ease' }}>✓</span> Added {quantity > 1 ? `(${quantity})` : ''}!</>
-                  : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>
-                }
+                  : <><span style={{ fontSize: 18 }}>🛒</span> Add to Cart {quantity > 1 ? `(${quantity})` : ''}</>}
               </button>
             )}
           </div>
@@ -1381,23 +1076,15 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* PRODUCT TABS */}
       <div className="prod-tabs-section">
         <div className="prod-tabs-wrap">
           <nav className="prod-tabs-nav" role="tablist">
             {allTabs.map((tab, idx) => (
-              <button
-                key={idx}
-                role="tab"
-                aria-selected={activeTab === idx}
-                className={`prod-tab-btn${activeTab === idx ? ' active' : ''}`}
-                onClick={() => setActiveTab(idx)}
-              >
+              <button key={idx} role="tab" aria-selected={activeTab === idx} className={`prod-tab-btn${activeTab === idx ? ' active' : ''}`} onClick={() => setActiveTab(idx)}>
                 {tab.title}
               </button>
             ))}
           </nav>
-
           {allTabs.map((tab, idx) => (
             <div key={idx} role="tabpanel" style={{ display: activeTab === idx ? 'block' : 'none' }}>
               {activeTab === idx && (
@@ -1414,7 +1101,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Related Products */}
       {related.length > 0 && (
         <div className="rel-section">
           <div className="rel-head">Similar Products</div>
@@ -1442,7 +1128,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Cart Toast */}
       {addedAnim && (
         <div className="cart-toast">
           <span style={{ fontSize: 20 }}>✅</span>
@@ -1450,7 +1135,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Zoom Modal */}
       {zoomOpen && images[curSlide]?.type !== 'video' && (
         <div className="zoom-overlay" onClick={() => setZoomOpen(false)}>
           <button className="zoom-close" onClick={() => setZoomOpen(false)}>×</button>
@@ -1458,7 +1142,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Enquiry Modal */}
       <div className={`enq-overlay ${enquiryOpen ? 'open' : ''}`} onClick={e => { if (e.target === e.currentTarget) setEnquiryOpen(false); }}>
         <div className="enq-modal">
           <div className="enq-header">
