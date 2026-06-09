@@ -310,7 +310,7 @@ const ProductSection = ({ section = null, products = [] }) => {
         .ps-card:hover .ps-title { color:#1872B5; }
 
         /* ── Overview ── */
-        .ps-overview { font-size:11.5px; color:#6b7280; line-height:1.4; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
+        .ps-overview { font-size:11.5px; color:#6b7280; line-height:1.4; margin-bottom:0px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-family:'Nunito',sans-serif; font-weight:500; }
 
         .ps-price-row { display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:6px; flex-wrap:wrap; }
         .ps-price { font-size:16px; font-weight:800; color:#1872B5; font-family:'Nunito',sans-serif; }
