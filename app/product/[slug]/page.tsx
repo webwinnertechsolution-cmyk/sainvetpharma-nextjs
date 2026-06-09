@@ -515,12 +515,11 @@ export default function ProductDetailPage() {
     return null; 
   };
   
-const getCompare = () => {
-  if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price);
-  if (product?.sale_price && product?.price && parseFloat(product.price) > parseFloat(product.sale_price))
-    return parseFloat(product.price);
-  return null;
-};
+  const getCompare = () => { 
+    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); 
+    if (product?.sale_price && product?.price) return parseFloat(product.price); 
+    return null; 
+  };
   
   const getVariantDisc = () => { 
     const p = getPrice(), c = getCompare(); 
@@ -703,7 +702,7 @@ useEffect(() => {
   const variantDisc = getVariantDisc();
   const inStock = (selectedVariant?.stock_quantity ?? product.stock_quantity) > 0;
   const applicable = isDiscountApplicable();
-  const finalPrice = price && applicable ? getDiscountedPrice(price) : price;
+  const finalPrice = price && applicable && !isBxgy ? getDiscountedPrice(price) : price;
   const savings = price && applicable ? getSavingsAmount(price) : 0;
   const discountLabel = getDiscountLabel();
   const minQty = discount?.min_quantity ?? 0;
@@ -1263,7 +1262,7 @@ useEffect(() => {
                     <>
                       <span className="price-main">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                       {compare && <span className="price-orig">₹{compare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
-{`{variantDisc && {variantDisc}% OFF}`}
+                      {variantDisc && <span className="disc-tag">{variantDisc}% OFF</span>}
                     </>
                   )}
                 </div>
@@ -1277,7 +1276,12 @@ useEffect(() => {
                         {discount.title && <div className="savings-sub">"{discount.title}" applied</div>}
                       </div>
                     </div>
-                    <div className="savings-right">{discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`} off</div>
+                   <div className="savings-right">
+  {isBxgy 
+    ? (discount.get_value_type === 'free' ? 'FREE' : `${discount.get_value}% off`)
+    : (discount.value_type === 'percentage' ? `${discount.value}%` : `₹${discount.value}`) + ' off'
+  }
+</div>
                   </div>
                 )}
                 {needMoreForBxgy && discount && (
