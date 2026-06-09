@@ -235,7 +235,7 @@ export default function CartDrawer() {
         .cd-rm:hover{color:#ef4444;}
 
         /* ── Shipping Section ── */
-        .cd-ship{flex-shrink:0;border-top:1px solid #f3f4f6;padding:10px 16px 0;}
+        .cd-ship{flex-shrink:0;border-top:1px solid #f3f4f6;padding:10px 16px 0; display:none;}
         .cd-ship-lbl{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
         .cd-ship-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
         .cd-ship-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .18s;background:#fff;}
