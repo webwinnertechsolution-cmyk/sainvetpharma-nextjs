@@ -32,22 +32,20 @@ export default function CartDrawer() {
   const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
   const [shippingLoading, setShippingLoading]   = useState(false);
   const [shippingError, setShippingError]       = useState(false);
+  // Fallback charge jab methods[] empty ho (backend se configured nahi)
+  const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
   const [itemsWithDiscount, setItemsWithDiscount] = useState<any[]>([]);
 
-  // ── Free shipping threshold ──
+  // ── Free shipping threshold — sirf ek baar fetch ──
+  // (calculate-shipping API se hi milta hai free_shipping_min)
   useEffect(() => {
-    fetch(`${API_URL}/api/free-shipping-discount`)
+    if (freeShippingMin !== null) return; // already fetched
+    fetch(`${API_URL}/api/calculate-shipping?cart_total=0&country=india`)
       .then(r => r.json())
       .then(d => {
-        if (d.has_discount && d.min_amount) setFreeShippingMin(Number(d.min_amount));
+        if (d.free_shipping_min) setFreeShippingMin(Number(d.free_shipping_min));
       })
-      .catch(() => {
-        // Fallback: try without /api prefix
-        fetch(`${API_URL}/free-shipping-discount`)
-          .then(r => r.json())
-          .then(d => { if (d.has_discount && d.min_amount) setFreeShippingMin(Number(d.min_amount)); })
-          .catch(() => {});
-      });
+      .catch(() => {});
   }, []);
 
   // ── Items discount display ──
@@ -98,13 +96,31 @@ export default function CartDrawer() {
     setShippingError(false);
     setShippingMethods([]);
     setSelectedShipping(null);
+    setFallbackCharge(null);
 
     fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
       .then(r => r.json())
       .then(data => {
-        if (data.success && data.methods?.length > 0) {
+        // free_shipping_min hamesha save karo
+        if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
+
+        if (data.is_free_shipping) {
+          // Backend ne free shipping confirm kiya
+          setFallbackCharge(0);
+        } else if (data.success && data.methods?.length > 0) {
+          // Normal methods available
           setShippingMethods(data.methods);
           setSelectedShipping(data.methods[0]);
+        } else if (data.success && data.methods?.length === 0) {
+          // methods[] empty — backend mein configure nahi
+          // free_shipping_min se decide karo
+          const freeMin = data.free_shipping_min ? Number(data.free_shipping_min) : null;
+          if (freeMin !== null && totalPrice >= freeMin) {
+            setFallbackCharge(0); // free shipping threshold cross ho gayi
+          } else {
+            // Default fallback charge — admin ne koi method set nahi kiya
+            setFallbackCharge(99);
+          }
         } else {
           setShippingError(true);
         }
@@ -131,11 +147,12 @@ export default function CartDrawer() {
   const freeUnlocked = freeMin > 0 && totalPrice >= freeMin;
 
   const shippingCharge: number | null = (() => {
-    if (items.length === 0) return 0;
-    if (freeUnlocked)       return 0;
-    if (shippingLoading)    return null;
-    if (shippingError)      return null;
-    if (!selectedShipping)  return null;
+    if (items.length === 0)        return 0;
+    if (freeUnlocked)              return 0;
+    if (shippingLoading)           return null;
+    if (shippingError)             return null;
+    if (fallbackCharge !== null)   return fallbackCharge;   // ✅ fallback use karo
+    if (!selectedShipping)         return null;
     return Number(selectedShipping.charge);
   })();
 
@@ -367,10 +384,28 @@ export default function CartDrawer() {
               <div className="cd-ship-lbl">🚚 Shipping</div>
               {shippingLoading ? (
                 <div className="cd-sloading"><div className="cd-spinner" /> Calculating shipping...</div>
-              ) : freeUnlocked ? (
+              ) : freeUnlocked || fallbackCharge === 0 ? (
                 <div className="cd-sfree">🎉 Free shipping applied automatically!</div>
               ) : shippingError ? (
                 <div className="cd-serror">⚠️ Shipping unavailable — calculated at checkout</div>
+              ) : fallbackCharge !== null ? (
+                // methods[] empty tha — fallback charge show karo
+                <div className="cd-ship-list">
+                  <div className="cd-ship-opt on">
+                    <div className="cd-sradio"><div className="cd-sdot" /></div>
+                    <div className="cd-sinfo">
+                      <div className="cd-sname">Standard Delivery</div>
+                      {freeShippingMin && (
+                        <div className="cd-stime">
+                          Free above ₹{Number(freeShippingMin).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </div>
+                      )}
+                    </div>
+                    <div className={`cd-sprice ${fallbackCharge === 0 ? 'free' : ''}`}>
+                      {fallbackCharge === 0 ? 'FREE' : `₹${fallbackCharge.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
+                    </div>
+                  </div>
+                </div>
               ) : shippingMethods.length > 0 ? (
                 <div className="cd-ship-list">
                   {shippingMethods.map((m: ShippingMethod) => (
