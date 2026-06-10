@@ -150,7 +150,7 @@ export default function EnhancedHeader({ logo, menus }) {
         .search-input:focus { outline: none; border-color: #1872B5; box-shadow: 0 0 0 3px rgba(24,114,181,0.1); }
         .search-icon {
           position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-          width: 48px; height: 40px; display: flex; align-items: center; justify-content: center;
+          width: 48px; height: 41px; display: flex; align-items: center; justify-content: center;
           pointer-events: none; background: #1872B5; color: white; border-radius: 0 50px 50px 0;
         }
         .search-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
