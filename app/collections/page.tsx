@@ -291,9 +291,7 @@ function CollectionsPageInner() {
             {categories.map((cat: any) => (
               <button key={cat.id} className={`cat-link ${category === cat.slug ? 'active' : ''}`} onClick={() => applyCategory(cat.slug)}>
                 {cat.name}
-                <span className="cat-count">
-  {totalCount || '∞'}
-</span>
+                <span className="cat-count">{cat.products_count || 0}</span>
               </button>
             ))}
           </div>
