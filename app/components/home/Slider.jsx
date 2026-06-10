@@ -89,7 +89,7 @@ export default function Slider({ sliders }) {
           font-family: 'Nunito', sans-serif;
         }
         .rl-slide-title {
-          color: #1a2e44;
+          color: #ffffff;
           font-size: 52px;
           font-weight: 800;
           line-height: 1.15;
