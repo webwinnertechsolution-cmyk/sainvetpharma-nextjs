@@ -89,15 +89,14 @@ export default function PromotionalBanner() {
     width: 100%;
     min-height: 75vh;
     background-position: center;
-	background-size: cover;
+    background-size: auto;
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0;
+    border-radius: 16px;
     overflow: hidden;
 }
-
 
         .promotional-banner::before {
           content: '';
