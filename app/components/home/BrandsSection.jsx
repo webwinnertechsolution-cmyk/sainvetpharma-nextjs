@@ -105,7 +105,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   .br-header h2{
   font-size:27px;
   }
-  .br-header{
+  .br-header p {
   font-size: 17px;
     color: #1872B5;
     margin: 6px 0 0;
@@ -139,7 +139,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
       <div className="br-inner">
         <div className="br-header">
           <h2>{section?.heading || 'Our Brands'}</h2>
-          <P>~ Trusted by leading brands and businesses ~</P>
+          <p> ~ Trusted by leading brands and businesses ~ </p>
         </div>
 
         <div className="br-slider-wrapper">
