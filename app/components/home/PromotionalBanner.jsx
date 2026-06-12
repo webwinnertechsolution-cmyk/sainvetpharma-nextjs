@@ -85,17 +85,17 @@ export default function PromotionalBanner() {
 }
 
 .promotional-banner {
-  position: relative;
-  width: 100%;
-  min-height: 75vh;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0;
-  overflow: hidden;
+    position: relative;
+    width: 100%;
+    min-height: 75vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    overflow: hidden;
 }
 
 
