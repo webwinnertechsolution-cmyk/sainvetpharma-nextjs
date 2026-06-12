@@ -11,6 +11,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   const [isDragging, setIsDragging]     = useState(false);
   const [startX, setStartX]             = useState(0);
   const [offset, setOffset]             = useState(0);
+  const [cardWidth, setCardWidth]       = useState(0);
   const trackRef = useRef(null);
 
   useEffect(() => {
@@ -20,28 +21,33 @@ const BrandsSection = ({ section = null, brands = [] }) => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const GAP          = 12;  // Mobile mein gap kam kiya
-  const maxVisible   = isMobile ? 3 : 7;  // Mobile mein 3 slides
+  const GAP          = 12;
+  const maxVisible   = isMobile ? 3 : 7;
   const itemsVisible = Math.min(maxVisible, brands.length);
   const totalSlides  = brands.length > itemsVisible ? brands.length - itemsVisible + 1 : 1;
   const showArrows   = brands.length > itemsVisible;
 
-  /* ── Drag helpers ── */
-  const getCardWidth = () => {
-    const firstCard = trackRef.current?.querySelector('.br-card');
-    return firstCard ? firstCard.offsetWidth + GAP : 0;
-  };
+  /* ── Measure card width ── */
+  useEffect(() => {
+    const updateWidth = () => {
+      const firstCard = trackRef.current?.querySelector('.br-card');
+      if (firstCard) setCardWidth(firstCard.offsetWidth + GAP);
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, [isMobile, brands, itemsVisible]);
 
+  /* ── Drag helpers ── */
   const handleMouseDown  = (e) => { setIsDragging(true); setStartX(e.clientX); setOffset(0); };
   const handleMouseMove  = (e) => { if (!isDragging) return; setOffset(e.clientX - startX); };
   const handleMouseLeave = ()  => { if (isDragging) { setIsDragging(false); setOffset(0); } };
   const handleMouseUp    = ()  => {
     if (!isDragging) return;
     setIsDragging(false);
-    const cardW = getCardWidth();
-    const slide = Math.round(-offset / cardW);
+    const slide = Math.round(-offset / cardWidth);
     if (Math.abs(slide) > 0)
-      setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+      setCurrentIndex((prev) => Math.max(0, Math.min(prev + slide, totalSlides - 1)));
     setOffset(0);
   };
 
@@ -50,16 +56,14 @@ const BrandsSection = ({ section = null, brands = [] }) => {
   const handleTouchEnd   = ()  => {
     if (!isDragging) return;
     setIsDragging(false);
-    const cardW = getCardWidth();
-    const slide = Math.round(-offset / cardW);
+    const slide = Math.round(-offset / cardWidth);
     if (Math.abs(slide) > 0)
-      setCurrentIndex(Math.max(0, Math.min(currentIndex + slide, totalSlides - 1)));
+      setCurrentIndex((prev) => Math.max(0, Math.min(prev + slide, totalSlides - 1)));
     setOffset(0);
   };
 
   /* ── Transform ── */
-  const translateStep  = `calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible} + ${GAP}px)`;
-  const baseTransform  = `calc(-${currentIndex} * ${translateStep})`;
+  const baseTransform  = `${-currentIndex * cardWidth}px`;
   const finalTransform = isDragging ? `calc(${baseTransform} + ${offset}px)` : baseTransform;
 
   const getImageUrl = (name) =>
@@ -72,16 +76,15 @@ const BrandsSection = ({ section = null, brands = [] }) => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
-
         .br-wrap {
-          padding: 40px 0;
-          background: transparent;
-        }
+        padding: 40px 0;
+        background: #22c55e;
+      }
+    
         .br-inner {
           max-width: 1400px; margin: 0 auto; padding: 0 24px;
         }
 
-        /* ── Header ── */
         .br-header {
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 24px;
@@ -90,9 +93,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           font-size: 24px; font-weight: 700; color: #0a214f;
           font-family: 'Sora', sans-serif; margin: 0;
         }
-        .br-view-all { display: none; }
 
-        /* ── Slider wrapper ── */
         .br-slider-wrapper {
           position: relative; display: flex; align-items: center; user-select: none;
         }
@@ -100,12 +101,11 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         .br-overflow.dragging { cursor: grabbing; }
         .br-track {
           display: flex; gap: ${GAP}px; padding: 6px 0;
-          transition: ${isDragging ? 'none' : 'transform .6s cubic-bezier(.25,.46,.45,.94)'};
+          transition: ${isDragging ? 'none' : 'transform .5s ease'};
           will-change: transform;
           transform: translateX(${finalTransform});
         }
 
-        /* ── Arrows ── */
         .br-arrow {
           position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
           width: 36px; height: 36px; border-radius: 50%;
@@ -127,7 +127,6 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
         }
 
-        /* ── Brand Card ── */
         .br-card {
           flex: 0 0 calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible});
           max-width: 150px;
@@ -159,7 +158,6 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           justify-content: center; color: #d1d5db; font-size: 20px;
         }
 
-        /* ── Mobile ── */
         @media (max-width: 767px) {
           .br-wrap { padding: 20px 0; }
           .br-inner { padding: 0 10px; }
@@ -167,7 +165,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           .br-header h2 { font-size: 18px; }
 
           .br-card {
-            flex: 0 0 calc((100% - 24px) / 3) !important;  /* 3 cards, 2 gaps of 12px = 24px */
+            flex: 0 0 calc((100% - 24px) / 3) !important;
             height: 60px;
             max-width: none !important;
           }
@@ -188,12 +186,10 @@ const BrandsSection = ({ section = null, brands = [] }) => {
       `}</style>
 
       <div className="br-inner">
-        {/* Header */}
         <div className="br-header">
           <h2>{section?.heading || 'Our Brands'}</h2>
         </div>
 
-        {/* Slider */}
         <div
           className="br-slider-wrapper"
           onMouseDown={handleMouseDown}
@@ -204,7 +200,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           {showArrows && (
             <button
               className="br-arrow br-arrow-prev"
-              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
               disabled={currentIndex === 0}
               aria-label="Previous"
               type="button"
@@ -253,7 +249,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           {showArrows && (
             <button
               className="br-arrow br-arrow-next"
-              onClick={() => setCurrentIndex(Math.min(currentIndex + 1, totalSlides - 1))}
+              onClick={() => setCurrentIndex((prev) => Math.min(prev + 1, totalSlides - 1))}
               disabled={currentIndex >= totalSlides - 1}
               aria-label="Next"
               type="button"
