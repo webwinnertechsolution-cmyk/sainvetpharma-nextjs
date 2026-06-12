@@ -78,7 +78,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
         * { box-sizing: border-box; }
         .br-wrap {
         padding: 40px 0;
-        background: #22c55e;
+        background: #1872b5;
       }
     
         .br-inner {
