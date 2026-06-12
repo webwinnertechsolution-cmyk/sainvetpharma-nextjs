@@ -85,15 +85,15 @@ export default function Slider({ sliders }) {
         .rl-slide-content {
           max-width: 520px;
         }
-        .rl-slide-sub-title {
-          color: #444;
-          font-size: 13px;
-          font-weight: 600;
-          margin-bottom: 16px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          font-family: 'Nunito', sans-serif;
-        }
+       .rl-slide-sub-title {
+			color: #ffffff;
+			font-size: 14px;
+			font-weight: 600;
+			margin-bottom: 16px;
+			letter-spacing: 2px;
+			text-transform: uppercase;
+			font-family: 'Nunito', sans-serif;
+		}
         .rl-slide-title {
           color: #1a2e44;
           font-size: 52px;
