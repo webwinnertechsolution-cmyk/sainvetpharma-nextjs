@@ -446,7 +446,7 @@ const ExclusiveOffers = () => {
     padding: 0 0px;
 }
 .offer-item {
-    height: 361px;
+    height: 440px;
 }
 .offers-grid {
     grid-template-columns: 1fr;
