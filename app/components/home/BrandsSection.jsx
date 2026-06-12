@@ -6,13 +6,7 @@ import Link from 'next/link';
 const BrandsSection = ({ section = null, brands = [] }) => {
   const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost/sainivetpharma/public').replace(/\/$/, '');
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile]         = useState(false);
-  const [isDragging, setIsDragging]     = useState(false);
-  const [startX, setStartX]             = useState(0);
-  const [offset, setOffset]             = useState(0);
-  const [cardWidth, setCardWidth]       = useState(0);
-  const trackRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -21,66 +15,25 @@ const BrandsSection = ({ section = null, brands = [] }) => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const GAP          = 12;
-  const maxVisible   = isMobile ? 3 : 7;
-  const itemsVisible = Math.min(maxVisible, brands.length);
-  const totalSlides  = brands.length > itemsVisible ? brands.length - itemsVisible + 1 : 1;
-  const showArrows   = brands.length > itemsVisible;
-
-  /* ── Measure card width ── */
-  useEffect(() => {
-    const updateWidth = () => {
-      const firstCard = trackRef.current?.querySelector('.br-card');
-      if (firstCard) setCardWidth(firstCard.offsetWidth + GAP);
-    };
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
-  }, [isMobile, brands, itemsVisible]);
-
-  /* ── Drag helpers ── */
-  const handleMouseDown  = (e) => { setIsDragging(true); setStartX(e.clientX); setOffset(0); };
-  const handleMouseMove  = (e) => { if (!isDragging) return; setOffset(e.clientX - startX); };
-  const handleMouseLeave = ()  => { if (isDragging) { setIsDragging(false); setOffset(0); } };
-  const handleMouseUp    = ()  => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const slide = Math.round(-offset / cardWidth);
-    if (Math.abs(slide) > 0)
-      setCurrentIndex((prev) => Math.max(0, Math.min(prev + slide, totalSlides - 1)));
-    setOffset(0);
-  };
-
-  const handleTouchStart = (e) => { setIsDragging(true); setStartX(e.touches[0].clientX); setOffset(0); };
-  const handleTouchMove  = (e) => { if (!isDragging) return; setOffset(e.touches[0].clientX - startX); };
-  const handleTouchEnd   = ()  => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const slide = Math.round(-offset / cardWidth);
-    if (Math.abs(slide) > 0)
-      setCurrentIndex((prev) => Math.max(0, Math.min(prev + slide, totalSlides - 1)));
-    setOffset(0);
-  };
-
-  /* ── Transform ── */
-  const baseTransform  = `${-currentIndex * cardWidth}px`;
-  const finalTransform = isDragging ? `calc(${baseTransform} + ${offset}px)` : baseTransform;
-
   const getImageUrl = (name) =>
     name ? `${API_URL}/uploads/brands/${name}` : null;
 
   if (!brands || brands.length === 0) return null;
+
+  // Duplicate brands for seamless infinite loop
+  const loopBrands = [...brands, ...brands];
 
   return (
     <div className="br-wrap">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
+
         .br-wrap {
-        padding: 40px 0;
-        background: #1872b5;
-      }
-    
+          padding: 40px 0;
+          background: #1872b514;
+        }
+
         .br-inner {
           max-width: 1400px; margin: 0 auto; padding: 0 24px;
         }
@@ -90,51 +43,41 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           margin-bottom: 24px;
         }
         .br-header h2 {
-          font-size: 24px; font-weight: 700; color: #ffffff;
-          font-family: 'Sora', sans-serif; margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: #0a214f;
+          font-family: 'Sora', sans-serif;
+          margin: 0;
         }
 
         .br-slider-wrapper {
-          position: relative; display: flex; align-items: center; user-select: none;
-        }
-        .br-overflow { overflow: hidden; flex: 1; min-width: 0; cursor: grab; }
-        .br-overflow.dragging { cursor: grabbing; }
-        .br-track {
-          display: flex; gap: ${GAP}px; padding: 6px 0;
-          transition: ${isDragging ? 'none' : 'transform .5s ease'};
-          will-change: transform;
-          transform: translateX(${finalTransform});
+          position: relative;
+          overflow: hidden;
+          width: 100%;
         }
 
-        .br-arrow {
-          position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-          width: 36px; height: 36px; border-radius: 50%;
-          background: #fff; border: 1.5px solid #e5e7eb;
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; opacity: 0;
-          transition: opacity .3s, box-shadow .3s;
-          box-shadow: 0 2px 8px rgba(0,0,0,.1); color: #374151;
+        .br-track {
+          display: flex;
+          gap: 12px;
+          width: max-content;
+          animation: br-scroll 30s linear infinite;
         }
-        .br-slider-wrapper:hover .br-arrow { opacity: 1; }
-        .br-arrow:hover:not(:disabled) {
-          box-shadow: 0 4px 16px rgba(0,0,0,.18);
+
+        .br-slider-wrapper:hover .br-track {
+          animation-play-state: paused;
         }
-        .br-arrow:disabled { opacity: .3 !important; cursor: not-allowed; pointer-events: none; }
-        .br-arrow-prev { left: -18px; }
-        .br-arrow-next { right: -18px; }
-        .br-arrow svg {
-          width: 16px; height: 16px; fill: none; stroke: currentColor;
-          stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+
+        @keyframes br-scroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
         }
 
         .br-card {
-          flex: 0 0 calc((100% - ${(itemsVisible - 1) * GAP}px) / ${itemsVisible});
-          max-width: 150px;
+          flex: 0 0 150px;
           height: 80px;
           display: flex; align-items: center; justify-content: center;
           transition: transform .22s ease;
           text-decoration: none; cursor: pointer;
-          pointer-events: ${isDragging ? 'none' : 'auto'};
           background: transparent;
         }
         .br-card:hover {
@@ -165,23 +108,18 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           .br-header h2 { font-size: 18px; }
 
           .br-card {
-            flex: 0 0 calc((100% - 24px) / 3) !important;
+            flex: 0 0 110px;
             height: 60px;
-            max-width: none !important;
           }
-          .br-card img { 
-            max-height: 60px; 
-            width: 100%; 
-            height: 60px; 
+          .br-card img {
+            max-height: 60px;
+            width: 110px;
+            height: 60px;
           }
 
-          .br-arrow { 
-            opacity: 1 !important; 
-            width: 28px; 
-            height: 28px; 
+          .br-track {
+            animation-duration: 20s;
           }
-          .br-arrow-prev { left: -6px; }
-          .br-arrow-next { right: -6px; }
         }
       `}</style>
 
@@ -190,73 +128,35 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           <h2>{section?.heading || 'Our Brands'}</h2>
         </div>
 
-        <div
-          className="br-slider-wrapper"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-        >
-          {showArrows && (
-            <button
-              className="br-arrow br-arrow-prev"
-              onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-              disabled={currentIndex === 0}
-              aria-label="Previous"
-              type="button"
-            >
-              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
-            </button>
-          )}
+        <div className="br-slider-wrapper">
+          <div className="br-track">
+            {loopBrands.map((brand, idx) => {
+              const imgSrc = getImageUrl(brand.image);
+              const CardTag = brand.url ? 'a' : 'div';
+              const cardProps = brand.url
+                ? { href: brand.url, target: '_blank', rel: 'noopener noreferrer' }
+                : {};
 
-          <div
-            className={`br-overflow ${isDragging ? 'dragging' : ''}`}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div className="br-track" ref={trackRef}>
-              {brands.map((brand) => {
-                const imgSrc = getImageUrl(brand.image);
-                const CardTag = brand.url ? 'a' : 'div';
-                const cardProps = brand.url
-                  ? { href: brand.url, target: '_blank', rel: 'noopener noreferrer' }
-                  : {};
-
-                return (
-                  <CardTag
-                    key={brand.id}
-                    className="br-card"
-                    onClick={(e) => isDragging && e.preventDefault()}
-                    {...cardProps}
-                  >
-                    {imgSrc ? (
-                      <img
-                        src={imgSrc}
-                        alt={brand.alt_tag || 'Brand'}
-                        loading="lazy"
-                        draggable={false}
-                      />
-                    ) : (
-                      <div className="br-placeholder">🏷️</div>
-                    )}
-                  </CardTag>
-                );
-              })}
-            </div>
+              return (
+                <CardTag
+                  key={`${brand.id}-${idx}`}
+                  className="br-card"
+                  {...cardProps}
+                >
+                  {imgSrc ? (
+                    <img
+                      src={imgSrc}
+                      alt={brand.alt_tag || 'Brand'}
+                      loading="lazy"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="br-placeholder">🏷️</div>
+                  )}
+                </CardTag>
+              );
+            })}
           </div>
-
-          {showArrows && (
-            <button
-              className="br-arrow br-arrow-next"
-              onClick={() => setCurrentIndex((prev) => Math.min(prev + 1, totalSlides - 1))}
-              disabled={currentIndex >= totalSlides - 1}
-              aria-label="Next"
-              type="button"
-            >
-              <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-            </button>
-          )}
         </div>
       </div>
     </div>
