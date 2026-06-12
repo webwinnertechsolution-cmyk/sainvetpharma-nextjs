@@ -194,19 +194,7 @@ export default function PromotionalBanner() {
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 		
-		.promotional-banner {
-    position: relative;
-    width: 100%;
-    min-height: 75vh;
-    background-position: center;
-    background-size: auto;
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-    overflow: hidden;
-}
+
 .banner-button:hover {
     background: #1872B5;
     color: #fff;
