@@ -102,7 +102,18 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           border-radius: 8px; display: flex; align-items: center;
           justify-content: center; color: #d1d5db; font-size: 20px;
         }
-
+  .br-header h2{
+  font-size:27px;
+  }
+  .br-header{
+  font-size: 17px;
+    color: #1872B5;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    margin-top: 18px;
+    margin-bottom: -19px;
+        }
         @media (max-width: 767px) {
           .br-wrap { padding: 20px 0; }
           .br-inner { padding: 0 10px; }
@@ -128,6 +139,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
       <div className="br-inner">
         <div className="br-header">
           <h2>{section?.heading || 'Our Brands'}</h2>
+          <P>~ Trusted by leading brands and businesses ~</P>
         </div>
 
         <div className="br-slider-wrapper">
