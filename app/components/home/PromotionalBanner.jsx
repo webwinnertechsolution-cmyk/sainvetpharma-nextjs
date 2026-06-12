@@ -94,10 +94,9 @@ export default function PromotionalBanner() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;  /* ← 16px se 0 karo */
+  border-radius: 0;
   overflow: hidden;
 }
-
 
 
         .promotional-banner::before {
