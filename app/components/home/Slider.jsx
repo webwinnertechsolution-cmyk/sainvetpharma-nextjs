@@ -1,28 +1,34 @@
 'use client';
- 
+
 import { useEffect, useRef, useState } from 'react';
- 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
- 
+
 export default function Slider({ sliders }) {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef(null);
   const total = sliders?.length || 0;
- 
-  const goTo = (index) => {
-    setCurrent((index + total) % total);
-  };
- 
-  useEffect(() => {
-    if (total <= 1) return;
+
+  const startInterval = () => {
+    clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % total);
     }, 5000);
+  };
+
+  const goTo = (index) => {
+    setCurrent((index + total) % total);
+    startInterval(); // reset timer on manual navigation
+  };
+
+  useEffect(() => {
+    if (total <= 1) return;
+    startInterval();
     return () => clearInterval(intervalRef.current);
   }, [total]);
- 
+
   if (!sliders || sliders.length === 0) return null;
- 
+
   return (
     <>
       <style>{`
