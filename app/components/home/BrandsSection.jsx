@@ -114,6 +114,23 @@ const BrandsSection = ({ section = null, brands = [] }) => {
     margin-top: 18px;
     margin-bottom: -19px;
         }
+        .br-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    FLEX-DIRECTION: column;
+    GAP: 0;
+}
+.br-header p {
+    font-size: 17px;
+    color: #1872B5;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    margin-top: -3px;
+    margin-bottom: -2px;
+}
         @media (max-width: 767px) {
           .br-wrap { padding: 20px 0; }
           .br-inner { padding: 0 10px; }
@@ -133,6 +150,18 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           .br-track {
             animation-duration: 20s;
           }
+          .br-header h2 {
+    font-size: 20px;
+}
+.br-header p {
+    font-size: 14px;
+    color: #1872B5;
+    margin: 6px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    margin-top: -3px;
+    margin-bottom: -2px;
+}
         }
       `}</style>
 
