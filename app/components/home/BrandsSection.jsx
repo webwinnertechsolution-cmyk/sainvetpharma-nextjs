@@ -90,7 +90,7 @@ const BrandsSection = ({ section = null, brands = [] }) => {
           margin-bottom: 24px;
         }
         .br-header h2 {
-          font-size: 24px; font-weight: 700; color: #0a214f;
+          font-size: 24px; font-weight: 700; color: #ffffff;
           font-family: 'Sora', sans-serif; margin: 0;
         }
 
