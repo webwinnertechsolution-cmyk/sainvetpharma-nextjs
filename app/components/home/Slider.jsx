@@ -242,7 +242,7 @@ export default function Slider({ sliders }) {
  @media (max-width: 767px) {
           .rl-slider { height: 280px; }
           .rl-slide-title { font-size: 24px; }
-          .rl-slide-sub-title { font-size: 11px; }
+          .rl-slide-sub-title { font-size: 10px; }
           .rl-slide-desc { display: none; }
           .rl-slide-btn { font-size: 13px; padding: 10px 20px; }
           .rl-arrow { opacity: 1 !important; width: 36px; height: 36px; }
@@ -302,8 +302,8 @@ button.rl-arrow.rl-arrow-prev {
     max-width: 209px;
 }
 .rl-slide-sub-title {
-    color: #444;
-    font-size: 13px;
+    color: #ffffff;
+    font-size: 10px;
     font-weight: 600;
     margin-bottom: 4px;
     letter-spacing: normal;
