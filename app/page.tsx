@@ -6,7 +6,7 @@ import ExclusiveOffers from './components/home/ExclusiveOffers';
 import VideoSection from './components/home/VideoSection';
 import BlogSection from './components/home/BlogSection';
 import BrandsSection from './components/home/BrandsSection';
-
+import InstagramSection from './components/home/InstagramSection'; 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function getAllData() {
@@ -66,6 +66,12 @@ export default async function Home() {
       <ExclusiveOffers />
       <BrandsSection section={brandSection} brands={brands} />
       <VideoSection sectionId={1} />
+       <InstagramSection  {/* ✅ 2. Section add kiya BlogSection se pehle */}
+        heading="Follow Us on Instagram"
+        subHeading="@sainvetpharma"
+        instagramUrl="https://www.instagram.com/sainvetpharma"
+        curatorPublishedId="928465ce-8db6-4d9a-860c-1baceccacb89"
+      />
       <BlogSection blogs={blogs} />
     </div>
   );
