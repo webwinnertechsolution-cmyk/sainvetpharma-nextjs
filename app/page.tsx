@@ -65,7 +65,7 @@ export default async function Home() {
       <ProductSection section={section2} products={products2} />
       <ExclusiveOffers />
       <BrandsSection section={brandSection} brands={brands} />
-      <VideoSection sectionId={1} />
+  
        <InstagramSection 
         heading="Follow Us on Instagram"
         subHeading="@sainvetpharma"
