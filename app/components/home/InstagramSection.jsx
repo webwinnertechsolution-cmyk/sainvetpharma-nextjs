@@ -151,7 +151,19 @@ const InstagramSection = ({
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
-
+.crt-post-c.crt-post-border .crt-post-header {
+    display: none;
+}
+.crt-post-c.crt-post-border .crt-post-text {
+    display: none;
+}
+.crt-post-c.crt-post-border .crt-widget.crt-widget-carousel .crt-carousel-slider .crt-post-c {
+    height: 400px;
+    justify-content: center;
+}
+.crt-post-c.crt-post-border .crt-post-footer {
+    display: none;
+}
         @media (max-width: 767px) {
           .ig-inner { padding: 0 14px; }
           .ig-follow-btn { display: none; }
