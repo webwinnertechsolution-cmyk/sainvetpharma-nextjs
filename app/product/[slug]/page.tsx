@@ -607,14 +607,15 @@ export default function ProductDetailPage() {
   const increaseQty = () => setQuantity(q => Math.min(maxStock, q + 1));
 
   const handleAddToCart = () => {
+	  /*
   // ── AUTH CHECK ──────────────────────────────
   const currentUser = getStoredUser();
   if (!currentUser?.firebase_uid) {
     const returnPath = window.location.pathname;
     window.location.href = `/login?returnTo=${encodeURIComponent(returnPath)}`;
     return;
-  }
-  // ────────────────────────────────────────────
+  } 
+  // ────────────────────────────────────────────*/
 
   const price = getPrice();
   if (!price || !product) return;
