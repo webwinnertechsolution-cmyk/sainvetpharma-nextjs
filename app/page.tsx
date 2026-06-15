@@ -66,7 +66,7 @@ export default async function Home() {
       <ExclusiveOffers />
       <BrandsSection section={brandSection} brands={brands} />
       <VideoSection sectionId={1} />
-       <InstagramSection  {/* ✅ 2. Section add kiya BlogSection se pehle */}
+       <InstagramSection 
         heading="Follow Us on Instagram"
         subHeading="@sainvetpharma"
         instagramUrl="https://www.instagram.com/sainvetpharma"
