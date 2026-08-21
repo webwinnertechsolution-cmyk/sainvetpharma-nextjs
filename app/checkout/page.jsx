@@ -37,8 +37,7 @@ export default function CheckoutPage() {
   // Calculate totals
   const subtotal = totalPrice;
   const shipping = shippingCost;
-  const tax = Math.round(subtotal * 0.18); // 18% GST
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shipping;
 
   // Validate form
   const validate = () => {
@@ -83,7 +82,6 @@ export default function CheckoutPage() {
           })),
           subtotal,
           shipping,
-          tax,
           total,
           payment_method: form.payment_method,
           shipping_method: shippingMethod,
@@ -434,16 +432,15 @@ export default function CheckoutPage() {
             </div>
 
             {shipping > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: 13 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: 13, paddingBottom: '16px', borderBottom: '1.5px solid #ddd' }}>
                 <span style={{ color: '#666' }}>Shipping</span>
                 <span style={{ fontWeight: 600 }}>₹{shipping.toLocaleString('en-IN')}</span>
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: 13, paddingBottom: '16px', borderBottom: '1.5px solid #ddd' }}>
-              <span style={{ color: '#666' }}>Tax (18% GST)</span>
-              <span style={{ fontWeight: 600 }}>₹{tax.toLocaleString('en-IN')}</span>
-            </div>
+            {shipping === 0 && (
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1.5px solid #ddd' }} />
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>Total</span>
