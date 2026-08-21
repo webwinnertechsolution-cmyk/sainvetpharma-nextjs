@@ -393,13 +393,36 @@ export default function CheckoutPage() {
             {/* Items */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
               {items.map(item => (
-                <div key={`${item.id}-${item.variant}`} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: 13 }}>
-                  <div>
-                    <p style={{ fontWeight: 600, margin: 0, color: '#1a1a1a' }}>{item.title}</p>
-                    {item.variant && <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0 0' }}>{item.variant}</p>}
-                    <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0 0' }}>Qty: {item.quantity}</p>
+                <div key={`${item.id}-${item.variant}`} style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
+                  {/* Image */}
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    flexShrink: 0,
+                    borderRadius: '8px',
+                    border: '1px solid #ddd',
+                    background: '#f5f5f5',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    {item.image ? (
+                      <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontSize: 24 }}>📦</span>
+                    )}
                   </div>
-                  <span style={{ fontWeight: 700, color: '#1a1a1a' }}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+
+                  {/* Details */}
+                  <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p style={{ fontWeight: 600, margin: 0, color: '#1a1a1a', fontSize: 13 }}>{item.title}</p>
+                      {item.variant && <p style={{ fontSize: 11, color: '#888', margin: '2px 0 0 0' }}>{item.variant}</p>}
+                      <p style={{ fontSize: 11, color: '#888', margin: '4px 0 0 0' }}>Qty: {item.quantity}</p>
+                    </div>
+                    <span style={{ fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -410,10 +433,12 @@ export default function CheckoutPage() {
               <span style={{ fontWeight: 600 }}>₹{subtotal.toLocaleString('en-IN')}</span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: 13 }}>
-              <span style={{ color: '#666' }}>Shipping</span>
-              <span style={{ fontWeight: 600 }}>₹{shipping.toLocaleString('en-IN')}</span>
-            </div>
+            {shipping > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: 13 }}>
+                <span style={{ color: '#666' }}>Shipping</span>
+                <span style={{ fontWeight: 600 }}>₹{shipping.toLocaleString('en-IN')}</span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: 13, paddingBottom: '16px', borderBottom: '1.5px solid #ddd' }}>
               <span style={{ color: '#666' }}>Tax (18% GST)</span>
