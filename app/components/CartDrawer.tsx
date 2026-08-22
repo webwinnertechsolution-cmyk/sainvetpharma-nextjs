@@ -444,7 +444,7 @@ export default function CartDrawer() {
                 </span>
               </div>
 
-              <Link href="/cart" className="cd-btn" onClick={() => setDrawerOpen(false)}>
+              <Link href="/checkout" className="cd-btn" onClick={() => setDrawerOpen(false)}>
                 🛒 View Cart &amp; Checkout
               </Link>
             </div>
