@@ -1,11 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 export default function ThankYouPage() {
-  const searchParams = useSearchParams();
-  const orderNumber = searchParams.get('order');
+  const [orderNumber, setOrderNumber] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setOrderNumber(params.get('order') || '');
+    }
+  }, []);
 
   return (
     <div
