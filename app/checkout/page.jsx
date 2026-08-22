@@ -2,9 +2,21 @@
 
 import { useCart } from '@/app/components/CartContext';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
+// Load Razorpay script
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function CheckoutPage() {
   const { items, totalPrice, totalItems } = useCart();
@@ -31,8 +43,20 @@ export default function CheckoutPage() {
   // Shipping state
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingMethod, setShippingMethod] = useState('standard');
+  const [razorpayKey, setRazorpayKey] = useState(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Load Razorpay script on mount
+  useEffect(() => {
+    loadRazorpayScript();
+    // Get Razorpay key from backend
+    fetch(`${API_URL}/api/checkout/razorpay/key`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) setRazorpayKey(data.key);
+      });
+  }, []);
 
   // Calculate totals
   const subtotal = totalPrice;
@@ -61,44 +85,97 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/checkout/place-order`, {
+      const orderPayload = {
+        email: form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        phone: form.phone,
+        address: form.address,
+        apartment: form.apartment,
+        city: form.city,
+        state: form.state,
+        zip: form.zip,
+        country: form.country,
+        items: items.map(i => ({
+          id: i.id,
+          quantity: i.quantity,
+        })),
+        subtotal,
+        shipping,
+        total,
+        payment_method: form.payment_method,
+      };
+
+      const orderRes = await fetch(`${API_URL}/api/checkout/place-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: form.email,
-          first_name: form.first_name,
-          last_name: form.last_name,
-          phone: form.phone,
-          address: form.address,
-          apartment: form.apartment,
-          city: form.city,
-          state: form.state,
-          zip: form.zip,
-          country: form.country,
-          items: items.map(i => ({
-            product_id: i.id,
-            quantity: i.quantity,
-            variant: i.variant,
-          })),
-          subtotal,
-          shipping,
-          total,
-          payment_method: form.payment_method,
-          shipping_method: shippingMethod,
-        }),
+        body: JSON.stringify(orderPayload),
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setOrderPlaced(true);
-      } else {
-        setErrors({ submit: data.message || 'Order failed' });
+      const orderData = await orderRes.json();
+
+      if (!orderData.success) {
+        setErrors({ submit: orderData.message || 'Order failed' });
+        setLoading(false);
+        return;
       }
+
+      if (form.payment_method === 'razorpay' && razorpayKey) {
+        handleRazorpayPayment(orderData.order);
+      } else {
+        setOrderPlaced(true);
+        setLoading(false);
+      }
+
     } catch (err) {
       setErrors({ submit: 'Network error. Try again.' });
-    } finally {
       setLoading(false);
     }
+  };
+
+  const handleRazorpayPayment = async (order) => {
+    const options = {
+      key: razorpayKey,
+      amount: Math.round(order.total * 100),
+      currency: 'INR',
+      name: 'SAINI VET PHARMA',
+      description: `Order ${order.order_number}`,
+      order_id: order.order_number,
+      handler: async (response) => {
+        try {
+          const verifyRes = await fetch(`${API_URL}/api/checkout/razorpay/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_id: order.id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setOrderPlaced(true);
+          } else {
+            setErrors({ submit: 'Payment verification failed' });
+          }
+        } catch (err) {
+          setErrors({ submit: 'Verification error' });
+        } finally {
+          setLoading(false);
+        }
+      },
+      prefill: {
+        name: `${form.first_name} ${form.last_name}`,
+        email: form.email,
+        contact: form.phone,
+      },
+      theme: { color: '#2B7FE0' },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   if (items.length === 0) {
@@ -350,6 +427,17 @@ export default function CheckoutPage() {
                     style={{ marginRight: '10px' }}
                   />
                   <span style={{ fontSize: 14, fontWeight: 600 }}>🏦 Bank Transfer</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', padding: '12px 14px', border: form.payment_method === 'razorpay' ? '2px solid #2B7FE0' : '1.5px solid #ddd', borderRadius: '8px', cursor: 'pointer', background: form.payment_method === 'razorpay' ? '#f0f7ff' : '#fff' }}>
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="razorpay"
+                    checked={form.payment_method === 'razorpay'}
+                    onChange={e => set('payment_method', e.target.value)}
+                    style={{ marginRight: '10px' }}
+                  />
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>💳 Card / UPI / Netbanking</span>
                 </label>
               </div>
             </div>
