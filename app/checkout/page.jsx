@@ -140,7 +140,8 @@ export default function CheckoutPage() {
       currency: 'INR',
       name: 'SAINI VET PHARMA',
       description: `Order ${order.order_number}`,
-      order_id: order.order_number,
+      // 👇 FIX: Razorpay ko uska apna order_id chahiye, order_number nahi
+      order_id: order.razorpay_order_id,
       handler: async (response) => {
         try {
           const verifyRes = await fetch(`${API_URL}/api/checkout/razorpay/verify`, {
@@ -165,6 +166,12 @@ export default function CheckoutPage() {
         } finally {
           setLoading(false);
         }
+      },
+      modal: {
+        // Agar user popup close kar de bina pay kiye, loading state reset ho jaye
+        ondismiss: () => {
+          setLoading(false);
+        },
       },
       prefill: {
         name: `${form.first_name} ${form.last_name}`,
