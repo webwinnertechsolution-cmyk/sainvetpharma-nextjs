@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { logoutGoogle, getStoredUser } from "@/lib/googleAuth";
+// Google Auth kept for future use (currently disabled)
+// import { logoutGoogle, getStoredUser } from "@/lib/googleAuth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +10,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function AccountPage() {
   const [user, setUser] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [phoneLoginLoading, setPhoneLoginLoading] = useState(false);
+  const [loginPopup, setLoginPopup] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const [wishlist, setWishlist] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -21,19 +26,56 @@ export default function AccountPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // ============================================
+    // PHONE CUSTOMER SESSION
+    // ============================================
+    try {
+      const storedPhoneCustomer = localStorage.getItem("phone_customer");
+
+      if (storedPhoneCustomer) {
+        const customer = JSON.parse(storedPhoneCustomer);
+
+        const normalizedUser = {
+          ...customer,
+          name:
+            customer.name ||
+            `${customer.first_name || ""} ${customer.last_name || ""}`.trim(),
+          provider: "phone",
+          login_type: "phone",
+        };
+
+        setUser(normalizedUser);
+        setPhone(customer.phone || "");
+        fetchWishlist();
+
+        if (customer.phone) {
+          fetchOrders(customer.phone);
+        }
+
+        return;
+      }
+    } catch (error) {
+      console.error("Phone customer read error:", error);
+      localStorage.removeItem("phone_customer");
+    }
+
+    // ============================================
+    // GOOGLE AUTH - FUTURE USE ONLY
+    // Keep this code commented. Google auth is not
+    // being used for the current phone-account flow.
+    // ============================================
+    /*
     const storedUser = getStoredUser();
 
     if (storedUser) {
       setUser(storedUser);
-
       fetchWishlist();
 
       if (storedUser.email) {
-        fetchOrders(storedUser.email);
+        // Old Google/email order lookup can be restored later if needed.
       }
-    } else {
-      router.replace("/login");
     }
+    */
   }, []);
 
   // ================================
@@ -58,12 +100,14 @@ export default function AccountPage() {
   // ================================
   // ORDERS
   // ================================
-  const fetchOrders = async (email) => {
+  const fetchOrders = async (customerPhone) => {
+    if (!customerPhone) return;
+
     setOrdersLoading(true);
 
     try {
       const res = await fetch(
-        `${API_URL}/api/checkout/my-orders?email=${encodeURIComponent(email)}`,
+        `${API_URL}/api/checkout/my-orders?phone=${encodeURIComponent(customerPhone)}`,
         {
           method: "GET",
           headers: {
@@ -77,15 +121,79 @@ export default function AccountPage() {
 
       if (data.success) {
         setOrders(data.orders || []);
-      } else {
-        console.error("Orders API error:", data);
-        setOrders([]);
+        return data;
       }
+
+      console.error("Orders API error:", data);
+      setOrders([]);
+      return data;
     } catch (err) {
       console.error("Orders fetch error:", err);
       setOrders([]);
+      return { success: false };
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  // ================================
+  // LOGIN WITH PHONE NUMBER
+  // ================================
+  const handlePhoneLogin = async (e) => {
+    e?.preventDefault();
+    setLoginError("");
+
+    const cleanedPhone = phone.replace(/\D/g, "");
+    let finalPhone = cleanedPhone;
+
+    if (cleanedPhone.length > 10 && cleanedPhone.startsWith("91")) {
+      finalPhone = cleanedPhone.slice(-10);
+    }
+
+    if (finalPhone.length !== 10) {
+      setLoginError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    setPhoneLoginLoading(true);
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/checkout/my-orders?phone=${encodeURIComponent(finalPhone)}`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.success || !data.customer) {
+        setLoginPopup(true);
+        return;
+      }
+
+      const customer = {
+        ...data.customer,
+        name:
+          data.customer.name ||
+          `${data.customer.first_name || ""} ${data.customer.last_name || ""}`.trim(),
+        provider: "phone",
+        login_type: "phone",
+      };
+
+      localStorage.setItem("phone_customer", JSON.stringify(customer));
+      setUser(customer);
+      setPhone(customer.phone || finalPhone);
+      setOrders(data.orders || []);
+      fetchWishlist();
+      window.dispatchEvent(new Event("phoneCustomerUpdated"));
+    } catch (error) {
+      console.error("Phone login error:", error);
+      setLoginError("Something went wrong. Please try again.");
+    } finally {
+      setPhoneLoginLoading(false);
     }
   };
 
@@ -93,8 +201,15 @@ export default function AccountPage() {
   // LOGOUT
   // ================================
   const handleLogout = async () => {
-    await logoutGoogle();
-    router.replace("/login");
+    localStorage.removeItem("phone_customer");
+    setUser(null);
+    setOrders([]);
+    setPhone("");
+
+    window.dispatchEvent(new Event("phoneCustomerUpdated"));
+
+    // Google Auth - future use only
+    // await logoutGoogle();
   };
 
   // ================================
@@ -192,37 +307,253 @@ export default function AccountPage() {
   }
 
   // ================================
-  // LOADING USER
+  // PHONE LOGIN SCREEN
   // ================================
   if (!user) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f5f7fa",
-        }}
-      >
-        <div className="acc-spinner" />
-
+      <div className="phone-login-page">
         <style>{`
-          .acc-spinner {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 4px solid #dbeafe;
-            border-top-color: #1872B5;
-            animation: acc-spin 0.8s linear infinite;
+          * { box-sizing: border-box; }
+
+          .phone-login-page {
+            min-height: 75vh;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            font-family: 'Nunito', sans-serif;
           }
 
-          @keyframes acc-spin {
-            to {
-              transform: rotate(360deg);
-            }
+          .phone-login-card {
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.07);
+          }
+
+          .phone-login-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #1872B5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 18px;
+          }
+
+          .phone-login-title {
+            font-size: 25px;
+            font-weight: 800;
+            color: #111827;
+            text-align: center;
+            margin: 0 0 8px;
+          }
+
+          .phone-login-description {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.6;
+            text-align: center;
+            margin: 0 0 25px;
+          }
+
+          .phone-login-label {
+            display: block;
+            font-size: 13px;
+            color: #374151;
+            font-weight: 700;
+            margin-bottom: 7px;
+          }
+
+          .phone-login-input {
+            width: 100%;
+            height: 48px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
+            padding: 0 14px;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+          }
+
+          .phone-login-input:focus { border-color: #1872B5; }
+
+          .phone-login-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 6px;
+          }
+
+          .phone-login-btn {
+            width: 100%;
+            height: 48px;
+            border: 0;
+            border-radius: 10px;
+            background: #1872B5;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 16px;
+            font-family: inherit;
+          }
+
+          .phone-login-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+          .phone-login-note {
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: center;
+            line-height: 1.5;
+            margin-top: 15px;
+          }
+
+          .customer-popup-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(17,24,39,.62);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+          }
+
+          .customer-popup {
+            width: 100%;
+            max-width: 430px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 20px 70px rgba(0,0,0,.22);
+          }
+
+          .customer-popup-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: #fff7ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+          }
+
+          .customer-popup h2 {
+            color: #111827;
+            font-size: 21px;
+            margin: 0 0 10px;
+          }
+
+          .customer-popup p {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 0 0 22px;
+          }
+
+          .customer-popup-shop {
+            display: block;
+            background: #1872B5;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 9px;
+          }
+
+          .customer-popup-close {
+            border: 0;
+            background: transparent;
+            color: #6b7280;
+            font-size: 12px;
+            cursor: pointer;
+          }
+
+          @media(max-width: 500px) {
+            .phone-login-card { padding: 28px 20px; }
           }
         `}</style>
+
+        <form className="phone-login-card" onSubmit={handlePhoneLogin}>
+          <div className="phone-login-icon">👤</div>
+
+          <h1 className="phone-login-title">My Account</h1>
+
+          <p className="phone-login-description">
+            Enter the phone number you used during checkout to access your account and view your orders.
+          </p>
+
+          <label className="phone-login-label">Phone Number</label>
+
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+              setLoginError("");
+            }}
+            placeholder="Enter your phone number"
+            className="phone-login-input"
+            inputMode="numeric"
+          />
+
+          {loginError && <div className="phone-login-error">{loginError}</div>}
+
+          <button
+            type="submit"
+            className="phone-login-btn"
+            disabled={phoneLoginLoading}
+          >
+            {phoneLoginLoading ? "Checking..." : "Login to My Account"}
+          </button>
+
+          <p className="phone-login-note">
+            Your account is automatically created after you complete your first purchase.
+          </p>
+        </form>
+
+        {loginPopup && (
+          <div
+            className="customer-popup-overlay"
+            onClick={() => setLoginPopup(false)}
+          >
+            <div className="customer-popup" onClick={(e) => e.stopPropagation()}>
+              <div className="customer-popup-icon">🛍️</div>
+
+              <h2>No Account Found</h2>
+
+              <p>
+                We couldn't find an account associated with this phone number.
+                Your account is automatically created after you complete your first purchase.
+                Please purchase a product first, then return here using the same phone number.
+              </p>
+
+              <Link href="/collections" className="customer-popup-shop">
+                Start Shopping
+              </Link>
+
+              <button
+                type="button"
+                className="customer-popup-close"
+                onClick={() => setLoginPopup(false)}
+              >
+                Try Another Number
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1055,11 +1386,11 @@ export default function AccountPage() {
               </h1>
 
               <p className="acc-hero-email">
-                {user.email}
+                {user.phone ? `+91 ${user.phone}` : user.email}
               </p>
 
               <span className="acc-google-badge">
-                Google Account
+                Phone Account
               </span>
 
             </div>
@@ -1148,7 +1479,7 @@ export default function AccountPage() {
                 </p>
 
                 <span className="acc-verified-badge">
-                  ✓ Verified Account
+                  Customer Account
                 </span>
 
               </div>
@@ -1177,13 +1508,25 @@ export default function AccountPage() {
                 </span>
               </li>
 
+              {user.phone && (
+                <li className="acc-info-item">
+                  <span className="acc-info-label">
+                    📱 Phone
+                  </span>
+
+                  <span className="acc-info-value">
+                    +91 {user.phone}
+                  </span>
+                </li>
+              )}
+
               <li className="acc-info-item">
                 <span className="acc-info-label">
                   🔑 Login Method
                 </span>
 
                 <span className="acc-info-value">
-                  {user.provider}
+                  {user.login_type === "phone" ? "Phone Number" : user.provider}
                 </span>
               </li>
 
