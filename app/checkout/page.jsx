@@ -9,7 +9,7 @@ import { getStoredUser } from '@/lib/googleAuth';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // ================================
-// LOAD RAZORPAY
+// LOAD RAZORPAY SCRIPT
 // ================================
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -53,12 +53,21 @@ export default function CheckoutPage() {
     totalItems,
   } = useCart();
 
+  // ================================
+  // AUTH
+  // ================================
   const [authChecking, setAuthChecking] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // ================================
+  // CHECKOUT
+  // ================================
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // ================================
+  // FORM
+  // ================================
   const [form, setForm] = useState({
     email: '',
     first_name: '',
@@ -73,10 +82,21 @@ export default function CheckoutPage() {
     payment_method: 'cod',
   });
 
+  // ================================
+  // SHIPPING
+  // ================================
   const [shippingCost, setShippingCost] = useState(0);
+  const [shippingMethod, setShippingMethod] = useState('standard');
+
+  // ================================
+  // RAZORPAY
+  // ================================
   const [razorpayKey, setRazorpayKey] = useState(null);
   const [razorpayReady, setRazorpayReady] = useState(false);
 
+  // ================================
+  // SET FORM FIELD
+  // ================================
   const set = (key, value) => {
     setForm((prev) => ({
       ...prev,
@@ -140,6 +160,9 @@ export default function CheckoutPage() {
     setupRazorpay();
   }, [currentUser]);
 
+  // ================================
+  // TOTALS
+  // ================================
   const subtotal = Number(totalPrice || 0);
   const shipping = Number(shippingCost || 0);
   const total = subtotal + shipping;
@@ -198,7 +221,9 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!validate()) return;
+    if (!validate()) {
+      return;
+    }
 
     if (!items || items.length === 0) {
       setErrors({
@@ -241,6 +266,7 @@ export default function CheckoutPage() {
         subtotal,
         shipping,
         total,
+
         payment_method: form.payment_method,
       };
 
@@ -248,10 +274,12 @@ export default function CheckoutPage() {
         `${API_URL}/api/checkout/place-order`,
         {
           method: 'POST',
+
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
           },
+
           body: JSON.stringify(orderPayload),
         }
       );
@@ -269,16 +297,23 @@ export default function CheckoutPage() {
         return;
       }
 
+      // ================================
+      // RAZORPAY
+      // ================================
       if (form.payment_method === 'razorpay') {
         handleRazorpayPayment(orderData.order);
         return;
       }
 
+      // ================================
+      // COD / BANK SUCCESS
+      // ================================
       router.push(
         `/thank-you?order=${encodeURIComponent(
           orderData.order.order_number
         )}`
       );
+
     } catch (error) {
       console.error('Place order error:', error);
 
@@ -291,7 +326,7 @@ export default function CheckoutPage() {
   };
 
   // ================================
-  // RAZORPAY
+  // RAZORPAY PAYMENT
   // ================================
   const handleRazorpayPayment = (order) => {
     if (
@@ -321,12 +356,16 @@ export default function CheckoutPage() {
 
       order_id: order.razorpay_order_id,
 
+      // ================================
+      // PAYMENT SUCCESS
+      // ================================
       handler: async (response) => {
         try {
           const verifyResponse = await fetch(
             `${API_URL}/api/checkout/razorpay/verify`,
             {
               method: 'POST',
+
               headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -334,18 +373,20 @@ export default function CheckoutPage() {
 
               body: JSON.stringify({
                 order_id: order.id,
+
                 razorpay_payment_id:
                   response.razorpay_payment_id,
+
                 razorpay_order_id:
                   response.razorpay_order_id,
+
                 razorpay_signature:
                   response.razorpay_signature,
               }),
             }
           );
 
-          const verifyData =
-            await verifyResponse.json();
+          const verifyData = await verifyResponse.json();
 
           if (
             verifyResponse.ok &&
@@ -365,6 +406,7 @@ export default function CheckoutPage() {
               verifyData.message ||
               'Payment verification failed.',
           });
+
         } catch (error) {
           console.error(
             'Razorpay verification error:',
@@ -374,17 +416,24 @@ export default function CheckoutPage() {
           setErrors({
             submit: 'Payment verification error.',
           });
+
         } finally {
           setLoading(false);
         }
       },
 
+      // ================================
+      // POPUP CLOSE
+      // ================================
       modal: {
         ondismiss: () => {
           setLoading(false);
         },
       },
 
+      // ================================
+      // PREFILL
+      // ================================
       prefill: {
         name: `${form.first_name} ${form.last_name}`,
         email: form.email,
@@ -403,9 +452,17 @@ export default function CheckoutPage() {
 
     const razorpay = new window.Razorpay(options);
 
+    // ================================
+    // PAYMENT FAILED
+    // ================================
     razorpay.on(
       'payment.failed',
       function (response) {
+        console.error(
+          'Razorpay payment failed:',
+          response.error
+        );
+
         setErrors({
           submit:
             response.error?.description ||
@@ -420,7 +477,7 @@ export default function CheckoutPage() {
   };
 
   // ================================
-  // AUTH LOADER
+  // AUTH LOADING
   // ================================
   if (authChecking || !currentUser) {
     return (
@@ -473,7 +530,12 @@ export default function CheckoutPage() {
         }}
       >
         <div>
-          <div style={{ fontSize: 45, marginBottom: 15 }}>
+          <div
+            style={{
+              fontSize: 45,
+              marginBottom: 15,
+            }}
+          >
             🛒
           </div>
 
@@ -577,7 +639,12 @@ export default function CheckoutPage() {
           margin: '0 auto',
         }}
       >
-        <div style={{ marginBottom: '30px' }}>
+        {/* HEADER */}
+        <div
+          style={{
+            marginBottom: '30px',
+          }}
+        >
           <h1
             style={{
               fontSize: 28,
@@ -601,6 +668,7 @@ export default function CheckoutPage() {
 
         <div className="checkout-layout">
 
+          {/* LEFT */}
           <div
             className="checkout-main-card"
             style={{
@@ -612,12 +680,18 @@ export default function CheckoutPage() {
             }}
           >
 
-            <div style={{ marginBottom: '30px' }}>
+            {/* CONTACT */}
+            <div
+              style={{
+                marginBottom: '30px',
+              }}
+            >
               <h2
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
                   marginBottom: 18,
+                  color: '#1a1a1a',
                 }}
               >
                 Contact Information
@@ -629,6 +703,7 @@ export default function CheckoutPage() {
                   fontSize: 13,
                   fontWeight: 600,
                   marginBottom: 6,
+                  color: '#333',
                 }}
               >
                 Email Address *
@@ -644,6 +719,7 @@ export default function CheckoutPage() {
                     ? '2px solid #e74c3c'
                     : '1.5px solid #ddd',
                   background: '#f9fafb',
+                  color: '#4b5563',
                 }}
               />
 
@@ -656,12 +732,25 @@ export default function CheckoutPage() {
               >
                 Logged in as {currentUser.email}
               </div>
+
+              {errors.email && (
+                <p
+                  style={{
+                    color: '#e74c3c',
+                    fontSize: 12,
+                    marginTop: 5,
+                  }}
+                >
+                  {errors.email}
+                </p>
+              )}
             </div>
 
+            {/* SHIPPING */}
             <div
               style={{
-                marginBottom: 30,
-                paddingBottom: 30,
+                marginBottom: '30px',
+                paddingBottom: '30px',
                 borderBottom: '1px solid #eee',
               }}
             >
@@ -670,6 +759,7 @@ export default function CheckoutPage() {
                   fontSize: 16,
                   fontWeight: 700,
                   marginBottom: 18,
+                  color: '#1a1a1a',
                 }}
               >
                 Shipping Address
@@ -708,6 +798,7 @@ export default function CheckoutPage() {
                       style={{
                         color: '#e74c3c',
                         fontSize: 12,
+                        marginTop: 4,
                       }}
                     >
                       {errors.first_name}
@@ -746,6 +837,7 @@ export default function CheckoutPage() {
                       style={{
                         color: '#e74c3c',
                         fontSize: 12,
+                        marginTop: 4,
                       }}
                     >
                       {errors.last_name}
@@ -755,6 +847,7 @@ export default function CheckoutPage() {
 
               </div>
 
+              {/* PHONE */}
               <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
@@ -787,6 +880,7 @@ export default function CheckoutPage() {
                     style={{
                       color: '#e74c3c',
                       fontSize: 12,
+                      marginTop: 4,
                     }}
                   >
                     {errors.phone}
@@ -794,6 +888,7 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              {/* ADDRESS */}
               <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
@@ -825,6 +920,7 @@ export default function CheckoutPage() {
                     style={{
                       color: '#e74c3c',
                       fontSize: 12,
+                      marginTop: 4,
                     }}
                   >
                     {errors.address}
@@ -832,6 +928,7 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              {/* APARTMENT */}
               <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
@@ -857,6 +954,7 @@ export default function CheckoutPage() {
                 />
               </div>
 
+              {/* CITY STATE ZIP */}
               <div className="checkout-three-column">
 
                 <div>
@@ -884,6 +982,18 @@ export default function CheckoutPage() {
                         : '1.5px solid #ddd',
                     }}
                   />
+
+                  {errors.city && (
+                    <p
+                      style={{
+                        color: '#e74c3c',
+                        fontSize: 12,
+                        marginTop: 4,
+                      }}
+                    >
+                      {errors.city}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -911,6 +1021,18 @@ export default function CheckoutPage() {
                         : '1.5px solid #ddd',
                     }}
                   />
+
+                  {errors.state && (
+                    <p
+                      style={{
+                        color: '#e74c3c',
+                        fontSize: 12,
+                        marginTop: 4,
+                      }}
+                    >
+                      {errors.state}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -938,11 +1060,24 @@ export default function CheckoutPage() {
                         : '1.5px solid #ddd',
                     }}
                   />
+
+                  {errors.zip && (
+                    <p
+                      style={{
+                        color: '#e74c3c',
+                        fontSize: 12,
+                        marginTop: 4,
+                      }}
+                    >
+                      {errors.zip}
+                    </p>
+                  )}
                 </div>
 
               </div>
             </div>
 
+            {/* PAYMENT */}
             <div style={{ marginBottom: 30 }}>
               <h2
                 style={{
@@ -1015,6 +1150,7 @@ export default function CheckoutPage() {
               ))}
             </div>
 
+            {/* ERROR */}
             {errors.submit && (
               <div
                 style={{
@@ -1031,6 +1167,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
+            {/* BUTTON */}
             <button
               onClick={placeOrder}
               disabled={loading}
@@ -1073,6 +1210,7 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
+          {/* RIGHT SUMMARY */}
           <div
             className="checkout-summary"
             style={{
@@ -1121,6 +1259,9 @@ export default function CheckoutPage() {
                       border: '1px solid #ddd',
                       overflow: 'hidden',
                       background: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {item.image ? (
@@ -1134,16 +1275,9 @@ export default function CheckoutPage() {
                         }}
                       />
                     ) : (
-                      <div
-                        style={{
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
+                      <span style={{ fontSize: 24 }}>
                         📦
-                      </div>
+                      </span>
                     )}
                   </div>
 
@@ -1166,6 +1300,18 @@ export default function CheckoutPage() {
                         {item.title}
                       </p>
 
+                      {item.variant && (
+                        <p
+                          style={{
+                            fontSize: 11,
+                            color: '#888',
+                            margin: '2px 0 0',
+                          }}
+                        >
+                          {item.variant}
+                        </p>
+                      )}
+
                       <p
                         style={{
                           fontSize: 11,
@@ -1181,6 +1327,7 @@ export default function CheckoutPage() {
                       style={{
                         fontWeight: 700,
                         fontSize: 13,
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       ₹
@@ -1194,6 +1341,7 @@ export default function CheckoutPage() {
               ))}
             </div>
 
+            {/* SUBTOTAL */}
             <div
               style={{
                 display: 'flex',
@@ -1202,13 +1350,16 @@ export default function CheckoutPage() {
                 fontSize: 13,
               }}
             >
-              <span>Subtotal</span>
+              <span style={{ color: '#666' }}>
+                Subtotal
+              </span>
 
               <strong>
                 ₹{subtotal.toLocaleString('en-IN')}
               </strong>
             </div>
 
+            {/* SHIPPING */}
             <div
               style={{
                 display: 'flex',
@@ -1219,7 +1370,9 @@ export default function CheckoutPage() {
                 fontSize: 13,
               }}
             >
-              <span>Shipping</span>
+              <span style={{ color: '#666' }}>
+                Shipping
+              </span>
 
               <strong>
                 {shipping > 0
@@ -1228,6 +1381,7 @@ export default function CheckoutPage() {
               </strong>
             </div>
 
+            {/* TOTAL */}
             <div
               style={{
                 display: 'flex',
