@@ -8,9 +8,9 @@ import { getStoredUser } from '@/lib/googleAuth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// ============================================
-// LOAD RAZORPAY SCRIPT
-// ============================================
+// ================================
+// LOAD RAZORPAY
+// ================================
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') {
@@ -28,16 +28,13 @@ const loadRazorpayScript = () => {
     );
 
     if (existingScript) {
-      existingScript.onload = () => resolve(true);
-      existingScript.onerror = () => resolve(false);
+      existingScript.addEventListener('load', () => resolve(true));
+      existingScript.addEventListener('error', () => resolve(false));
       return;
     }
 
     const script = document.createElement('script');
-
-    script.src =
-      'https://checkout.razorpay.com/v1/checkout.js';
-
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
 
     script.onload = () => resolve(true);
@@ -56,27 +53,12 @@ export default function CheckoutPage() {
     totalItems,
   } = useCart();
 
-  // ============================================
-  // AUTH
-  // ============================================
-  const [authChecking, setAuthChecking] =
-    useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [currentUser, setCurrentUser] =
-    useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  // ============================================
-  // CHECKOUT
-  // ============================================
-  const [loading, setLoading] =
-    useState(false);
-
-  const [errors, setErrors] =
-    useState({});
-
-  // ============================================
-  // FORM
-  // ============================================
   const [form, setForm] = useState({
     email: '',
     first_name: '',
@@ -91,27 +73,10 @@ export default function CheckoutPage() {
     payment_method: 'cod',
   });
 
-  // ============================================
-  // SHIPPING
-  // ============================================
-  const [shippingCost, setShippingCost] =
-    useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [razorpayKey, setRazorpayKey] = useState(null);
+  const [razorpayReady, setRazorpayReady] = useState(false);
 
-  const [shippingMethod, setShippingMethod] =
-    useState('standard');
-
-  // ============================================
-  // RAZORPAY
-  // ============================================
-  const [razorpayKey, setRazorpayKey] =
-    useState(null);
-
-  const [razorpayReady, setRazorpayReady] =
-    useState(false);
-
-  // ============================================
-  // SET FORM FIELD
-  // ============================================
   const set = (key, value) => {
     setForm((prev) => ({
       ...prev,
@@ -119,14 +84,14 @@ export default function CheckoutPage() {
     }));
   };
 
-  // ============================================
+  // ================================
   // LOGIN CHECK
-  // ============================================
+  // ================================
   useEffect(() => {
     const user = getStoredUser();
 
     if (!user) {
-      router.replace('/login');
+      router.replace('/login?redirect=/checkout');
       return;
     }
 
@@ -140,19 +105,15 @@ export default function CheckoutPage() {
     setAuthChecking(false);
   }, [router]);
 
-  // ============================================
-  // LOAD RAZORPAY AFTER LOGIN
-  // ============================================
+  // ================================
+  // LOAD RAZORPAY
+  // ================================
   useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
+    if (!currentUser) return;
 
     const setupRazorpay = async () => {
       try {
-        const loaded =
-          await loadRazorpayScript();
-
+        const loaded = await loadRazorpayScript();
         setRazorpayReady(loaded);
 
         const response = await fetch(
@@ -171,107 +132,78 @@ export default function CheckoutPage() {
         if (data.success && data.key) {
           setRazorpayKey(data.key);
         }
-
       } catch (error) {
-        console.error(
-          'Razorpay setup error:',
-          error
-        );
+        console.error('Razorpay setup error:', error);
       }
     };
 
     setupRazorpay();
-
   }, [currentUser]);
 
-  // ============================================
-  // TOTAL
-  // ============================================
-  const subtotal =
-    Number(totalPrice || 0);
+  const subtotal = Number(totalPrice || 0);
+  const shipping = Number(shippingCost || 0);
+  const total = subtotal + shipping;
 
-  const shipping =
-    Number(shippingCost || 0);
-
-  const total =
-    subtotal + shipping;
-
-  // ============================================
-  // VALIDATE FORM
-  // ============================================
+  // ================================
+  // VALIDATION
+  // ================================
   const validate = () => {
     const newErrors = {};
 
     if (!form.email) {
-      newErrors.email =
-        'Email required';
-    } else if (
-      !/\S+@\S+\.\S+/.test(form.email)
-    ) {
-      newErrors.email =
-        'Invalid email';
+      newErrors.email = 'Email required';
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = 'Invalid email';
     }
 
     if (!form.first_name) {
-      newErrors.first_name =
-        'First name required';
+      newErrors.first_name = 'First name required';
     }
 
     if (!form.last_name) {
-      newErrors.last_name =
-        'Last name required';
+      newErrors.last_name = 'Last name required';
     }
 
     if (!form.phone) {
-      newErrors.phone =
-        'Phone required';
+      newErrors.phone = 'Phone required';
     }
 
     if (!form.address) {
-      newErrors.address =
-        'Address required';
+      newErrors.address = 'Address required';
     }
 
     if (!form.city) {
-      newErrors.city =
-        'City required';
+      newErrors.city = 'City required';
     }
 
     if (!form.state) {
-      newErrors.state =
-        'State required';
+      newErrors.state = 'State required';
     }
 
     if (!form.zip) {
-      newErrors.zip =
-        'ZIP required';
+      newErrors.zip = 'ZIP required';
     }
 
     setErrors(newErrors);
 
-    return (
-      Object.keys(newErrors).length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   };
 
-  // ============================================
+  // ================================
   // PLACE ORDER
-  // ============================================
+  // ================================
   const placeOrder = async () => {
     if (!currentUser) {
-      router.replace('/login');
+      router.replace('/login?redirect=/checkout');
       return;
     }
 
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     if (!items || items.length === 0) {
       setErrors({
         submit: 'Your cart is empty.',
       });
-
       return;
     }
 
@@ -280,10 +212,8 @@ export default function CheckoutPage() {
       (!razorpayKey || !razorpayReady)
     ) {
       setErrors({
-        submit:
-          'Razorpay is loading. Please try again.',
+        submit: 'Razorpay is still loading. Please try again.',
       });
-
       return;
     }
 
@@ -311,36 +241,24 @@ export default function CheckoutPage() {
         subtotal,
         shipping,
         total,
-
-        payment_method:
-          form.payment_method,
+        payment_method: form.payment_method,
       };
 
-      const orderResponse =
-        await fetch(
-          `${API_URL}/api/checkout/place-order`,
-          {
-            method: 'POST',
+      const orderResponse = await fetch(
+        `${API_URL}/api/checkout/place-order`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderPayload),
+        }
+      );
 
-            headers: {
-              Accept: 'application/json',
-              'Content-Type':
-                'application/json',
-            },
+      const orderData = await orderResponse.json();
 
-            body: JSON.stringify(
-              orderPayload
-            ),
-          }
-        );
-
-      const orderData =
-        await orderResponse.json();
-
-      if (
-        !orderResponse.ok ||
-        !orderData.success
-      ) {
+      if (!orderResponse.ok || !orderData.success) {
         setErrors({
           submit:
             orderData.message ||
@@ -351,60 +269,40 @@ export default function CheckoutPage() {
         return;
       }
 
-      // ========================================
-      // RAZORPAY PAYMENT
-      // ========================================
-      if (
-        form.payment_method === 'razorpay'
-      ) {
-        handleRazorpayPayment(
-          orderData.order
-        );
-
+      if (form.payment_method === 'razorpay') {
+        handleRazorpayPayment(orderData.order);
         return;
       }
 
-      // ========================================
-      // COD / BANK SUCCESS
-      // ========================================
       router.push(
         `/thank-you?order=${encodeURIComponent(
           orderData.order.order_number
         )}`
       );
-
     } catch (error) {
-      console.error(
-        'Place order error:',
-        error
-      );
+      console.error('Place order error:', error);
 
       setErrors({
-        submit:
-          'Network error. Try again.',
+        submit: 'Network error. Try again.',
       });
 
       setLoading(false);
     }
   };
 
-  // ============================================
-  // RAZORPAY PAYMENT
-  // ============================================
-  const handleRazorpayPayment = (
-    order
-  ) => {
+  // ================================
+  // RAZORPAY
+  // ================================
+  const handleRazorpayPayment = (order) => {
     if (
       typeof window === 'undefined' ||
       !window.Razorpay
     ) {
       setErrors({
-        submit:
-          'Razorpay could not be loaded.',
+        submit: 'Razorpay could not be loaded.',
       });
 
       setLoading(false);
-
       return;
     }
 
@@ -419,46 +317,32 @@ export default function CheckoutPage() {
 
       name: 'SAINI VET PHARMA',
 
-      description:
-        `Order ${order.order_number}`,
+      description: `Order ${order.order_number}`,
 
-      order_id:
-        order.razorpay_order_id,
+      order_id: order.razorpay_order_id,
 
-      // ========================================
-      // PAYMENT SUCCESS
-      // ========================================
       handler: async (response) => {
         try {
-          const verifyResponse =
-            await fetch(
-              `${API_URL}/api/checkout/razorpay/verify`,
-              {
-                method: 'POST',
+          const verifyResponse = await fetch(
+            `${API_URL}/api/checkout/razorpay/verify`,
+            {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+              },
 
-                headers: {
-                  Accept:
-                    'application/json',
-
-                  'Content-Type':
-                    'application/json',
-                },
-
-                body: JSON.stringify({
-                  order_id:
-                    order.id,
-
-                  razorpay_payment_id:
-                    response.razorpay_payment_id,
-
-                  razorpay_order_id:
-                    response.razorpay_order_id,
-
-                  razorpay_signature:
-                    response.razorpay_signature,
-                }),
-              }
-            );
+              body: JSON.stringify({
+                order_id: order.id,
+                razorpay_payment_id:
+                  response.razorpay_payment_id,
+                razorpay_order_id:
+                  response.razorpay_order_id,
+                razorpay_signature:
+                  response.razorpay_signature,
+              }),
+            }
+          );
 
           const verifyData =
             await verifyResponse.json();
@@ -467,9 +351,6 @@ export default function CheckoutPage() {
             verifyResponse.ok &&
             verifyData.success
           ) {
-            // ================================
-            // THANK YOU PAGE REDIRECT
-            // ================================
             router.push(
               `/thank-you?order=${encodeURIComponent(
                 order.order_number
@@ -484,7 +365,6 @@ export default function CheckoutPage() {
               verifyData.message ||
               'Payment verification failed.',
           });
-
         } catch (error) {
           console.error(
             'Razorpay verification error:',
@@ -492,44 +372,28 @@ export default function CheckoutPage() {
           );
 
           setErrors({
-            submit:
-              'Payment verification error.',
+            submit: 'Payment verification error.',
           });
-
         } finally {
           setLoading(false);
         }
       },
 
-      // ========================================
-      // USER CLOSES POPUP
-      // ========================================
       modal: {
         ondismiss: () => {
           setLoading(false);
         },
       },
 
-      // ========================================
-      // CUSTOMER PREFILL
-      // ========================================
       prefill: {
-        name:
-          `${form.first_name} ${form.last_name}`,
-
-        email:
-          form.email,
-
-        contact:
-          form.phone,
+        name: `${form.first_name} ${form.last_name}`,
+        email: form.email,
+        contact: form.phone,
       },
 
       notes: {
-        customer_email:
-          form.email,
-
-        order_number:
-          order.order_number,
+        customer_email: form.email,
+        order_number: order.order_number,
       },
 
       theme: {
@@ -537,24 +401,14 @@ export default function CheckoutPage() {
       },
     };
 
-    const razorpay =
-      new window.Razorpay(options);
+    const razorpay = new window.Razorpay(options);
 
-    // ============================================
-    // PAYMENT FAILED
-    // ============================================
     razorpay.on(
       'payment.failed',
       function (response) {
-        console.error(
-          'Razorpay payment failed:',
-          response.error
-        );
-
         setErrors({
           submit:
-            response.error
-              ?.description ||
+            response.error?.description ||
             'Payment failed. Please try again.',
         });
 
@@ -565,13 +419,10 @@ export default function CheckoutPage() {
     razorpay.open();
   };
 
-  // ============================================
-  // CHECK LOGIN LOADING
-  // ============================================
-  if (
-    authChecking ||
-    !currentUser
-  ) {
+  // ================================
+  // AUTH LOADER
+  // ================================
+  if (authChecking || !currentUser) {
     return (
       <div
         style={{
@@ -587,10 +438,8 @@ export default function CheckoutPage() {
             width: 40,
             height: 40,
             borderRadius: '50%',
-            border:
-              '4px solid #dbeafe',
-            borderTopColor:
-              '#1872B5',
+            border: '4px solid #dbeafe',
+            borderTopColor: '#1872B5',
             animation:
               'checkoutSpin 0.8s linear infinite',
           }}
@@ -607,13 +456,10 @@ export default function CheckoutPage() {
     );
   }
 
-  // ============================================
+  // ================================
   // EMPTY CART
-  // ============================================
-  if (
-    !items ||
-    items.length === 0
-  ) {
+  // ================================
+  if (!items || items.length === 0) {
     return (
       <div
         style={{
@@ -627,12 +473,7 @@ export default function CheckoutPage() {
         }}
       >
         <div>
-          <div
-            style={{
-              fontSize: 45,
-              marginBottom: 15,
-            }}
-          >
+          <div style={{ fontSize: 45, marginBottom: 15 }}>
             🛒
           </div>
 
@@ -660,17 +501,13 @@ export default function CheckoutPage() {
     );
   }
 
-  // ============================================
-  // PAGE
-  // ============================================
   return (
     <div
       style={{
         background: '#f9f9f9',
         minHeight: '100vh',
         padding: '20px',
-        fontFamily:
-          "'Nunito', sans-serif",
+        fontFamily: "'Nunito', sans-serif",
       }}
     >
       <style>{`
@@ -680,24 +517,21 @@ export default function CheckoutPage() {
 
         .checkout-layout {
           display: grid;
-          grid-template-columns:
-            minmax(0, 1fr) 380px;
+          grid-template-columns: minmax(0, 1fr) 380px;
           gap: 24px;
           align-items: start;
         }
 
         .checkout-two-column {
           display: grid;
-          grid-template-columns:
-            1fr 1fr;
+          grid-template-columns: 1fr 1fr;
           gap: 12px;
           margin-bottom: 12px;
         }
 
         .checkout-three-column {
           display: grid;
-          grid-template-columns:
-            2fr 1fr 1fr;
+          grid-template-columns: 2fr 1fr 1fr;
           gap: 12px;
           margin-bottom: 12px;
         }
@@ -717,26 +551,22 @@ export default function CheckoutPage() {
 
         @media(max-width: 850px) {
           .checkout-layout {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .checkout-summary {
-            position:
-              static !important;
+            position: static !important;
           }
         }
 
         @media(max-width: 600px) {
           .checkout-two-column,
           .checkout-three-column {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .checkout-main-card {
-            padding:
-              20px !important;
+            padding: 20px !important;
           }
         }
       `}</style>
@@ -747,15 +577,7 @@ export default function CheckoutPage() {
           margin: '0 auto',
         }}
       >
-
-        {/* ================================
-            HEADER
-        ================================ */}
-        <div
-          style={{
-            marginBottom: '30px',
-          }}
-        >
+        <div style={{ marginBottom: '30px' }}>
           <h1
             style={{
               fontSize: 28,
@@ -779,9 +601,6 @@ export default function CheckoutPage() {
 
         <div className="checkout-layout">
 
-          {/* ================================
-              LEFT
-          ================================ */}
           <div
             className="checkout-main-card"
             style={{
@@ -793,20 +612,12 @@ export default function CheckoutPage() {
             }}
           >
 
-            {/* ============================
-                CONTACT
-            ============================ */}
-            <div
-              style={{
-                marginBottom: '30px',
-              }}
-            >
+            <div style={{ marginBottom: '30px' }}>
               <h2
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
                   marginBottom: 18,
-                  color: '#1a1a1a',
                 }}
               >
                 Contact Information
@@ -818,7 +629,6 @@ export default function CheckoutPage() {
                   fontSize: 13,
                   fontWeight: 600,
                   marginBottom: 6,
-                  color: '#333',
                 }}
               >
                 Email Address *
@@ -833,12 +643,7 @@ export default function CheckoutPage() {
                   border: errors.email
                     ? '2px solid #e74c3c'
                     : '1.5px solid #ddd',
-
-                  background:
-                    '#f9fafb',
-
-                  color:
-                    '#4b5563',
+                  background: '#f9fafb',
                 }}
               />
 
@@ -849,33 +654,15 @@ export default function CheckoutPage() {
                   marginTop: 6,
                 }}
               >
-                Logged in as{' '}
-                {currentUser.email}
+                Logged in as {currentUser.email}
               </div>
-
-              {errors.email && (
-                <p
-                  style={{
-                    color: '#e74c3c',
-                    fontSize: 12,
-                    marginTop: 5,
-                  }}
-                >
-                  {errors.email}
-                </p>
-              )}
-
             </div>
 
-            {/* ============================
-                SHIPPING ADDRESS
-            ============================ */}
             <div
               style={{
-                marginBottom: '30px',
-                paddingBottom: '30px',
-                borderBottom:
-                  '1px solid #eee',
+                marginBottom: 30,
+                paddingBottom: 30,
+                borderBottom: '1px solid #eee',
               }}
             >
               <h2
@@ -883,13 +670,11 @@ export default function CheckoutPage() {
                   fontSize: 16,
                   fontWeight: 700,
                   marginBottom: 18,
-                  color: '#1a1a1a',
                 }}
               >
                 Shipping Address
               </h2>
 
-              {/* NAME */}
               <div className="checkout-two-column">
 
                 <div>
@@ -905,37 +690,27 @@ export default function CheckoutPage() {
                   </label>
 
                   <input
-                    className="checkout-input"
-                    value={
-                      form.first_name
-                    }
+                    value={form.first_name}
                     onChange={(e) =>
-                      set(
-                        'first_name',
-                        e.target.value
-                      )
+                      set('first_name', e.target.value)
                     }
                     placeholder="John"
+                    className="checkout-input"
                     style={{
-                      border:
-                        errors.first_name
-                          ? '2px solid #e74c3c'
-                          : '1.5px solid #ddd',
+                      border: errors.first_name
+                        ? '2px solid #e74c3c'
+                        : '1.5px solid #ddd',
                     }}
                   />
 
                   {errors.first_name && (
                     <p
                       style={{
-                        color:
-                          '#e74c3c',
+                        color: '#e74c3c',
                         fontSize: 12,
-                        marginTop: 4,
                       }}
                     >
-                      {
-                        errors.first_name
-                      }
+                      {errors.first_name}
                     </p>
                   )}
                 </div>
@@ -953,49 +728,34 @@ export default function CheckoutPage() {
                   </label>
 
                   <input
-                    className="checkout-input"
-                    value={
-                      form.last_name
-                    }
+                    value={form.last_name}
                     onChange={(e) =>
-                      set(
-                        'last_name',
-                        e.target.value
-                      )
+                      set('last_name', e.target.value)
                     }
                     placeholder="Doe"
+                    className="checkout-input"
                     style={{
-                      border:
-                        errors.last_name
-                          ? '2px solid #e74c3c'
-                          : '1.5px solid #ddd',
+                      border: errors.last_name
+                        ? '2px solid #e74c3c'
+                        : '1.5px solid #ddd',
                     }}
                   />
 
                   {errors.last_name && (
                     <p
                       style={{
-                        color:
-                          '#e74c3c',
+                        color: '#e74c3c',
                         fontSize: 12,
-                        marginTop: 4,
                       }}
                     >
-                      {
-                        errors.last_name
-                      }
+                      {errors.last_name}
                     </p>
                   )}
                 </div>
 
               </div>
 
-              {/* PHONE */}
-              <div
-                style={{
-                  marginBottom: 12,
-                }}
-              >
+              <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
                     display: 'block',
@@ -1009,30 +769,24 @@ export default function CheckoutPage() {
 
                 <input
                   type="tel"
-                  className="checkout-input"
                   value={form.phone}
                   onChange={(e) =>
-                    set(
-                      'phone',
-                      e.target.value
-                    )
+                    set('phone', e.target.value)
                   }
                   placeholder="+91 98765 43210"
+                  className="checkout-input"
                   style={{
-                    border:
-                      errors.phone
-                        ? '2px solid #e74c3c'
-                        : '1.5px solid #ddd',
+                    border: errors.phone
+                      ? '2px solid #e74c3c'
+                      : '1.5px solid #ddd',
                   }}
                 />
 
                 {errors.phone && (
                   <p
                     style={{
-                      color:
-                        '#e74c3c',
+                      color: '#e74c3c',
                       fontSize: 12,
-                      marginTop: 4,
                     }}
                   >
                     {errors.phone}
@@ -1040,12 +794,7 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {/* ADDRESS */}
-              <div
-                style={{
-                  marginBottom: 12,
-                }}
-              >
+              <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
                     display: 'block',
@@ -1058,30 +807,24 @@ export default function CheckoutPage() {
                 </label>
 
                 <input
-                  className="checkout-input"
                   value={form.address}
                   onChange={(e) =>
-                    set(
-                      'address',
-                      e.target.value
-                    )
+                    set('address', e.target.value)
                   }
                   placeholder="123 Main Street"
+                  className="checkout-input"
                   style={{
-                    border:
-                      errors.address
-                        ? '2px solid #e74c3c'
-                        : '1.5px solid #ddd',
+                    border: errors.address
+                      ? '2px solid #e74c3c'
+                      : '1.5px solid #ddd',
                   }}
                 />
 
                 {errors.address && (
                   <p
                     style={{
-                      color:
-                        '#e74c3c',
+                      color: '#e74c3c',
                       fontSize: 12,
-                      marginTop: 4,
                     }}
                   >
                     {errors.address}
@@ -1089,12 +832,7 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {/* APARTMENT */}
-              <div
-                style={{
-                  marginBottom: 12,
-                }}
-              >
+              <div style={{ marginBottom: 12 }}>
                 <label
                   style={{
                     display: 'block',
@@ -1103,30 +841,22 @@ export default function CheckoutPage() {
                     marginBottom: 6,
                   }}
                 >
-                  Apartment, Suite, etc.
-                  (Optional)
+                  Apartment, Suite, etc. (Optional)
                 </label>
 
                 <input
-                  className="checkout-input"
-                  value={
-                    form.apartment
-                  }
+                  value={form.apartment}
                   onChange={(e) =>
-                    set(
-                      'apartment',
-                      e.target.value
-                    )
+                    set('apartment', e.target.value)
                   }
                   placeholder="Apt 4B"
+                  className="checkout-input"
                   style={{
-                    border:
-                      '1.5px solid #ddd',
+                    border: '1.5px solid #ddd',
                   }}
                 />
               </div>
 
-              {/* CITY STATE ZIP */}
               <div className="checkout-three-column">
 
                 <div>
@@ -1142,35 +872,18 @@ export default function CheckoutPage() {
                   </label>
 
                   <input
-                    className="checkout-input"
                     value={form.city}
                     onChange={(e) =>
-                      set(
-                        'city',
-                        e.target.value
-                      )
+                      set('city', e.target.value)
                     }
                     placeholder="Ambala"
+                    className="checkout-input"
                     style={{
-                      border:
-                        errors.city
-                          ? '2px solid #e74c3c'
-                          : '1.5px solid #ddd',
+                      border: errors.city
+                        ? '2px solid #e74c3c'
+                        : '1.5px solid #ddd',
                     }}
                   />
-
-                  {errors.city && (
-                    <p
-                      style={{
-                        color:
-                          '#e74c3c',
-                        fontSize: 12,
-                        marginTop: 4,
-                      }}
-                    >
-                      {errors.city}
-                    </p>
-                  )}
                 </div>
 
                 <div>
@@ -1186,35 +899,18 @@ export default function CheckoutPage() {
                   </label>
 
                   <input
-                    className="checkout-input"
                     value={form.state}
                     onChange={(e) =>
-                      set(
-                        'state',
-                        e.target.value
-                      )
+                      set('state', e.target.value)
                     }
                     placeholder="Haryana"
+                    className="checkout-input"
                     style={{
-                      border:
-                        errors.state
-                          ? '2px solid #e74c3c'
-                          : '1.5px solid #ddd',
+                      border: errors.state
+                        ? '2px solid #e74c3c'
+                        : '1.5px solid #ddd',
                     }}
                   />
-
-                  {errors.state && (
-                    <p
-                      style={{
-                        color:
-                          '#e74c3c',
-                        fontSize: 12,
-                        marginTop: 4,
-                      }}
-                    >
-                      {errors.state}
-                    </p>
-                  )}
                 </div>
 
                 <div>
@@ -1230,48 +926,24 @@ export default function CheckoutPage() {
                   </label>
 
                   <input
-                    className="checkout-input"
                     value={form.zip}
                     onChange={(e) =>
-                      set(
-                        'zip',
-                        e.target.value
-                      )
+                      set('zip', e.target.value)
                     }
                     placeholder="133001"
+                    className="checkout-input"
                     style={{
-                      border:
-                        errors.zip
-                          ? '2px solid #e74c3c'
-                          : '1.5px solid #ddd',
+                      border: errors.zip
+                        ? '2px solid #e74c3c'
+                        : '1.5px solid #ddd',
                     }}
                   />
-
-                  {errors.zip && (
-                    <p
-                      style={{
-                        color:
-                          '#e74c3c',
-                        fontSize: 12,
-                        marginTop: 4,
-                      }}
-                    >
-                      {errors.zip}
-                    </p>
-                  )}
                 </div>
 
               </div>
             </div>
 
-            {/* ============================
-                PAYMENT METHODS
-            ============================ */}
-            <div
-              style={{
-                marginBottom: 30,
-              }}
-            >
+            <div style={{ marginBottom: 30 }}>
               <h2
                 style={{
                   fontSize: 16,
@@ -1282,39 +954,35 @@ export default function CheckoutPage() {
                 Payment Method
               </h2>
 
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection:
-                    'column',
-                  gap: 10,
-                }}
-              >
-
-                {/* COD */}
+              {[
+                {
+                  value: 'cod',
+                  label: '💵 Cash on Delivery',
+                },
+                {
+                  value: 'bank',
+                  label: '🏦 Bank Transfer',
+                },
+                {
+                  value: 'razorpay',
+                  label: '💳 Card / UPI / Netbanking',
+                },
+              ].map((method) => (
                 <label
+                  key={method.value}
                   style={{
                     display: 'flex',
-                    alignItems:
-                      'center',
-
-                    padding:
-                      '12px 14px',
-
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    marginBottom: 10,
                     border:
-                      form.payment_method ===
-                      'cod'
+                      form.payment_method === method.value
                         ? '2px solid #2B7FE0'
                         : '1.5px solid #ddd',
-
                     borderRadius: 8,
-
-                    cursor:
-                      'pointer',
-
+                    cursor: 'pointer',
                     background:
-                      form.payment_method ===
-                      'cod'
+                      form.payment_method === method.value
                         ? '#f0f7ff'
                         : '#fff',
                   }}
@@ -1322,10 +990,9 @@ export default function CheckoutPage() {
                   <input
                     type="radio"
                     name="payment"
-                    value="cod"
+                    value={method.value}
                     checked={
-                      form.payment_method ===
-                      'cod'
+                      form.payment_method === method.value
                     }
                     onChange={(e) =>
                       set(
@@ -1333,9 +1000,7 @@ export default function CheckoutPage() {
                         e.target.value
                       )
                     }
-                    style={{
-                      marginRight: 10,
-                    }}
+                    style={{ marginRight: 10 }}
                   />
 
                   <span
@@ -1344,196 +1009,51 @@ export default function CheckoutPage() {
                       fontWeight: 600,
                     }}
                   >
-                    💵 Cash on Delivery
+                    {method.label}
                   </span>
                 </label>
-
-                {/* BANK */}
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems:
-                      'center',
-
-                    padding:
-                      '12px 14px',
-
-                    border:
-                      form.payment_method ===
-                      'bank'
-                        ? '2px solid #2B7FE0'
-                        : '1.5px solid #ddd',
-
-                    borderRadius: 8,
-
-                    cursor:
-                      'pointer',
-
-                    background:
-                      form.payment_method ===
-                      'bank'
-                        ? '#f0f7ff'
-                        : '#fff',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="bank"
-                    checked={
-                      form.payment_method ===
-                      'bank'
-                    }
-                    onChange={(e) =>
-                      set(
-                        'payment_method',
-                        e.target.value
-                      )
-                    }
-                    style={{
-                      marginRight: 10,
-                    }}
-                  />
-
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                    }}
-                  >
-                    🏦 Bank Transfer
-                  </span>
-                </label>
-
-                {/* RAZORPAY */}
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems:
-                      'center',
-
-                    padding:
-                      '12px 14px',
-
-                    border:
-                      form.payment_method ===
-                      'razorpay'
-                        ? '2px solid #2B7FE0'
-                        : '1.5px solid #ddd',
-
-                    borderRadius: 8,
-
-                    cursor:
-                      'pointer',
-
-                    background:
-                      form.payment_method ===
-                      'razorpay'
-                        ? '#f0f7ff'
-                        : '#fff',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="razorpay"
-                    checked={
-                      form.payment_method ===
-                      'razorpay'
-                    }
-                    onChange={(e) =>
-                      set(
-                        'payment_method',
-                        e.target.value
-                      )
-                    }
-                    style={{
-                      marginRight: 10,
-                    }}
-                  />
-
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                    }}
-                  >
-                    💳 Card / UPI /
-                    Netbanking
-                  </span>
-                </label>
-
-              </div>
+              ))}
             </div>
 
-            {/* ============================
-                ERROR
-            ============================ */}
             {errors.submit && (
               <div
                 style={{
-                  background:
-                    '#ffe6e6',
-
-                  color:
-                    '#c41e3a',
-
-                  padding:
-                    '12px 14px',
-
-                  borderRadius:
-                    8,
-
-                  marginBottom:
-                    20,
-
-                  fontSize:
-                    13,
-
-                  fontWeight:
-                    600,
+                  background: '#ffe6e6',
+                  color: '#c41e3a',
+                  padding: '12px 14px',
+                  borderRadius: 8,
+                  marginBottom: 20,
+                  fontSize: 13,
+                  fontWeight: 600,
                 }}
               >
                 ⚠️ {errors.submit}
               </div>
             )}
 
-            {/* ============================
-                BUTTON
-            ============================ */}
             <button
               onClick={placeOrder}
               disabled={loading}
               style={{
                 width: '100%',
-                padding: '14px',
-
-                background:
-                  loading
-                    ? '#ccc'
-                    : '#2B7FE0',
-
+                padding: 14,
+                background: loading
+                  ? '#ccc'
+                  : '#2B7FE0',
                 color: '#fff',
                 border: 'none',
-
                 borderRadius: 8,
-
                 fontSize: 14,
                 fontWeight: 700,
-
-                cursor:
-                  loading
-                    ? 'not-allowed'
-                    : 'pointer',
+                cursor: loading
+                  ? 'not-allowed'
+                  : 'pointer',
               }}
             >
               {loading
                 ? 'Processing...'
-                : form.payment_method ===
-                  'razorpay'
-                ? `Pay ₹${total.toLocaleString(
-                    'en-IN'
-                  )}`
+                : form.payment_method === 'razorpay'
+                ? `Pay ₹${total.toLocaleString('en-IN')}`
                 : 'Place Order'}
             </button>
 
@@ -1541,51 +1061,28 @@ export default function CheckoutPage() {
               href="/cart"
               style={{
                 display: 'block',
-
                 marginTop: 12,
-
-                textAlign:
-                  'center',
-
-                color:
-                  '#2B7FE0',
-
-                textDecoration:
-                  'none',
-
-                fontSize:
-                  13,
-
-                fontWeight:
-                  600,
+                textAlign: 'center',
+                color: '#2B7FE0',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 600,
               }}
             >
               ← Return to Cart
             </Link>
-
           </div>
 
-          {/* ================================
-              ORDER SUMMARY
-          ================================ */}
           <div
             className="checkout-summary"
             style={{
               background: '#fff',
-
-              padding: '24px',
-
+              padding: 24,
               borderRadius: 12,
-
               boxShadow:
                 '0 1px 4px rgba(0,0,0,0.08)',
-
-              height:
-                'fit-content',
-
-              position:
-                'sticky',
-
+              height: 'fit-content',
+              position: 'sticky',
               top: 20,
             }}
           >
@@ -1599,316 +1096,150 @@ export default function CheckoutPage() {
               Order Summary
             </h2>
 
-            {/* PRODUCTS */}
             <div
               style={{
                 marginBottom: 20,
-
                 paddingBottom: 20,
-
-                borderBottom:
-                  '1px solid #eee',
+                borderBottom: '1px solid #eee',
               }}
             >
-              {items.map(
-                (item, index) => (
+              {items.map((item, index) => (
+                <div
+                  key={`${item.id}-${item.variant || index}`}
+                  style={{
+                    display: 'flex',
+                    gap: 12,
+                    marginBottom: 14,
+                  }}
+                >
                   <div
-                    key={`${item.id}-${item.variant || index}`}
                     style={{
-                      display:
-                        'flex',
-
-                      gap:
-                        12,
-
-                      marginBottom:
-                        14,
+                      width: 60,
+                      height: 60,
+                      flexShrink: 0,
+                      borderRadius: 8,
+                      border: '1px solid #ddd',
+                      overflow: 'hidden',
+                      background: '#f5f5f5',
                     }}
                   >
-
-                    {/* IMAGE */}
-                    <div
-                      style={{
-                        width:
-                          60,
-
-                        height:
-                          60,
-
-                        flexShrink:
-                          0,
-
-                        borderRadius:
-                          8,
-
-                        border:
-                          '1px solid #ddd',
-
-                        background:
-                          '#f5f5f5',
-
-                        overflow:
-                          'hidden',
-
-                        display:
-                          'flex',
-
-                        alignItems:
-                          'center',
-
-                        justifyContent:
-                          'center',
-                      }}
-                    >
-                      {item.image ? (
-                        <img
-                          src={
-                            item.image
-                          }
-
-                          alt={
-                            item.title ||
-                            'Product'
-                          }
-
-                          style={{
-                            width:
-                              '100%',
-
-                            height:
-                              '100%',
-
-                            objectFit:
-                              'cover',
-                          }}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            fontSize:
-                              24,
-                          }}
-                        >
-                          📦
-                        </span>
-                      )}
-                    </div>
-
-                    {/* INFO */}
-                    <div
-                      style={{
-                        flex: 1,
-
-                        display:
-                          'flex',
-
-                        justifyContent:
-                          'space-between',
-
-                        alignItems:
-                          'flex-start',
-
-                        gap: 8,
-                      }}
-                    >
-                      <div>
-                        <p
-                          style={{
-                            fontWeight:
-                              600,
-
-                            margin:
-                              0,
-
-                            color:
-                              '#1a1a1a',
-
-                            fontSize:
-                              13,
-                          }}
-                        >
-                          {item.title}
-                        </p>
-
-                        {item.variant && (
-                          <p
-                            style={{
-                              fontSize:
-                                11,
-
-                              color:
-                                '#888',
-
-                              margin:
-                                '2px 0 0',
-                            }}
-                          >
-                            {
-                              item.variant
-                            }
-                          </p>
-                        )}
-
-                        <p
-                          style={{
-                            fontSize:
-                              11,
-
-                            color:
-                              '#888',
-
-                            margin:
-                              '4px 0 0',
-                          }}
-                        >
-                          Qty:{' '}
-                          {
-                            item.quantity
-                          }
-                        </p>
-                      </div>
-
-                      <span
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
                         style={{
-                          fontWeight:
-                            700,
-
-                          color:
-                            '#1a1a1a',
-
-                          fontSize:
-                            13,
-
-                          whiteSpace:
-                            'nowrap',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
-                        ₹
-                        {(
-                          Number(
-                            item.price ||
-                              0
-                          ) *
-                          Number(
-                            item.quantity ||
-                              0
-                          )
-                        ).toLocaleString(
-                          'en-IN'
-                        )}
-                      </span>
-                    </div>
+                        📦
+                      </div>
+                    )}
                   </div>
-                )
-              )}
+
+                  <div
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          fontWeight: 600,
+                          margin: 0,
+                          fontSize: 13,
+                        }}
+                      >
+                        {item.title}
+                      </p>
+
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: '#888',
+                          marginTop: 4,
+                        }}
+                      >
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    >
+                      ₹
+                      {(
+                        Number(item.price || 0) *
+                        Number(item.quantity || 0)
+                      ).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* SUBTOTAL */}
             <div
               style={{
-                display:
-                  'flex',
-
-                justifyContent:
-                  'space-between',
-
-                marginBottom:
-                  10,
-
-                fontSize:
-                  13,
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+                fontSize: 13,
               }}
             >
-              <span
-                style={{
-                  color:
-                    '#666',
-                }}
-              >
-                Subtotal
-              </span>
+              <span>Subtotal</span>
 
-              <span
-                style={{
-                  fontWeight:
-                    600,
-                }}
-              >
-                ₹
-                {subtotal.toLocaleString(
-                  'en-IN'
-                )}
-              </span>
+              <strong>
+                ₹{subtotal.toLocaleString('en-IN')}
+              </strong>
             </div>
 
-            {/* SHIPPING */}
             <div
               style={{
-                display:
-                  'flex',
-
-                justifyContent:
-                  'space-between',
-
-                marginBottom:
-                  16,
-
-                paddingBottom:
-                  16,
-
-                borderBottom:
-                  '1.5px solid #ddd',
-
-                fontSize:
-                  13,
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingBottom: 16,
+                marginBottom: 16,
+                borderBottom: '1.5px solid #ddd',
+                fontSize: 13,
               }}
             >
-              <span
-                style={{
-                  color:
-                    '#666',
-                }}
-              >
-                Shipping
-              </span>
+              <span>Shipping</span>
 
-              <span
-                style={{
-                  fontWeight:
-                    600,
-                }}
-              >
+              <strong>
                 {shipping > 0
-                  ? `₹${shipping.toLocaleString(
-                      'en-IN'
-                    )}`
+                  ? `₹${shipping.toLocaleString('en-IN')}`
                   : 'Free'}
-              </span>
+              </strong>
             </div>
 
-            {/* TOTAL */}
             <div
               style={{
-                display:
-                  'flex',
-
-                justifyContent:
-                  'space-between',
-
-                alignItems:
-                  'center',
-
-                marginBottom:
-                  20,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
               }}
             >
               <span
                 style={{
-                  fontSize:
-                    15,
-
-                  fontWeight:
-                    700,
+                  fontSize: 15,
+                  fontWeight: 700,
                 }}
               >
                 Total
@@ -1916,38 +1247,24 @@ export default function CheckoutPage() {
 
               <span
                 style={{
-                  fontSize:
-                    18,
-
-                  fontWeight:
-                    700,
-
-                  color:
-                    '#2B7FE0',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: '#2B7FE0',
                 }}
               >
-                ₹
-                {total.toLocaleString(
-                  'en-IN'
-                )}
+                ₹{total.toLocaleString('en-IN')}
               </span>
             </div>
 
             <div
               style={{
-                fontSize:
-                  11,
-
-                color:
-                  '#888',
-
-                textAlign:
-                  'center',
+                fontSize: 11,
+                color: '#888',
+                textAlign: 'center',
               }}
             >
               🔒 Secure & Encrypted
             </div>
-
           </div>
 
         </div>
