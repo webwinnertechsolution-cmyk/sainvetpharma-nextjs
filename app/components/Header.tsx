@@ -14,6 +14,7 @@ export default function EnhancedHeader({ logo, menus }) {
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [wishlistCount, setWishlistCount]           = useState(0);
   const [user, setUser]                             = useState(null);
+  const [phoneCustomer, setPhoneCustomer]             = useState(null);
   const searchRef = useRef(null);
 
   // ← Cart context se liya — localStorage nahi
@@ -54,11 +55,44 @@ export default function EnhancedHeader({ logo, menus }) {
 
   /* ── Init ── */
   useEffect(() => {
+    // Existing Google auth ko preserve rakha hai (wishlist/future use ke liye)
     const storedUser = getStoredUser();
     setUser(storedUser);
+
+    // Phone based customer account
+    const loadPhoneCustomer = () => {
+      try {
+        const savedCustomer = localStorage.getItem('phone_customer');
+
+        if (savedCustomer) {
+          setPhoneCustomer(JSON.parse(savedCustomer));
+        } else {
+          setPhoneCustomer(null);
+        }
+      } catch (error) {
+        console.error('Phone customer read error:', error);
+        setPhoneCustomer(null);
+      }
+    };
+
+    loadPhoneCustomer();
     fetchWishlistCount();
+
+    const handleStorage = (event) => {
+      if (event.key === 'phone_customer') {
+        loadPhoneCustomer();
+      }
+    };
+
+    window.addEventListener('phoneCustomerUpdated', loadPhoneCustomer);
+    window.addEventListener('storage', handleStorage);
     window.addEventListener('wishlistUpdated', fetchWishlistCount);
-    return () => window.removeEventListener('wishlistUpdated', fetchWishlistCount);
+
+    return () => {
+      window.removeEventListener('phoneCustomerUpdated', loadPhoneCustomer);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('wishlistUpdated', fetchWishlistCount);
+    };
   }, []);
 
   /* ── Outside click — close search ── */
@@ -458,14 +492,17 @@ export default function EnhancedHeader({ logo, menus }) {
           {/* Icons */}
           <div className="icons-container">
 
-            {/* Account */}
-            <Link href={user ? "/account" : "/login"}>
-              <button className="icon-button" title={user ? "My Account" : "Login"}>
+            {/* Account — always open phone based account page */}
+            <Link href="/account">
+              <button className="icon-button" title="My Account">
                 <svg viewBox="0 0 24 24">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                {user && <span className="badge-green">✓</span>}
+
+                {(phoneCustomer || user) && (
+                  <span className="badge-green">✓</span>
+                )}
               </button>
             </Link>
 
