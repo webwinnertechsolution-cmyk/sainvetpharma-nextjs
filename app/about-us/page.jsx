@@ -1108,8 +1108,8 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════ CORE VALUES SECTION ══════════════════════════════════════ */}
-      {(coreValuesMain || coreValues.length > 0) && (
+      {/* ══════════════════════════════════════ CORE VALUES SECTION - DISABLED FOR NOW ══════════════════════════════════════ */}
+      {false && (coreValuesMain || coreValues.length > 0) && (
         <div className="cv-section">
           <div className="cv-orb1" />
           <div className="cv-orb2" />
