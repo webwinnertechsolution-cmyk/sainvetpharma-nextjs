@@ -128,6 +128,12 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] =
     useState('standard');
 
+  const [shippingLoading, setShippingLoading] =
+    useState(false);
+
+  const [shippingError, setShippingError] =
+    useState('');
+
 
   // ============================================
   // RAZORPAY
@@ -208,6 +214,94 @@ export default function CheckoutPage() {
       );
     }
   }, []);
+
+
+  // ============================================
+  // LOAD SHIPPING RATE FROM LARAVEL
+  // Same API used by Cart Drawer
+  // ============================================
+  useEffect(() => {
+    if (!items || items.length === 0) {
+      setShippingCost(0);
+      setShippingMethod('standard');
+      return;
+    }
+
+    const loadShipping = async () => {
+      setShippingLoading(true);
+      setShippingError('');
+
+      try {
+        const country = (form.country || 'India').toLowerCase();
+
+        const response = await fetch(
+          `${API_URL}/api/calculate-shipping?cart_total=${encodeURIComponent(
+            Number(totalPrice || 0)
+          )}&country=${encodeURIComponent(country)}`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+            cache: 'no-store',
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message || 'Could not calculate shipping.'
+          );
+        }
+
+        if (data.is_free_shipping) {
+          setShippingCost(0);
+          setShippingMethod('Free Shipping');
+          return;
+        }
+
+        if (
+          data.success &&
+          Array.isArray(data.methods) &&
+          data.methods.length > 0
+        ) {
+          const selected = data.methods[0];
+
+          setShippingCost(
+            Number(selected.charge || 0)
+          );
+
+          setShippingMethod(
+            selected.name || 'Standard Delivery'
+          );
+
+          return;
+        }
+
+        setShippingCost(0);
+        setShippingMethod('standard');
+        setShippingError(
+          'No shipping rate is available for this order.'
+        );
+      } catch (error) {
+        console.error(
+          'Checkout shipping error:',
+          error
+        );
+
+        setShippingCost(0);
+        setShippingMethod('standard');
+        setShippingError(
+          'Could not calculate shipping. Please refresh and try again.'
+        );
+      } finally {
+        setShippingLoading(false);
+      }
+    };
+
+    loadShipping();
+  }, [totalPrice, form.country, items.length]);
 
 
   // ============================================
