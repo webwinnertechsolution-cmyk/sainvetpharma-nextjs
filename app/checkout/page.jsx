@@ -115,7 +115,7 @@ export default function CheckoutPage() {
     state: '',
     zip: '',
     country: 'India',
-    payment_method: 'cod',
+    payment_method: 'razorpay',
   });
 
 
@@ -1801,6 +1801,11 @@ export default function CheckoutPage() {
 
 
               {[
+                // ============================================
+                // CASH ON DELIVERY - DISABLED FOR NOW
+                // Future me use karna ho to uncomment kar dena
+                // ============================================
+                /*
                 {
                   value:
                     'cod',
@@ -1808,7 +1813,13 @@ export default function CheckoutPage() {
                   label:
                     '💵 Cash on Delivery',
                 },
+                */
 
+                // ============================================
+                // BANK TRANSFER - DISABLED FOR NOW
+                // Future me use karna ho to uncomment kar dena
+                // ============================================
+                /*
                 {
                   value:
                     'bank',
@@ -1816,7 +1827,11 @@ export default function CheckoutPage() {
                   label:
                     '🏦 Bank Transfer',
                 },
+                */
 
+                // ============================================
+                // RAZORPAY - ACTIVE
+                // ============================================
                 {
                   value:
                     'razorpay',
