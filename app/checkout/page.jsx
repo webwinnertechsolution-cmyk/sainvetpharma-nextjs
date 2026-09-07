@@ -2083,7 +2083,7 @@ export default function CheckoutPage() {
                   loading
                     ? '#ccc'
                     : '#2B7FE0',
-
+display:none;
                 color:
                   '#fff',
 
