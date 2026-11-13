@@ -213,6 +213,7 @@ export default function PromotionalBanner() {
     color: #e74c3c;
     line-height: 1;
     min-width: 50px;
+	display:none;
 }
 
         /* Mobile Styles */
