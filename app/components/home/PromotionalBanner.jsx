@@ -215,7 +215,12 @@ export default function PromotionalBanner() {
     min-width: 50px;
 	display:none;
 }
-
+.countdown {
+    display: none;
+}
+.banner-sale-heading {
+    display: none;
+}
         /* Mobile Styles */
         @media (max-width: 767px) {
           .promotional-banner {
