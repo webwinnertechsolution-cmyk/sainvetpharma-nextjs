@@ -552,6 +552,10 @@ export default function CheckoutPage() {
               id: item.id,
               quantity:
                 item.quantity,
+              variant: item.variant
+                ? item.variant.replace(/__FREE__\d*__/g, '').trim() || null
+                : null,
+              is_free: !!item.variant?.includes('__FREE__'),
             })
           ),
 
