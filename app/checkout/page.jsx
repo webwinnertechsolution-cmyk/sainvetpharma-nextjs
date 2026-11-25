@@ -134,6 +134,8 @@ export default function CheckoutPage() {
   const [shippingError, setShippingError] =
     useState('');
 
+  const [shippingQuoteValid, setShippingQuoteValid] = useState(false);
+
 
   // ============================================
   // RAZORPAY
@@ -217,91 +219,62 @@ export default function CheckoutPage() {
 
 
   // ============================================
-  // LOAD SHIPPING RATE FROM LARAVEL
-  // Same API used by Cart Drawer
+  // LIVE SHIPPING FROM LARAVEL / SHIPROCKET
   // ============================================
+  const shippingCartPayload = JSON.stringify((items || []).map(item => ({
+    id: item.id,
+    quantity: item.quantity,
+    variant: item.variant ? item.variant.replace(/__FREE__\d*__/g, '').trim() || null : null,
+    is_free: !!item.variant?.includes('__FREE__'),
+  })));
+
   useEffect(() => {
-    if (!items || items.length === 0) {
-      setShippingCost(0);
-      setShippingMethod('standard');
-      return;
+    const controller = new AbortController();
+    setShippingQuoteValid(false);
+    setShippingCost(0);
+    setShippingMethod('');
+
+    if (!items?.length || !/^[1-9][0-9]{5}$/.test((form.zip || '').trim())) {
+      setShippingLoading(false);
+      setShippingError('Enter a valid 6-digit delivery PIN to calculate shipping.');
+      return () => controller.abort();
     }
 
     const loadShipping = async () => {
       setShippingLoading(true);
       setShippingError('');
-
       try {
-        const country = (form.country || 'India').toLowerCase();
-
-        const response = await fetch(
-          `${API_URL}/api/calculate-shipping?cart_total=${encodeURIComponent(
-            Number(totalPrice || 0)
-          )}&country=${encodeURIComponent(country)}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-            cache: 'no-store',
-          }
-        );
-
+        const response = await fetch(`${API_URL}/api/checkout/calculate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            zip: form.zip.trim(),
+            payment_method: form.payment_method,
+            items: JSON.parse(shippingCartPayload),
+          }),
+          signal: controller.signal,
+          cache: 'no-store',
+        });
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message || 'Could not calculate shipping.'
-          );
+        if (!response.ok || !data.success || !data.courier || !Number.isFinite(Number(data.shipping))) {
+          throw new Error(data.message || 'No shipping service available.');
         }
-
-        if (data.is_free_shipping) {
-          setShippingCost(0);
-          setShippingMethod('Free Shipping');
-          return;
-        }
-
-        if (
-          data.success &&
-          Array.isArray(data.methods) &&
-          data.methods.length > 0
-        ) {
-          const selected = data.methods[0];
-
-          setShippingCost(
-            Number(selected.charge || 0)
-          );
-
-          setShippingMethod(
-            selected.name || 'Standard Delivery'
-          );
-
-          return;
-        }
-
-        setShippingCost(0);
-        setShippingMethod('standard');
-        setShippingError(
-          'No shipping rate is available for this order.'
-        );
+        if (controller.signal.aborted) return;
+        setShippingCost(Number(data.shipping));
+        setShippingMethod(data.courier.courier_name || 'Shiprocket Courier');
+        setShippingQuoteValid(true);
       } catch (error) {
-        console.error(
-          'Checkout shipping error:',
-          error
-        );
-
+        if (controller.signal.aborted) return;
         setShippingCost(0);
-        setShippingMethod('standard');
-        setShippingError(
-          'Could not calculate shipping. Please refresh and try again.'
-        );
+        setShippingQuoteValid(false);
+        setShippingError(error.message || 'Shipping rate unavailable.');
       } finally {
-        setShippingLoading(false);
+        if (!controller.signal.aborted) setShippingLoading(false);
       }
     };
-
     loadShipping();
-  }, [totalPrice, form.country, items.length]);
+    return () => controller.abort();
+  }, [shippingCartPayload, form.zip, form.payment_method]);
 
 
   // ============================================
@@ -468,6 +441,11 @@ export default function CheckoutPage() {
   // PLACE ORDER
   // ============================================
   const placeOrder = async () => {
+
+    if (shippingLoading || !shippingQuoteValid || shippingError) {
+      setErrors({ submit: shippingError || 'Wait for a valid shipping quote before placing your order.' });
+      return;
+    }
 
     if (!validate()) {
       return;
@@ -2062,6 +2040,12 @@ export default function CheckoutPage() {
             )}
 
 
+            {(shippingLoading || shippingError) && (
+              <p style={{ color: shippingError ? '#c41e3a' : '#555', fontSize: 13 }}>
+                {shippingLoading ? 'Calculating live Shiprocket shipping...' : shippingError}
+              </p>
+            )}
+
             {/* ==================================
                 PLACE ORDER BUTTON
             ================================== */}
@@ -2073,7 +2057,7 @@ export default function CheckoutPage() {
               }
 
               disabled={
-                loading
+                loading || shippingLoading || !shippingQuoteValid || !!shippingError
               }
 
               style={{
@@ -2084,7 +2068,7 @@ export default function CheckoutPage() {
                   14,
 
                 background:
-                  loading
+                  (loading || shippingLoading || !shippingQuoteValid || !!shippingError)
                     ? '#ccc'
                     : '#2B7FE0',
                 color:
@@ -2103,7 +2087,7 @@ export default function CheckoutPage() {
                   700,
 
                 cursor:
-                  loading
+                  (loading || shippingLoading || !shippingQuoteValid || !!shippingError)
                     ? 'not-allowed'
                     : 'pointer',
               }}
