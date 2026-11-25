@@ -2099,9 +2099,9 @@ export default function CheckoutPage() {
                 : form.payment_method ===
                   'razorpay'
 
-                ? `Pay ₹${total.toLocaleString(
-                    'en-IN'
-                  )}`
+                ? (shippingQuoteValid && !shippingLoading && !shippingError
+                    ? `Pay ₹${total.toLocaleString('en-IN')}`
+                    : 'Shipping pending')
 
                 : 'Place Order'
               }
@@ -2487,11 +2487,11 @@ export default function CheckoutPage() {
 
               <strong>
 
-                {shipping > 0
-                  ? `₹${shipping.toLocaleString(
-                      'en-IN'
-                    )}`
-                  : 'Free'
+                {shippingLoading
+                  ? 'Calculating...'
+                  : shippingQuoteValid && !shippingError
+                    ? `₹${shipping.toLocaleString('en-IN')}`
+                    : 'Calculated after PIN code'
                 }
 
               </strong>
@@ -2541,10 +2541,9 @@ export default function CheckoutPage() {
                     '#2B7FE0',
                 }}
               >
-                ₹
-                {total.toLocaleString(
-                  'en-IN'
-                )}
+                {shippingQuoteValid && !shippingLoading && !shippingError
+                  ? `₹${total.toLocaleString('en-IN')}`
+                  : 'Pending shipping'}
               </span>
 
             </div>
