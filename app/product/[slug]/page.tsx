@@ -840,7 +840,7 @@ useEffect(() => {
         .reviews-stars{display:flex;gap:2px;}
         .reviews-star{font-size:20px;line-height:1;}
         .reviews-text{font-size:13px;font-weight:700;color:#374151;font-family:'Sora',sans-serif;}
-        .price-box{background:#ffffff00;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:-6px;}
+        .price-box{background:#ffffff00;border:0;border-radius:16px;padding:0;margin-bottom:13px;margin-top:14px;}
         .price-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
         .price-main{font-size:18px;font-weight:800;color:#1872B5;font-family:'Sora',sans-serif;line-height:1;}
         .price-main.with-discount{color:#059669;}
