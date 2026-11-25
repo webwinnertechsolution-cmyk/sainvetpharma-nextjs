@@ -30,50 +30,12 @@ export default function CartPage() {
   const [freeShippingMin, setFreeShippingMin]   = useState<number>(999);
   const [hasShippingData, setHasShippingData]   = useState(false); // ONLY show shipping if backend provides data
 
-  useEffect(() => {
-    if (items.length === 0) return;
-    setShippingLoading(true);
-    setShippingMethods([]);
-    setSelectedShipping(null);
-    setHasShippingData(false); // Reset when items change
-
-    fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
-        
-        // ONLY show shipping if we have valid backend data
-        if (data.success && data.methods?.length > 0) {
-          setShippingMethods(data.methods);
-          setSelectedShipping(data.methods[0]);
-          setHasShippingData(true); // ✅ Show shipping
-        } else if (data.is_free_shipping) {
-          setHasShippingData(true); // ✅ Show shipping (free)
-        } else {
-          // No data from backend - keep shipping hidden
-          setHasShippingData(false);
-        }
-        setShippingLoading(false);
-      })
-      .catch(() => {
-        // Error - shipping hidden completely
-        setShippingLoading(false);
-        setHasShippingData(false);
-      });
-  }, [totalPrice]);
-
-  const freeUnlocked = totalPrice >= freeShippingMin;
+  const freeUnlocked = false; // No shipping quote without delivery PIN
   const freeProgress = Math.min((totalPrice / freeShippingMin) * 100, 100);
   const remaining    = Math.max(0, freeShippingMin - totalPrice);
 
-  const shippingCharge: number = (() => {
-    if (!hasShippingData) return 0; // No shipping data = no charge
-    if (freeUnlocked) return 0;
-    if (selectedShipping) return Number(selectedShipping.charge);
-    return 0;
-  })();
-
-  const grandTotal = totalPrice + shippingCharge;
+  const shippingCharge = 0; // Not a shipping quote; subtotal displayed below.
+  const grandTotal = totalPrice; // Shipping calculated at checkout after PIN entry
 
   if (items.length === 0) return (
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8F9FC', fontFamily: "'Nunito',sans-serif" }}>
