@@ -35,17 +35,6 @@ export default function CartDrawer() {
   const [fallbackCharge, setFallbackCharge]     = useState<number | null>(null);
   const [itemsWithDiscount, setItemsWithDiscount] = useState<any[]>([]);
 
-  // ── Free shipping threshold — sirf ek baar fetch ──
-  useEffect(() => {
-    if (freeShippingMin !== null) return;
-    fetch(`${API_URL}/api/calculate-shipping?cart_total=0&country=india`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.free_shipping_min) setFreeShippingMin(Number(d.free_shipping_min));
-      })
-      .catch(() => {});
-  }, []);
-
   // ── Items discount display ──
   useEffect(() => {
     if (items.length === 0) { setItemsWithDiscount([]); return; }
@@ -86,36 +75,6 @@ export default function CartDrawer() {
     checkDiscounts();
   }, [JSON.stringify(items)]);
 
-  // ── Shipping fetch ──
-  useEffect(() => {
-    if (!drawerOpen || items.length === 0) return;
-
-    setShippingLoading(true);
-    setShippingError(false);
-    setShippingMethods([]);
-    setSelectedShipping(null);
-    setFallbackCharge(null);
-
-    fetch(`${API_URL}/api/calculate-shipping?cart_total=${totalPrice}&country=india`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.free_shipping_min) setFreeShippingMin(Number(data.free_shipping_min));
-
-        if (data.is_free_shipping) {
-          setFallbackCharge(0);
-        } else if (data.success && data.methods?.length > 0) {
-          setShippingMethods(data.methods);
-          setSelectedShipping(data.methods[0]);
-        }
-        // methods[] empty ho ya koi error ho — kuch set nahi karo
-        // shipping row hide rahegi jab tak real methods na aayein
-        setShippingLoading(false);
-      })
-      .catch(() => {
-        setShippingLoading(false);
-      });
-  }, [drawerOpen, totalPrice]);
-
   useEffect(() => {
     if (items.length === 0) {
       setShippingMethods([]);
@@ -128,26 +87,12 @@ export default function CartDrawer() {
   const freeMin      = freeShippingMin ?? 0;
   const remaining    = freeMin > 0 ? Math.max(0, freeMin - totalPrice) : 0;
   const progress     = freeMin > 0 ? Math.min(100, (totalPrice / freeMin) * 100) : 0;
-  const freeUnlocked = freeMin > 0 && totalPrice >= freeMin;
+  const freeUnlocked = false; // Shipping is quoted only at checkout with a PIN
 
   // shippingKnown = true sirf tab jab actual rate hai ya free confirm hai
-  const shippingKnown: boolean = (
-    freeUnlocked ||
-    fallbackCharge === 0 ||
-    shippingMethods.length > 0
-  );
-
-  const shippingCharge: number | null = (() => {
-    if (items.length === 0)        return 0;
-    if (freeUnlocked)              return 0;
-    if (fallbackCharge === 0)      return 0;
-    if (selectedShipping)          return Number(selectedShipping.charge);
-    return null; // unknown — row hide hogi
-  })();
-
-  const grandTotal = shippingCharge !== null
-    ? totalPrice + shippingCharge
-    : totalPrice;
+  const shippingKnown = false; // No delivery PIN in cart drawer.
+  const shippingCharge: number | null = null;
+  const grandTotal = totalPrice; // Items subtotal only; shipping at checkout.
 
   const handleQuantityChange = (itemId: number, variant: string | undefined, newQty: number) => {
     updateQty(itemId, variant, newQty);
@@ -438,7 +383,7 @@ export default function CartDrawer() {
 
               {/* Grand Total */}
               <div className="cd-grand">
-                <span className="cd-grand-l">Total</span>
+                <span className="cd-grand-l">Items subtotal · shipping at checkout</span>
                 <span className="cd-grand-r">
                   ₹{grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </span>
