@@ -509,19 +509,36 @@ export default function ProductDetailPage() {
     if (Math.abs(diff) > 40) diff > 0 ? goSlide(curSlide + 1) : goSlide(curSlide - 1);
   };
 
-  const getPrice = () => { 
-    if (selectedVariant?.price) return parseFloat(selectedVariant.price); 
-    if (product?.sale_price) return parseFloat(product.sale_price); 
-    if (product?.price) return parseFloat(product.price); 
-    return null; 
+  // Normalize variant pricing: the lower valid price is the selling price.
+  // Supports both existing variant price/compare_price field orders.
+  const parseValidPrice = (value: any): number | null => {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const amount = Number(value);
+    return Number.isFinite(amount) && amount > 0 ? amount : null;
   };
-  
-  const getCompare = () => { 
-    if (selectedVariant?.compare_price) return parseFloat(selectedVariant.compare_price); 
-    if (product?.sale_price && product?.price) return parseFloat(product.price); 
-    return null; 
+
+  const resolvePrices = (p: any, variant: any = null) => {
+    const variantPrice = parseValidPrice(variant?.price);
+    const variantCompare = parseValidPrice(variant?.compare_price);
+
+    if (variantPrice !== null) {
+      if (variantCompare !== null && variantCompare !== variantPrice) {
+        return { price: Math.min(variantPrice, variantCompare), compare: Math.max(variantPrice, variantCompare) };
+      }
+      return { price: variantPrice, compare: null };
+    }
+
+    const regular = parseValidPrice(p?.price);
+    const sale = parseValidPrice(p?.sale_price);
+    if (sale !== null && (regular === null || sale < regular)) {
+      return { price: sale, compare: regular };
+    }
+    return { price: regular, compare: null };
   };
-  
+
+  const getPrice = () => resolvePrices(product, selectedVariant).price;
+  const getCompare = () => resolvePrices(product, selectedVariant).compare;
+
   const getVariantDisc = () => { 
     const p = getPrice(), c = getCompare(); 
     if (!p || !c || c <= p) return null; 
@@ -644,8 +661,8 @@ export default function ProductDetailPage() {
     } catch { setFormStatus('error'); }
   };
 
-  const relPrice = (p: any) => p.sale_price ? parseFloat(p.sale_price) : p.price ? parseFloat(p.price) : p.variants?.[0]?.price ? parseFloat(p.variants[0].price) : null;
-  const relCompare = (p: any) => p.sale_price && p.price ? parseFloat(p.price) : p.variants?.[0]?.compare_price ? parseFloat(p.variants[0].compare_price) : null;
+  const relPrice = (p: any) => resolvePrices(p, p.variants?.[0]).price;
+  const relCompare = (p: any) => resolvePrices(p, p.variants?.[0]).compare;
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -1380,7 +1397,7 @@ useEffect(() => {
                   ) : (
                     <>
                       <span className="price-main">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                      {compare && <span className="price-orig">₹{compare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
+                      {compare !== null && compare > price && <span className="price-orig">₹{compare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                       {variantDisc && <span className="disc-tag">{variantDisc}% OFF</span>}
                     </>
                   )}
@@ -1567,7 +1584,7 @@ useEffect(() => {
                   <div style={{ padding: '10px 12px 14px' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#0a214f', lineHeight: 1.4, marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.title}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      {rComp && <span style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'line-through' }}>₹{rComp.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
+                      {rComp !== null && rPrice !== null && rComp > rPrice && <span style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'line-through' }}>₹{rComp.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                       {rPrice && <span style={{ fontSize: 14, fontWeight: 800, color: '#1872B5', fontFamily: "'Sora',sans-serif" }}>₹{rPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>}
                     </div>
                   </div>
