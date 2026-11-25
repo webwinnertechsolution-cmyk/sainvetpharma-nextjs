@@ -178,7 +178,7 @@ function ReviewsSection({ productId, productTitle }) {
     
 
 .price-box {
-    margin-top: 14px;
+    margin-top: 14px!important;
 }
 
         @media(max-width:700px){
