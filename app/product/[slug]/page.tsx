@@ -177,7 +177,9 @@ function ReviewsSection({ productId, productTitle }) {
         .rv-err-msg{background:#fee2e2;color:#991b1b;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;}
     
 
-
+.price-box {
+    margin-top: 14px;
+}
 
         @media(max-width:700px){
           .rv-summary-grid{grid-template-columns:1fr;gap:14px;}
